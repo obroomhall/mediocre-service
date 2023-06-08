@@ -3,42 +3,60 @@ project(mediocre)
 
 set(CMAKE_CXX_STANDARD 17)
 
-include_directories(${CMAKE_CURRENT_LIST_DIR})
-add_library(
+
+## -- specify files to include -- ##
+
+add_executable(
         mediocre
+        libmediocre/main/main.cpp
         libmediocre/api/api.cpp
         libmediocre/test/test.cpp
 )
 
-## integrate with protobuf
-
-# specify an output directory for proto files
-set(MESSAGES_GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/Generated)
-file(MAKE_DIRECTORY ${MESSAGES_GENERATED_DIR})
-include_directories(${MESSAGES_GENERATED_DIR})
-
-# find the protobuf cmake package
-find_package(Protobuf REQUIRED)
-
-# generate all protobuf sources and headers
-foreach (
-        PROTO_FILE
+add_library(
+        proto-objects OBJECT
+        libmediocre/main/main.proto
         libmediocre/api/api.proto
         libmediocre/test/test.proto
 )
-    # handle parent output directory
-    cmake_path(GET PROTO_FILE PARENT_PATH PROTO_DIR)
-    set(GEN_DIR ${MESSAGES_GENERATED_DIR}/${PROTO_DIR})
-    file(MAKE_DIRECTORY ${GEN_DIR})
 
-    # generate source and header
-    protobuf_generate_cpp(PROTO_SRC PROTO_HDR ${PROTO_FILE} PROTOC_OUT_DIR ${GEN_DIR})
 
-    # append source and header to lists
-    list(APPEND PROTO_SRCS ${PROTO_SRC})
-    list(APPEND PROTO_HDRS ${PROTO_HDR})
-endforeach ()
+## -- integrate with protobuf/grpc -- ##
 
-# link the libraries
-add_library(proto ${PROTO_HDRS} ${PROTO_SRCS})
-target_link_libraries(mediocre proto ${PROTOBUF_LIBRARY})
+# find the protobuf cmake package
+find_package(Protobuf CONFIG REQUIRED)
+message(STATUS "Using protobuf ${Protobuf_VERSION}")
+
+# find the protobuf cmake package
+find_package(gRPC CONFIG REQUIRED)
+message(STATUS "Using gRPC ${gRPC_VERSION}")
+
+# set some reusable directory variables
+set(PROTO_IMPORT_DIRS ${CMAKE_CURRENT_LIST_DIR})
+set(PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/Protobuf)
+file(MAKE_DIRECTORY ${PROTO_BINARY_DIR})
+
+# link up proto-objects
+target_link_libraries(proto-objects PUBLIC protobuf::libprotobuf gRPC::grpc++)
+target_include_directories(proto-objects PUBLIC "$<BUILD_INTERFACE:${PROTO_BINARY_DIR}>")
+
+# generate protobuf files (.pb.h and .pb.cc)
+protobuf_generate(
+        TARGET proto-objects
+        IMPORT_DIRS ${PROTO_IMPORT_DIRS}
+        PROTOC_OUT_DIR ${PROTO_BINARY_DIR})
+
+# generate grpc files (.grpc.pb.h and .grpc.pb.cc)
+protobuf_generate(
+        TARGET proto-objects
+        LANGUAGE grpc
+        GENERATE_EXTENSIONS .grpc.pb.h .grpc.pb.cc
+        PLUGIN "protoc-gen-grpc=\$<TARGET_FILE:gRPC::grpc_cpp_plugin>"
+        IMPORT_DIRS ${PROTO_IMPORT_DIRS}
+        PROTOC_OUT_DIR ${PROTO_BINARY_DIR})
+
+
+## -- link it all together -- ##
+
+target_include_directories(mediocre PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+target_link_libraries(mediocre proto-objects)
