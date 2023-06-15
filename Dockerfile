@@ -1,6 +1,7 @@
 FROM ubuntu:22.04
 
-ARG CMAKE_VERSION="3.26.4"
+# check support in Clion > Build, Execution, Deployment > Toolchains before upgrading cmake
+ARG CMAKE_VERSION="3.25.3"
 ARG GRPC_VERSION="v1.55.1"
 
 # use bash instead of sh (useful for pushd popd)
