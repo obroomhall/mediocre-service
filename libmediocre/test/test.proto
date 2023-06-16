@@ -1,4 +1,5 @@
 ﻿syntax = "proto3";
+
 package mediocre.test;
 option csharp_namespace = "Mediocre.Test";
 

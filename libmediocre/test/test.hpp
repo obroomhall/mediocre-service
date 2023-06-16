@@ -1,21 +1,10 @@
-#ifndef _MEDIOCRE_API_H_
-#define _MEDIOCRE_API_H_
+#ifndef test_h
+#define test_h
 
 #include <libmediocre/test/test.pb.h>
-#ifndef MEDIOCRE_API
-#define MEDIOCRE_API
-#endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-using namespace mediocre::test;
-
-MEDIOCRE_API void print_line(Something ut);
-
-#ifdef __cplusplus
+namespace mediocre::test {
+    void print_line(Something ut);
 }
-#endif
 
-#endif // _MEDIOCRE_API_H_
+#endif// test_h

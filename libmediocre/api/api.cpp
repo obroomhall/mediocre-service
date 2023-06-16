@@ -1,4 +1,6 @@
 #include <libmediocre/api/api.hpp>
 #include <cstdio>
 
-void print_line(UniqueThing ut) { printf("test\n"); }
+namespace mediocre::api {
+    void print_line(UniqueThing ut) { printf("test\n"); }
+}
