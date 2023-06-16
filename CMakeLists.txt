@@ -37,7 +37,7 @@ set(PROTO_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/Protobuf)
 file(MAKE_DIRECTORY ${PROTO_BINARY_DIR})
 
 # link up proto-objects
-target_link_libraries(proto-objects PUBLIC protobuf::libprotobuf gRPC::grpc++)
+target_link_libraries(proto-objects PUBLIC protobuf::libprotobuf gRPC::grpc++ gRPC::grpc++_reflection)
 target_include_directories(proto-objects PUBLIC "$<BUILD_INTERFACE:${PROTO_BINARY_DIR}>")
 
 # generate protobuf files (.pb.h and .pb.cc)
