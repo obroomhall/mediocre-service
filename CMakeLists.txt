@@ -56,7 +56,13 @@ protobuf_generate(
         PROTOC_OUT_DIR ${PROTO_BINARY_DIR})
 
 
+## -- integrate with opencv -- ##
+
+find_package( OpenCV CONFIG REQUIRED )
+message(STATUS "Using OpenCV ${OpenCV_VERSION}")
+
+
 ## -- link it all together -- ##
 
 target_include_directories(mediocre PUBLIC ${CMAKE_CURRENT_LIST_DIR})
-target_link_libraries(mediocre proto-objects)
+target_link_libraries(mediocre proto-objects ${OpenCV_LIBS})
