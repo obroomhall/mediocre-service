@@ -1,0 +1,8 @@
+﻿syntax = "proto3";
+
+package mediocre.test;
+option csharp_namespace = "Mediocre.Test";
+
+message Something {
+  bool yes = 1;
+}

@@ -1,0 +1,12 @@
+﻿syntax = "proto3";
+
+package mediocre.api;
+option csharp_namespace = "Mediocre.Api";
+
+message Person {
+  string name = 1;
+}
+
+message UniqueThing {
+  string name = 1;
+}
