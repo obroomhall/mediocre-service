@@ -40,6 +40,6 @@ namespace mediocre::main {
 }
 
 int main(int argc, char *argv[]) {
-    mediocre::main::RunServer(50052);
-    return 0;
+    mediocre::main::RunServer(50051);
+    return EXIT_SUCCESS;
 }
