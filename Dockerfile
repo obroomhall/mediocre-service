@@ -4,12 +4,19 @@ FROM ubuntu:22.04
 ARG CMAKE_VERSION="3.25.3"
 ARG GRPC_VERSION="v1.55.1"
 ARG OPENCV_VERSION="4.7.0"
+ARG TESSERACT_VERSION="5.2.0"
+ARG LEPTONICA_VERSION="1.83.1"
 
 # use bash instead of sh (useful for pushd popd)
 SHELL ["/bin/bash", "-c"]
 
-# install required build tools
-RUN apt-get update && apt-get install -y build-essential gdb autoconf libtool pkg-config wget git unzip
+# installation tools
+RUN apt-get update  \
+    && apt-get install -y wget git unzip
+
+# install build tools and debugger
+RUN apt-get update  \
+    && apt-get install -y build-essential gdb
 
 # install cmake
 RUN wget -q -O cmake-linux.sh https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION\-linux-x86_64.sh \
@@ -18,6 +25,8 @@ RUN wget -q -O cmake-linux.sh https://github.com/Kitware/CMake/releases/download
     && cmake --version
 
 # install grpc and protobuf
+RUN apt-get update  \
+    && apt-get install -y autoconf libtool pkg-config
 RUN git clone --recurse-submodules -b $GRPC_VERSION --depth 1 --shallow-submodules https://github.com/grpc/grpc \
     && mkdir -p grpc/cmake/build \
     && pushd grpc/cmake/build \
@@ -39,4 +48,27 @@ RUN wget -q -O opencv.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSI
     && make -j 4 \
     && make install \
     && popd \
-    && rm -rf opencv-$OPENCV_VERSION $OPENCV_VERSION.zip
+    && rm -rf opencv-$OPENCV_VERSION opencv.zip
+
+# install tesseract
+RUN apt-get update \
+    && apt-get install -y g++ autoconf automake libtool pkg-config libpng-dev libjpeg8-dev libtiff5-dev zlib1g-dev libwebpdemux2 libwebp-dev libopenjp2-7-dev libgif-dev libarchive-dev libcurl4-openssl-dev \
+    && apt-get install -y libicu-dev libpango1.0-dev libcairo2-dev
+RUN wget -q -O leptonica.zip https://github.com/DanBloomberg/leptonica/archive/refs/tags/$LEPTONICA_VERSION.zip \
+    && unzip leptonica.zip \
+    && mkdir -p leptonica-$LEPTONICA_VERSION/build \
+    && pushd leptonica-$LEPTONICA_VERSION/build \
+    && cmake .. \
+    && make -j 4 \
+    && make install \
+    && popd \
+    && rm -rf leptonica-$LEPTONICA_VERSION leptonica.zip
+RUN wget -q -O tesseract.zip https://github.com/tesseract-ocr/tesseract/archive/refs/tags/$TESSERACT_VERSION.zip \
+    && unzip tesseract.zip \
+    && mkdir -p tesseract-$TESSERACT_VERSION/build \
+    && pushd tesseract-$TESSERACT_VERSION/build \
+    && cmake .. \
+    && make -j 4 \
+    && make install \
+    && popd \
+    && rm -rf tesseract-$TESSERACT_VERSION tesseract.zip
