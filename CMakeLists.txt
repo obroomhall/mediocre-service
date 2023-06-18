@@ -58,18 +58,20 @@ protobuf_generate(
 
 ## -- integrate with image processing libraries -- ##
 
-add_library(image-processing INTERFACE)
-
 find_package(OpenCV CONFIG REQUIRED)
 message(STATUS "Using OpenCV ${OpenCV_VERSION}")
 
-find_package(Tesseract REQUIRED)
+find_package(Tesseract CONFIG REQUIRED)
 message(STATUS "Using Tesseract ${Tesseract_VERSION}")
-
-target_link_libraries(image-processing INTERFACE ${OpenCV_LIBS} Tesseract::libtesseract)
 
 
 ## -- link it all together -- ##
 
-target_include_directories(mediocre PUBLIC ${CMAKE_CURRENT_LIST_DIR})
-target_link_libraries(mediocre proto-objects image-processing)
+target_include_directories(
+        mediocre PUBLIC
+        ${CMAKE_CURRENT_LIST_DIR}
+        /usr/local/include/tesseract
+        /usr/local/include/leptonica
+        /usr/local/include/opencv4/opencv2
+)
+target_link_libraries(mediocre proto-objects ${OpenCV_LIBS} Tesseract::libtesseract)
