@@ -1,4 +1,4 @@
-FROM mediocre-base:dev
+FROM mediocre-base:latest
 
 COPY . /src
 RUN mkdir build
