@@ -1,0 +1,22 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build the base Docker image
+        run: docker build . --file Base.Dockerfile --tag mediocre-base:$(date +%s)
+
+      - uses: actions/checkout@v3
+      - name: Build the app Docker image
+        run: docker build . --file Dockerfile --tag mediocre:$(date +%s)
