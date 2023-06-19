@@ -1,5 +1,5 @@
-ARG TAG=latest
-FROM obroomhall/mediocre-base:$TAG
+ARG BASE_TAG=base-latest
+FROM obroomhall/mediocre:$BASE_TAG
 
 COPY . /src
 RUN mkdir build

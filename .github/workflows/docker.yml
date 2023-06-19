@@ -1,0 +1,58 @@
+name: Docker Image
+
+on:
+  pull_request:
+    branches:
+      - "master"
+  push:
+    branches:
+      - "master"
+  release:
+    types:
+      - "published"
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    env:
+      tag: ${{ github.head_ref || github.ref_name }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: Check if base dockerfile has changed
+        id: base-dockerfile-changed
+        uses: tj-actions/changed-files@v36
+        with:
+          files: "Base.Dockerfile"
+          since_last_remote_commit: true
+
+      - name: Build and push base Docker image
+        if: steps.base-dockerfile-changed.outputs.any_changed == 'true'
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: .
+          file: Base.Dockerfile
+          push: true
+          tags: obroomhall/mediocre:base-$tag
+
+#      - name: Extract metadata (tags, labels) for Docker
+#        id: meta
+#        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+#        with:
+#          images: obroomhall/mediocre:$tag
+
+      - name: Build and push main Docker image
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          build-args: BASE_TAG=base-$tag
+          tags: obroomhall/mediocre:$tag
