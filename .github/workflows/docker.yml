@@ -40,7 +40,7 @@ jobs:
           context: .
           file: Base.Dockerfile
           push: true
-          tags: obroomhall/mediocre:base-$tag
+          tags: "obroomhall/mediocre:base-$tag"
 
 #      - name: Extract metadata (tags, labels) for Docker
 #        id: meta
@@ -54,5 +54,5 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          build-args: BASE_TAG=base-$tag
-          tags: obroomhall/mediocre:$tag
+          build-args: "BASE_TAG=base-$tag"
+          tags: "obroomhall/mediocre:$tag"
