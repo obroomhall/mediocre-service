@@ -1,4 +1,4 @@
-FROM mediocre-base:latest
+FROM obroomhall/mediocre-base:latest
 
 COPY . /src
 RUN mkdir build
