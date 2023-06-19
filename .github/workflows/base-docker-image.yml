@@ -37,6 +37,6 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: obroomhall/mediocre-base:${{ github.ref_name }}
+          tags: obroomhall/mediocre-base:${{ github.head_ref || github.ref_name }}
 #           tags: ${{ steps.meta.outputs.tags }}
 #           labels: ${{ steps.meta.outputs.labels }}
