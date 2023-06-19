@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 
-# check support in Clion > Build, Execution, Deployment > Toolchains before upgrading cmake
+# check for CLion support before upgrading cmake
 ARG CMAKE_VERSION="3.25.3"
 ARG GRPC_VERSION="v1.55.1"
 ARG OPENCV_VERSION="4.7.0"
