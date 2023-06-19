@@ -14,6 +14,8 @@ on:
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
+    env:
+      DOCKER_TAG: ${{ github.head_ref || github.ref_name }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -23,10 +25,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-
-      - name: Set Docker tag
-        id: tag
-        uses: cytopia/docker-tag-action@v0.4.7
 
       - name: Check if base dockerfile has changed
         id: base-dockerfile-changed
@@ -42,7 +40,10 @@ jobs:
           context: .
           file: Base.Dockerfile
           push: true
-          tags: obroomhall/mediocre:base-${{ steps.tag.outputs.docker-tag }}
+          tags: obroomhall/mediocre:base-${{ env.DOCKER_TAG }}
+
+      - name: Check exists
+        run: docker manifest inspect obroomhall/mediocre:base-${{ env.DOCKER_TAG }} > /dev/null ; echo $?
 
       - name: Build and push main Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
@@ -50,5 +51,5 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          build-args: BASE_TAG=base-${{ steps.tag.outputs.docker-tag }}
-          tags: obroomhall/mediocre:${{ steps.tag.outputs.docker-tag }}
+          build-args: BASE_TAG=base-${{ env.DOCKER_TAG }}
+          tags: obroomhall/mediocre:${{ env.DOCKER_TAG }}
