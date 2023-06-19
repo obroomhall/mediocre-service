@@ -43,7 +43,7 @@ jobs:
           tags: obroomhall/mediocre:base-${{ env.DOCKER_TAG }}
 
       - name: Check exists
-        run: docker manifest inspect obroomhall/mediocre:${{ env.DOCKER_TAG }} > /dev/null ; echo $?
+        run: docker manifest inspect obroomhall/mediocre:base-${{ env.DOCKER_TAG }} > /dev/null ; echo $?
 
       - name: Build and push main Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
