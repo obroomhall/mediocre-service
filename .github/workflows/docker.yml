@@ -15,7 +15,7 @@ jobs:
   build_and_push:
     runs-on: ubuntu-latest
     env:
-      tag: ${{ github.head_ref || github.ref_name }}
+      DOCKER_TAG: ${{ github.head_ref || github.ref_name }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -40,7 +40,7 @@ jobs:
           context: .
           file: Base.Dockerfile
           push: true
-          tags: "obroomhall/mediocre:base-$tag"
+          tags: obroomhall/mediocre:base-$DOCKER_TAG
 
 #      - name: Extract metadata (tags, labels) for Docker
 #        id: meta
@@ -54,5 +54,5 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          build-args: "BASE_TAG=base-$tag"
-          tags: "obroomhall/mediocre:$tag"
+          build-args: BASE_TAG=base-$DOCKER_TAG
+          tags: obroomhall/mediocre:$DOCKER_TAG
