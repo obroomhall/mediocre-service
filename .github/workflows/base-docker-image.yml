@@ -1,14 +1,7 @@
 name: Base Docker Image
 
 on:
-  pull_request:
-    branches:
-      - "master"
-    paths:
-      - "Base.Dockerfile"
   push:
-    branches:
-      - "master"
     paths:
       - "Base.Dockerfile"
   release:

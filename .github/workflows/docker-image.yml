@@ -17,9 +17,6 @@ jobs:
     env:
       tag: ${{ github.head_ref || github.ref_name }}
     steps:
-      - name: "Say tag"
-        run: echo "$tag"
-
       - name: Check out the repo
         uses: actions/checkout@v3
 
@@ -33,7 +30,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
         with:
-          images: obroomhall/mediocre:${{ github.head_ref || github.ref_name }}
+          images: obroomhall/mediocre:$tag
 
       - name: Build and push Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
@@ -41,5 +38,5 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          build-args: TAG=${{ github.head_ref || github.ref_name }}
-          tags: obroomhall/mediocre:${{ github.head_ref || github.ref_name }}
+          build-args: TAG=$tag
+          tags: obroomhall/mediocre:$tag
