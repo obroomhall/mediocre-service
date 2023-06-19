@@ -33,4 +33,5 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
+          build-args: TAG=${{ github.head_ref || github.ref_name }}
           tags: obroomhall/mediocre:${{ github.head_ref || github.ref_name }}
