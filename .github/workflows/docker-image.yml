@@ -14,7 +14,12 @@ on:
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
+    env:
+      tag: ${{ github.head_ref || github.ref_name }}
     steps:
+      - name: "Say tag"
+        run: echo "$tag"
+
       - name: Check out the repo
         uses: actions/checkout@v3
 
