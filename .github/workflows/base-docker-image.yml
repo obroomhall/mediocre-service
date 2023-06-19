@@ -2,15 +2,19 @@ name: Base Docker Image
 
 on:
   pull_request:
-    branches: ["master"]
-    paths: ["Base.Dockerfile"]
+    branches:
+      - "master"
+    paths:
+      - "Base.Dockerfile"
   push:
-    branches: ["master"]
-    paths: ["Base.Dockerfile"]
+    branches:
+      - "master"
+    paths:
+      - "Base.Dockerfile"
   release:
-    types: ["published"]
-    paths: ["Base.Dockerfile"]
-    
+    types:
+      - "published"
+
 jobs:
   build_and_push:
     name: Build and Push

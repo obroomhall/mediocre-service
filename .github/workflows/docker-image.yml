@@ -2,11 +2,14 @@ name: Docker Image
 
 on:
   pull_request:
-    branches: ["master"]
+    branches:
+      - "master"
   push:
-    branches: ["master"]
+    branches:
+      - "master"
   release:
-    types: ["published"]
+    types:
+      - "published"
 
 jobs:
   build_and_push:
