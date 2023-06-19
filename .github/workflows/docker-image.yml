@@ -1,18 +1,36 @@
-name: Docker Image CI
+name: Docker Image
 
 on:
-  push:
-    branches: [ "master" ]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
+  push:
+    branches: ["master"]
+  release:
+    types: ["published"]
 
 jobs:
-
-  build:
-
+  build_and_push:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
-      - name: Build the app Docker image
-        run: docker build . --file Dockerfile --tag mediocre:$(date +%s)
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: obroomhall/mediocre:${{ github.head_ref || github.ref_name }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: .
+          file: ./Base.Dockerfile
+          push: true
+          tags: obroomhall/mediocre:${{ github.head_ref || github.ref_name }}
