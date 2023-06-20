@@ -1,5 +1,6 @@
-ARG BASE_TAG=base-latest
-FROM obroomhall/mediocre:$BASE_TAG
+ARG BASE_REPO=obroomhall/mediocre
+ARG BASE_TAG=base-dev-master
+FROM $BASE_REPO:$BASE_TAG
 
 COPY . /src
 RUN mkdir build
