@@ -63,7 +63,7 @@ jobs:
         run: |
           echo "Looking for base image ${{ steps.get-tags.outputs.docker-base-tag }}"
           export base_image_exists=$(docker manifest inspect ${{ steps.get-tags.outputs.docker-base-tag }} >/dev/null 2>&1)
-          echo "Base image $([[ $base_image_exists -eq 0 ]] && echo "does not exist" || echo "exists")"
+          echo "Base image $([[ $base_image_exists -eq 0 ]] && echo "does not exist, using ${{ steps.get-tags.outputs.docker-base-fallback-tag }}" || echo "exists")"
           echo "base-image-exists=$base_image_exists" >> $GITHUB_OUTPUT
 
       - name: Build and push main Docker image
