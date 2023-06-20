@@ -46,9 +46,9 @@ jobs:
         id: find-base-image
         run: |
           docker manifest inspect obroomhall/mediocre:base-${{ env.DOCKER_TAG }} > /dev/null
-          export base-image-name=$([[ $? -eq 0 ]] && echo "base-${{ env.DOCKER_TAG }}" || echo "base-master")
+          export base-image-name="$([[ $? -eq 0 ]] && echo "base-${{ env.DOCKER_TAG }}" || echo "base-master")"
           echo "Using base image $base-image-name"
-          echo "base-image-name='$base-image-name'" >> $GITHUB_OUTPUT
+          echo "base-image-name=$base-image-name" >> $GITHUB_OUTPUT
           echo "${{ github.event_name }}"
 
       - name: Build and push main Docker image
