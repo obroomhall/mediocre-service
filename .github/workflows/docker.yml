@@ -18,9 +18,9 @@ jobs:
       DOCKER_TAG_PREFIX: ${{ github.event_name == 'release' && '' || 'dev-' }}
       DOCKER_TAG_SUFFIX: ${{ github.head_ref || github.ref_name }}
       DOCKER_REPOSITORY: obroomhall/mediocre
-      DOCKER_BASE_TAG: ${{ env.DOCKER_REPOSITORY ':base-' env.DOCKER_TAG_PREFIX env.DOCKER_TAG_SUFFIX }}
-      DOCKER_BASE_FALLBACK_TAG: ${{ env.DOCKER_REPOSITORY ':base-' env.DOCKER_TAG_PREFIX 'master' }}
-      DOCKER_TAG: ${{ env.DOCKER_REPOSITORY ':' env.DOCKER_TAG_PREFIX env.DOCKER_TAG_SUFFIX }}
+      DOCKER_BASE_TAG: ${{ format('{0}:base-{1}{2}', env.DOCKER_REPOSITORY, env.DOCKER_TAG_PREFIX, env.DOCKER_TAG_SUFFIX) }}
+      DOCKER_BASE_FALLBACK_TAG: ${{ format('{0}:base-{1}master', env.DOCKER_REPOSITORY, env.DOCKER_TAG_PREFIX) }}
+      DOCKER_TAG: ${{ format('{0}:{1}{2}', env.DOCKER_REPOSITORY, env.DOCKER_TAG_PREFIX, env.DOCKER_TAG_SUFFIX) }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
