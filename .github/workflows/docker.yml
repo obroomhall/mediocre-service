@@ -15,7 +15,12 @@ jobs:
   build_and_push:
     runs-on: ubuntu-latest
     env:
-      DOCKER_TAG: ${{ github.head_ref || github.ref_name }}
+      DOCKER_TAG_PREFIX: ${{ github.event_name == 'release' && '' || 'dev-' }}
+      DOCKER_TAG_SUFFIX: ${{ github.head_ref || github.ref_name }}
+      DOCKER_REPOSITORY: obroomhall/mediocre
+      DOCKER_BASE_TAG: ${{ join([env.DOCKER_REPOSITORY, ':base-', env.DOCKER_TAG_PREFIX, env.DOCKER_TAG_SUFFIX ]}}
+      DOCKER_BASE_FALLBACK_TAG: ${{ join([env.DOCKER_REPOSITORY, ':base-', env.DOCKER_TAG_PREFIX, 'master' ]}}
+      DOCKER_TAG: ${{ join([env.DOCKER_REPOSITORY, ':', env.DOCKER_TAG_PREFIX, env.DOCKER_TAG_SUFFIX ]}}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -40,16 +45,16 @@ jobs:
           context: .
           file: Base.Dockerfile
           push: true
-          tags: obroomhall/mediocre:base-${{ env.DOCKER_TAG }}
+          tags: ${{ env.DOCKER_BASE_TAG }}
 
-      - name: Check base image exists, otherwise use master
+      - name: Check base image exists, otherwise use fallback
         id: find-base-image
         run: |
-          docker manifest inspect obroomhall/mediocre:base-${{ env.DOCKER_TAG }} > /dev/null
-          export base_image_name=$([[ $? -eq 0 ]] && echo "base-${{ env.DOCKER_TAG }}" || echo "base-master")
-          echo "Using base image $base_image_name"
-          echo "base-image-name=$base_image_name" >> $GITHUB_OUTPUT
-          echo "${{ github.event_name }}"
+          echo "Looking for base image ${{ env.DOCKER_BASE_TAG }}"
+          docker manifest inspect ${{ env.DOCKER_BASE_TAG }} > /dev/null
+          export base_image_exists=$?
+          echo "Base image $([[ $base_image_exists -eq 0 ]] && echo "does not exist" || echo "exists")"
+          echo "base-image-exists=$base_image_exists" >> $GITHUB_OUTPUT
 
       - name: Build and push main Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
@@ -57,5 +62,5 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          build-args: BASE_TAG=${{ steps.find-base-image.outputs.base-image-name }}
+          build-args: BASE_TAG=${{ steps.find-base-image.outputs.base-image-exists && env.DOCKER_BASE_TAG || env.DOCKER_BASE_FALLBACK_TAG }}
           tags: obroomhall/mediocre:${{ env.DOCKER_TAG }}
