@@ -18,9 +18,6 @@ jobs:
       DOCKER_TAG_PREFIX: ${{ github.event_name == 'release' && '' || 'dev-' }}
       DOCKER_TAG_SUFFIX: ${{ github.head_ref || github.ref_name }}
       DOCKER_REPOSITORY: obroomhall/mediocre
-      DOCKER_BASE_TAG: ${{ format('{0}:base-{1}{2}', env.DOCKER_REPOSITORY, env.DOCKER_TAG_PREFIX, env.DOCKER_TAG_SUFFIX) }}
-      DOCKER_BASE_FALLBACK_TAG: ${{ format('{0}:base-{1}master', env.DOCKER_REPOSITORY, env.DOCKER_TAG_PREFIX) }}
-      DOCKER_TAG: ${{ format('{0}:{1}{2}', env.DOCKER_REPOSITORY, env.DOCKER_TAG_PREFIX, env.DOCKER_TAG_SUFFIX) }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -37,6 +34,20 @@ jobs:
         with:
           files: "Base.Dockerfile"
           since_last_remote_commit: true
+          
+      - name: Get tag names
+        id: get-tags
+        run: |
+          echo "docker-base-tag=${{ format('{0}:base-{1}{2}', env.DOCKER_REPOSITORY, env.DOCKER_TAG_PREFIX, env.DOCKER_TAG_SUFFIX) }}" >> $GITHUB_OUTPUT
+          echo "docker-base-fallback-tag=${{ format('{0}:base-{1}master', env.DOCKER_REPOSITORY, env.DOCKER_TAG_PREFIX) }}" >> $GITHUB_OUTPUT
+          echo "docker-main-tag=${{ format('{0}:{1}{2}', env.DOCKER_REPOSITORY, env.DOCKER_TAG_PREFIX, env.DOCKER_TAG_SUFFIX) }}" >> $GITHUB_OUTPUT
+          
+      - name: Print tag names
+        id: print-tags
+        run: |
+          echo "docker-base-tag=${{ steps.get-tags.outputs.docker-base-tag }}"
+          echo "docker-base-fallback-tag=${{ steps.get-tags.outputs.docker-base-fallback-tag }}"
+          echo "docker-main-tag=${{ steps.get-tags.outputs.docker-main-tag }}"
 
       - name: Build and push base Docker image
         if: steps.base-dockerfile-changed.outputs.any_changed == 'true'
@@ -45,13 +56,13 @@ jobs:
           context: .
           file: Base.Dockerfile
           push: true
-          tags: ${{ env.DOCKER_BASE_TAG }}
+          tags: ${{ steps.get-tags.outputs.docker-base-tag }}
 
       - name: Check base image exists, otherwise use fallback
         id: find-base-image
         run: |
-          echo "Looking for base image ${{ env.DOCKER_BASE_TAG }}"
-          docker manifest inspect ${{ env.DOCKER_BASE_TAG }} > /dev/null
+          echo "Looking for base image ${{ steps.get-tags.outputs.docker-base-tag }}"
+          docker manifest inspect ${{ steps.get-tags.outputs.docker-base-tag }} > /dev/null
           export base_image_exists=$?
           echo "Base image $([[ $base_image_exists -eq 0 ]] && echo "does not exist" || echo "exists")"
           echo "base-image-exists=$base_image_exists" >> $GITHUB_OUTPUT
@@ -62,5 +73,5 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          build-args: BASE_TAG=${{ steps.find-base-image.outputs.base-image-exists && env.DOCKER_BASE_TAG || env.DOCKER_BASE_FALLBACK_TAG }}
-          tags: obroomhall/mediocre:${{ env.DOCKER_TAG }}
+          build-args: BASE_TAG=${{ steps.find-base-image.outputs.base-image-exists && steps.get-tags.outputs.docker-base-tag || steps.get-tags.outputs.docker-base-fallback-tag }}
+          tags: ${{ steps.get-tags.outputs.docker-main-tag }}
