@@ -42,8 +42,11 @@ jobs:
           push: true
           tags: obroomhall/mediocre:base-${{ env.DOCKER_TAG }}
 
-      - name: Check exists
-        run: docker manifest inspect obroomhall/mediocre:base-${{ env.DOCKER_TAG }} > /dev/null ; echo $?
+      - name: Check base image exists, otherwise use master
+        id: find-base-image
+        run: |
+          docker manifest inspect obroomhall/mediocre:base-${{ env.DOCKER_TAG }} > /dev/null
+          echo "base-image-name=$([[ $? -eq 0 ]] && echo "base-${{ env.DOCKER_TAG }}" || echo "base-master")\n" >> $GITHUB_OUTPUT
 
       - name: Build and push main Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
@@ -51,5 +54,5 @@ jobs:
           context: .
           file: Dockerfile
           push: true
-          build-args: BASE_TAG=base-${{ env.DOCKER_TAG }}
+          build-args: BASE_TAG=${{ steps.find-base-image.outputs.base-image-name }}
           tags: obroomhall/mediocre:${{ env.DOCKER_TAG }}
