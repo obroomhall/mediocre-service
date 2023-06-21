@@ -9,5 +9,4 @@ WORKDIR /src/build
 RUN cmake ..
 RUN cmake --build .
 
-ENTRYPOINT ["/bin/bash"]
-CMD ["mediocre"]
+ENTRYPOINT ["./mediocre"]

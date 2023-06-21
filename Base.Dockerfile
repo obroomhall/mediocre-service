@@ -31,7 +31,7 @@ RUN git clone --recurse-submodules -b $GRPC_VERSION --depth 1 --shallow-submodul
     && mkdir -p grpc/cmake/build \
     && pushd grpc/cmake/build \
     && cmake -DgRPC_INSTALL=ON \
-             -DgRPC_BUILD_TESTS=OFF \
+             -DgRPC_BUILD_TESTS=ON \
              ../.. \
     && make -j 4 \
     && make install \

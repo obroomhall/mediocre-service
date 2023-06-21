@@ -9,15 +9,12 @@ set(CMAKE_CXX_STANDARD 17)
 add_executable(
         mediocre
         libmediocre/main/main.cpp
-        libmediocre/api/api.cpp
-        libmediocre/test/test.cpp
+        libmediocre/dummy/dummy.cpp
 )
 
 add_library(
         proto-objects OBJECT
-        libmediocre/main/main.proto
-        libmediocre/api/api.proto
-        libmediocre/test/test.proto
+        libmediocre/dummy/dummy.proto
 )
 
 

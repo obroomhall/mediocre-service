@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package mediocre.dummy;
+option csharp_namespace = "Mediocre";
+
+message DummyRequest {
+  string request = 1;
+}
+
+message DummyResponse {
+  string response = 1;
+}
+
+service Dummy {
+  rpc DoThing(DummyRequest) returns (DummyResponse);
+}
