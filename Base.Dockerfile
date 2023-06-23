@@ -8,6 +8,7 @@ ARG TESSERACT_VERSION="5.2.0"
 ARG LEPTONICA_VERSION="1.83.1"
 
 ARG CMAKE_INSTALL_PREFIX="$HOME/local"
+RUN mkdir -p $CMAKE_INSTALL_PREFIX
 
 # use bash instead of sh
 SHELL ["/bin/bash", "-c"]
