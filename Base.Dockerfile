@@ -2,7 +2,7 @@ FROM ubuntu:22.04
 
 # check for CLion support before upgrading cmake
 ARG CMAKE_VERSION="3.25.3"
-ARG GRPC_VERSION="v1.55.1"
+ARG GRPC_VERSION="1.55.1"
 ARG OPENCV_VERSION="4.7.0"
 ARG TESSERACT_VERSION="5.2.0"
 ARG LEPTONICA_VERSION="1.83.1"
@@ -30,7 +30,7 @@ RUN wget -q -O cmake-linux.sh https://github.com/Kitware/CMake/releases/download
 # install grpc and protobuf
 RUN apt-get update  \
     && apt-get install -y autoconf libtool pkg-config
-RUN git clone --recurse-submodules -b $GRPC_VERSION --depth 1 --shallow-submodules https://github.com/grpc/grpc \
+RUN git clone --recurse-submodules -b v$GRPC_VERSION --depth 1 --shallow-submodules https://github.com/grpc/grpc \
     && mkdir -p grpc/cmake/build $CMAKE_INSTALL_PREFIX/grpc \
     && pushd grpc/cmake/build \
     && cmake -DgRPC_INSTALL=ON \
