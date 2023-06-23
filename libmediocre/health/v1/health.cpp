@@ -1,0 +1,15 @@
+#include <libmediocre/health/v1/health.hpp>
+
+namespace grpc::health::v1 {
+
+    using namespace grpc;
+
+    Status HealthServiceImpl::Check(
+            ServerContext *context,
+            const HealthCheckRequest *request,
+            HealthCheckResponse *response) {
+        response->set_status(HealthCheckResponse_ServingStatus_SERVING);
+        return Status::OK;
+    }
+
+}// namespace grpc::health::v1

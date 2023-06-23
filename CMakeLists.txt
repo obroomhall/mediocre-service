@@ -9,12 +9,14 @@ set(CMAKE_CXX_STANDARD 17)
 add_executable(
         mediocre
         libmediocre/main/main.cpp
-        libmediocre/dummy/dummy.cpp
+        libmediocre/health/v1/health.cpp
+        libmediocre/dependency/v1/dependency.cpp
 )
 
 add_library(
         proto-objects OBJECT
-        libmediocre/dummy/dummy.proto
+        libmediocre/health/v1/health.proto
+        libmediocre/dependency/v1/dependency.proto
 )
 
 
@@ -62,13 +64,13 @@ find_package(Tesseract CONFIG REQUIRED)
 message(STATUS "Using Tesseract ${Tesseract_VERSION}")
 
 
+## -- CMakeRC - A Standalone CMake-Based C++ Resource Compiler -- #
+
+#include(CMakeRC.cmake)
+#cmrc_add_resource_library(foo-resources ALIAS foo::rc ...)
+
+
 ## -- link it all together -- ##
 
-target_include_directories(
-        mediocre PUBLIC
-        ${CMAKE_CURRENT_LIST_DIR}
-        /usr/local/include/tesseract
-        /usr/local/include/leptonica
-        /usr/local/include/opencv4/opencv2
-)
+target_include_directories(mediocre PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 target_link_libraries(mediocre proto-objects ${OpenCV_LIBS} Tesseract::libtesseract)

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package mediocre.dependency.v1;
+option csharp_namespace = "Mediocre.Dependency.v1";
+
+message OpenCVCheckRequest {
+}
+
+message OpenCVCheckResponse {
+  bool healthy = 1;
+  string version = 2;
+  string error = 3;
+}
+
+service Dependency {
+  rpc CheckOpenCV(OpenCVCheckRequest) returns (OpenCVCheckResponse);
+}
