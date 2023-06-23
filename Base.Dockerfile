@@ -7,6 +7,8 @@ ARG OPENCV_VERSION="4.7.0"
 ARG TESSERACT_VERSION="5.2.0"
 ARG LEPTONICA_VERSION="1.83.1"
 
+ARG CMAKE_INSTALL_PREFIX="$HOME/local"
+
 # use bash instead of sh
 SHELL ["/bin/bash", "-c"]
 
@@ -20,7 +22,7 @@ RUN apt-get update  \
 
 # install cmake
 RUN wget -q -O cmake-linux.sh https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION\-linux-x86_64.sh \
-    && sh cmake-linux.sh -- --skip-license --prefix=/usr/local \
+    && sh cmake-linux.sh -- --skip-license --prefix=$CMAKE_INSTALL_PREFIX/cmake \
     && rm cmake-linux.sh \
     && cmake --version
 
@@ -31,7 +33,8 @@ RUN git clone --recurse-submodules -b $GRPC_VERSION --depth 1 --shallow-submodul
     && mkdir -p grpc/cmake/build \
     && pushd grpc/cmake/build \
     && cmake -DgRPC_INSTALL=ON \
-             -DgRPC_BUILD_TESTS=ON \
+             -DgRPC_BUILD_TESTS=OFF \
+             -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX/grpc \
              ../.. \
     && make -j 4 \
     && make install \
@@ -43,7 +46,7 @@ RUN wget -q -O opencv.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSI
     && unzip opencv.zip \
     && mkdir -p opencv-$OPENCV_VERSION/build \
     && pushd opencv-$OPENCV_VERSION/build \
-    && cmake .. \
+    && cmake -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX/opencv .. \
     && cmake --build . \
     && make -j 4 \
     && make install \
@@ -57,7 +60,7 @@ RUN wget -q -O leptonica.zip https://github.com/DanBloomberg/leptonica/archive/r
     && unzip leptonica.zip \
     && mkdir -p leptonica-$LEPTONICA_VERSION/build \
     && pushd leptonica-$LEPTONICA_VERSION/build \
-    && cmake .. \
+    && cmake -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX/leptonica .. \
     && make -j 4 \
     && make install \
     && popd \
@@ -66,7 +69,7 @@ RUN wget -q -O tesseract.zip https://github.com/tesseract-ocr/tesseract/archive/
     && unzip tesseract.zip \
     && mkdir -p tesseract-$TESSERACT_VERSION/build \
     && pushd tesseract-$TESSERACT_VERSION/build \
-    && cmake .. \
+    && cmake -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX/tesseract .. \
     && make -j 4 \
     && make install \
     && popd \
