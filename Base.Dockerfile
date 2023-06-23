@@ -25,7 +25,7 @@ RUN wget -q -O cmake-linux.sh https://github.com/Kitware/CMake/releases/download
     && mkdir -p $CMAKE_INSTALL_PREFIX/cmake \
     && sh cmake-linux.sh -- --skip-license --prefix=$CMAKE_INSTALL_PREFIX/cmake \
     && rm cmake-linux.sh \
-    && cmake --version
+    && export PATH=$PATH:$CMAKE_INSTALL_PREFIX/cmake/bin
 
 # install grpc and protobuf
 RUN apt-get update  \
