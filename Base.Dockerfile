@@ -24,7 +24,7 @@ RUN apt-get update  \
 RUN wget -q -O cmake-linux.sh https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION\-linux-x86_64.sh \
     && mkdir -p $CMAKE_INSTALL_PREFIX/cmake \
     && sh cmake-linux.sh -- --skip-license --prefix=$CMAKE_INSTALL_PREFIX/cmake \
-    && rm cmake-linux.sh \
+    && rm cmake-linux.sh
 
 ENV PATH="$PATH:$CMAKE_INSTALL_PREFIX/cmake/bin"
 
