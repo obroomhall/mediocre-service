@@ -40,14 +40,18 @@ jobs:
         run: |
           echo "docker-base-tag=${{ format('base-{0}{1}', env.DOCKER_TAG_PREFIX, env.DOCKER_TAG_SUFFIX) }}" >> $GITHUB_OUTPUT
           echo "docker-base-fallback-tag=${{ format('base-{0}master', env.DOCKER_TAG_PREFIX) }}" >> $GITHUB_OUTPUT
+          echo "docker-base-sha-tag=${{ format('base-{0}', github.sha) }}" >> $GITHUB_OUTPUT
           echo "docker-main-tag=${{ format('{0}{1}', env.DOCKER_TAG_PREFIX, env.DOCKER_TAG_SUFFIX) }}" >> $GITHUB_OUTPUT
+          echo "docker-main-sha-tag=${{ github.sha }}" >> $GITHUB_OUTPUT
           
       - name: Print tag names
         id: print-tags
         run: |
           echo "docker-base-tag=${{ steps.get-tags.outputs.docker-base-tag }}"
           echo "docker-base-fallback-tag=${{ steps.get-tags.outputs.docker-base-fallback-tag }}"
+          echo "docker-base-sha-tag=${{ steps.get-tags.outputs.docker-base-fallback-tag }}"
           echo "docker-main-tag=${{ steps.get-tags.outputs.docker-main-tag }}"
+          echo "docker-main-sha-tag=${{ steps.get-tags.outputs.docker-main-tag }}"
 
       - name: Build and push base Docker image
         if: steps.base-dockerfile-changed.outputs.any_changed == 'true'
@@ -56,7 +60,7 @@ jobs:
           context: .
           file: Base.Dockerfile
           push: true
-          tags: "${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-tag }}"
+          tags: ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-tag }},${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-sha-tag }}
 
       - name: Check base image exists, otherwise use fallback
         id: find-base-image
@@ -75,4 +79,4 @@ jobs:
           push: true
           build-args:
             BASE_TAG=${{ steps.find-base-image.outputs.base-image-exists == 'yes' && steps.get-tags.outputs.docker-base-tag || steps.get-tags.outputs.docker-base-fallback-tag }}
-          tags: "${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-main-tag }}"
+          tags: ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-main-tag }},${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-main-sha-tag }}
