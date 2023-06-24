@@ -53,25 +53,29 @@ jobs:
           echo "docker-main-tag=${{ steps.get-tags.outputs.docker-main-tag }}"
           echo "docker-main-sha-tag=${{ steps.get-tags.outputs.docker-main-sha-tag }}"
 
-      - name: Build and push base Docker image
+      - name: Build and push intermediate base Docker image
         if: steps.base-dockerfile-changed.outputs.any_changed == 'true'
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
           context: .
           file: Base.Dockerfile
           push: true
-          tags: ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-tag }},${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-sha-tag }}
+          tags: ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-sha-tag }}
 
       - name: Check base image exists, otherwise use fallback
         id: find-base-image
         run: |
-          export base_image_name="${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-tag }}"
-          echo "Looking for base image $base_image_name"
+          export base_image_name=${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-tag }}
+          export intermediate_base_image_name=${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-sha-tag }}
           export base_image_exists=$(docker manifest inspect $base_image_name >/dev/null 2>&1 && echo yes)
-          echo "Base image $([[ $base_image_exists == 'yes' ]] && echo "exists" || echo "does not exist, using ${{ steps.get-tags.outputs.docker-base-fallback-tag }}")"
-          echo "base-image-exists=$base_image_exists" >> $GITHUB_OUTPUT
+          export intermediate_base_image_exists=$(docker manifest inspect intermediate_base_image_exists >/dev/null 2>&1 && echo yes)
+          export base_image=$([[ $base_image_exists == 'yes' ]] && echo ${{ steps.get-tags.outputs.docker-base-tag }} \
+            || [[ $intermediate_base_image_exists == 'yes' ]] && echo ${{ steps.get-tags.outputs.docker-base-sha-tag }} \
+            || echo ${{ steps.get-tags.outputs.docker-base-fallback-tag }})
+          echo "Using $base_image"
+          echo base-image=$base_image >> $GITHUB_OUTPUT
 
-      - name: Build and push main Docker image (SHA)
+      - name: Build and push intermediate main Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
           context: .
@@ -79,7 +83,7 @@ jobs:
           push: true
           build-args: |
             BASE_REPO=${{ env.DOCKER_REPOSITORY }}
-            BASE_TAG=${{ steps.find-base-image.outputs.base-image-exists == 'yes' && steps.get-tags.outputs.docker-base-tag || steps.get-tags.outputs.docker-base-fallback-tag }}
+            BASE_TAG=${{ steps.find-base-image.outputs.base-image }}
           tags: ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-main-sha-tag }}
 
       - name: Health check
@@ -87,12 +91,21 @@ jobs:
         run: |
           docker run -d --rm -p 127.0.0.1:80:50051/tcp ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-main-sha-tag }}
           docker container ls
-          curl -L https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
+          curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
           grpc-client-cli health 127.0.0.1:80
         env:
           GRPC_CLIENT_CLI_VERSION: 1.18.0
 
-      - name: Build and push main Docker image (MAIN)
+      - name: Build and push base Docker image
+        if: steps.base-dockerfile-changed.outputs.any_changed == 'true'
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: .
+          file: Base.Dockerfile
+          push: true
+          tags: ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-tag }}
+
+      - name: Build and push main Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
           context: .
@@ -100,5 +113,5 @@ jobs:
           push: true
           build-args: |
             BASE_REPO=${{ env.DOCKER_REPOSITORY }}
-            BASE_TAG=${{ steps.find-base-image.outputs.base-image-exists == 'yes' && steps.get-tags.outputs.docker-base-tag || steps.get-tags.outputs.docker-base-fallback-tag }}
+            BASE_TAG=${{ steps.find-base-image.outputs.base-image }}
           tags: ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-main-tag }}
