@@ -68,7 +68,7 @@ jobs:
           export base_image_name=${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-tag }}
           export intermediate_base_image_name=${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-sha-tag }}
           export base_image_exists=$(docker manifest inspect $base_image_name >/dev/null 2>&1 && echo yes)
-          export intermediate_base_image_exists=$(docker manifest inspect intermediate_base_image_exists >/dev/null 2>&1 && echo yes)
+          export intermediate_base_image_exists=$(docker manifest inspect $intermediate_base_image_name >/dev/null 2>&1 && echo yes)
           export base_image=$([[ $base_image_exists == 'yes' ]] && echo ${{ steps.get-tags.outputs.docker-base-tag }} \
             || ([[ $intermediate_base_image_exists == 'yes' ]] && echo ${{ steps.get-tags.outputs.docker-base-sha-tag }} \
             || echo ${{ steps.get-tags.outputs.docker-base-fallback-tag }}))
