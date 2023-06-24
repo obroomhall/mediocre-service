@@ -9,7 +9,7 @@ namespace grpc::health::v1 {
             ServerContext *context,
             const HealthCheckRequest *request,
             HealthCheckResponse *response) {
-        response->set_status(HealthCheckResponse_ServingStatus_NOT_SERVING);
+        response->set_status(HealthCheckResponse_ServingStatus_SERVING);
         return Status::OK;
     }
 
