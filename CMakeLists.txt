@@ -64,12 +64,6 @@ find_package(Tesseract CONFIG REQUIRED)
 message(STATUS "Using Tesseract ${Tesseract_VERSION}")
 
 
-## -- CMakeRC - A Standalone CMake-Based C++ Resource Compiler -- #
-
-#include(CMakeRC.cmake)
-#cmrc_add_resource_library(foo-resources ALIAS foo::rc ...)
-
-
 ## -- link it all together -- ##
 
 target_include_directories(mediocre PUBLIC ${CMAKE_CURRENT_LIST_DIR})

@@ -13,7 +13,6 @@ ARG CMAKE_INSTALL_PREFIX_CMAKE=$CMAKE_INSTALL_PREFIX/cmake
 ARG CMAKE_INSTALL_PREFIX_GRPC=$CMAKE_INSTALL_PREFIX/grpc
 ARG CMAKE_INSTALL_PREFIX_OPENCV=$CMAKE_INSTALL_PREFIX/opencv
 ARG CMAKE_INSTALL_PREFIX_TESSERACT=$CMAKE_INSTALL_PREFIX/tesseract
-ARG TESSDATA_PREFIX=/usr/local/share/tessdata/
 
 # use bash instead of sh
 SHELL ["/bin/bash", "-c"]
@@ -34,7 +33,7 @@ RUN wget -q -O cmake-linux.sh https://github.com/Kitware/CMake/releases/download
     && sh cmake-linux.sh -- --skip-license --prefix=$CMAKE_INSTALL_PREFIX_CMAKE \
     && rm cmake-linux.sh
 
-ENV PATH=$PATH:$CMAKE_INSTALL_PREFIX/cmake/bin
+ENV PATH=$PATH:$CMAKE_INSTALL_PREFIX_CMAKE/bin
 
 
 # install grpc and protobuf
@@ -54,6 +53,8 @@ RUN git clone --recurse-submodules -b v$GRPC_VERSION --depth 1 --shallow-submodu
     && popd \
     && rm -rf grpc
 
+ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH;$CMAKE_INSTALL_PREFIX_GRPC/lib/cmake
+
 
 # install opencv
 
@@ -68,11 +69,13 @@ RUN wget -q -O opencv.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSI
     && popd \
     && rm -rf opencv-$OPENCV_VERSION opencv.zip
 
+ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH;$CMAKE_INSTALL_PREFIX_OPENCV/lib/cmake
+
 
 # install tesseract
 
 RUN apt-get update \
-    && apt-get install -y libicu-dev libpango1.0-dev libcairo2-dev
+    && apt-get install -y libicu-dev libpango1.0-dev libcairo2-dev libtiff-dev libjpeg-dev
 
 RUN wget -q -O leptonica.zip https://github.com/DanBloomberg/leptonica/archive/refs/tags/$LEPTONICA_VERSION.zip \
     && unzip leptonica.zip \
@@ -94,4 +97,6 @@ RUN wget -q -O tesseract.zip https://github.com/tesseract-ocr/tesseract/archive/
     && popd \
     && rm -rf tesseract-$TESSERACT_VERSION tesseract.zip
 
+ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH;$CMAKE_INSTALL_PREFIX_TESSERACT/lib/cmake
+ENV TESSDATA_PREFIX=$CMAKE_INSTALL_PREFIX_TESSERACT/share/tessdata/
 RUN wget -q -P $TESSDATA_PREFIX https://github.com/tesseract-ocr/tessdata_best/raw/$TESSDATA_VERSION/eng.traineddata
