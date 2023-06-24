@@ -100,6 +100,6 @@ RUN wget -q -O tesseract.zip https://github.com/tesseract-ocr/tesseract/archive/
     && popd \
     && rm -rf tesseract-$TESSERACT_VERSION tesseract.zip
 
-ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH;$CMAKE_INSTALL_PREFIX_TESSERACT/lib/cmake
+ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$CMAKE_INSTALL_PREFIX_TESSERACT/lib/cmake
 ENV TESSDATA_PREFIX=$CMAKE_INSTALL_PREFIX_TESSERACT/share/tessdata/
 RUN wget -q -P $TESSDATA_PREFIX https://github.com/tesseract-ocr/tessdata_best/raw/$TESSDATA_VERSION/eng.traineddata
