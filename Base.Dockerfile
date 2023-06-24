@@ -55,8 +55,6 @@ RUN git clone --recurse-submodules -b v$GRPC_VERSION --depth 1 --shallow-submodu
     && popd \
     && rm -rf grpc
 
-ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH;$CMAKE_INSTALL_PREFIX_GRPC/lib/cmake
-
 
 # install opencv
 
@@ -70,8 +68,6 @@ RUN wget -q -O opencv.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSI
     && make install \
     && popd \
     && rm -rf opencv-$OPENCV_VERSION opencv.zip
-
-ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH;$CMAKE_INSTALL_PREFIX_OPENCV/lib/cmake
 
 
 # install tesseract
@@ -89,18 +85,16 @@ RUN wget -q -O leptonica.zip https://github.com/DanBloomberg/leptonica/archive/r
     && popd \
     && rm -rf leptonica-$LEPTONICA_VERSION leptonica.zip
 
-ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH;$CMAKE_INSTALL_PREFIX_LEPTONICA/lib/cmake
-
 RUN wget -q -O tesseract.zip https://github.com/tesseract-ocr/tesseract/archive/refs/tags/$TESSERACT_VERSION.zip \
     && unzip tesseract.zip \
     && mkdir -p tesseract-$TESSERACT_VERSION/build $CMAKE_INSTALL_PREFIX_TESSERACT \
     && pushd tesseract-$TESSERACT_VERSION/build \
-    && cmake -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX_TESSERACT .. \
+    && cmake -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX_TESSERACT \
+             -DLeptonica_DIR=$CMAKE_INSTALL_PREFIX_TESSERACT/lib/cmake \
+             .. \
     && make -j 4 \
     && make install \
     && popd \
     && rm -rf tesseract-$TESSERACT_VERSION tesseract.zip
-
-ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH;$CMAKE_INSTALL_PREFIX_TESSERACT/lib/cmake
 
 RUN wget -q -P $TESSDATA_PREFIX https://github.com/tesseract-ocr/tessdata_best/raw/$TESSDATA_VERSION/eng.traineddata
