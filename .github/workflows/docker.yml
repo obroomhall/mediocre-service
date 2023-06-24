@@ -86,8 +86,9 @@ jobs:
         id: health-check
         run: |
           docker run -d --rm ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-main-sha-tag }} -p 127.0.0.1:80:50051/tcp
+          docker container ls
           curl -L https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
-          grpc-client-cli health localhost:80
+          grpc-client-cli health 127.0.0.1:80
         env:
           GRPC_CLIENT_CLI_VERSION: 1.18.0
 
