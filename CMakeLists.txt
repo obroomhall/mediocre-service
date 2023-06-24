@@ -66,5 +66,5 @@ message(STATUS "Using Tesseract ${Tesseract_VERSION}")
 
 ## -- link it all together -- ##
 
-target_include_directories(mediocre PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(mediocre PUBLIC ${CMAKE_CURRENT_LIST_DIR} ${Tesseract_INCLUDE_DIRS})
 target_link_libraries(mediocre proto-objects ${OpenCV_LIBS} Tesseract::libtesseract)

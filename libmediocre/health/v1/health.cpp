@@ -2,7 +2,8 @@
 
 namespace grpc::health::v1 {
 
-    using namespace grpc;
+    using grpc::Status;
+    using grpc::ServerContext;
 
     Status HealthServiceImpl::Check(
             ServerContext *context,

@@ -1,4 +1,3 @@
-#include <grpcpp/server_context.h>
 #include <leptonica/allheaders.h>
 #include <libmediocre/dependency/v1/dependency.hpp>
 #include <opencv2/opencv.hpp>
@@ -6,8 +5,8 @@
 
 namespace mediocre::dependency::v1 {
 
-    using grpc::ServerContext;
     using grpc::Status;
+    using grpc::ServerContext;
 
     Status DependencyServiceImpl::CheckOpenCV(
             ServerContext *context,

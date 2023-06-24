@@ -73,7 +73,7 @@ RUN wget -q -O opencv.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSI
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$CMAKE_INSTALL_PREFIX_OPENCV/lib/cmake
 
 
-# install tesseract
+# install tesseract and leptonica
 
 RUN apt-get update \
     && apt-get install -y libicu-dev libpango1.0-dev libcairo2-dev libtiff-dev libjpeg-dev
