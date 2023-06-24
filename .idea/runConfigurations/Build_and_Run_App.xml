@@ -3,7 +3,7 @@
     <deployment type="dockerfile">
       <settings>
         <option name="imageTag" value="mediocre:dev-local" />
-        <option name="buildCliOptions" value="--force-rm " />
+        <option name="buildCliOptions" value="--force-rm=true" />
         <option name="containerName" value="mediocre" />
         <option name="entrypoint" value="/src/build/mediocre" />
         <option name="portBindings">

@@ -1,5 +1,5 @@
 ARG BASE_REPO=mediocre
-ARG BASE_TAG=base-local
+ARG BASE_TAG=base-dev-local
 FROM $BASE_REPO:$BASE_TAG
 
 COPY . /src

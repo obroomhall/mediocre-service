@@ -10,6 +10,6 @@ if (!$tagToPull) {
 docker pull ${repo}:${tagToPull}
 
 if ($?) {
-    Write-Host "Retagging ${repo}:${tagToPull} as mediocre:base-local"
-    docker tag ${repo}:${tagToPull} mediocre:base-local
+    Write-Host "Retagging ${repo}:${tagToPull} as mediocre:base-dev-local"
+    docker tag ${repo}:${tagToPull} mediocre:base-dev-local
 }
