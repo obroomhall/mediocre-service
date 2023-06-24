@@ -38,11 +38,11 @@ jobs:
       - name: Get tag names
         id: get-tags
         run: |
-          echo "docker-base-tag=${{ format('base-{0}{1}', env.DOCKER_TAG_PREFIX, env.DOCKER_TAG_SUFFIX) }}" >> $GITHUB_OUTPUT
-          echo "docker-base-fallback-tag=${{ format('base-{0}master', env.DOCKER_TAG_PREFIX) }}" >> $GITHUB_OUTPUT
-          echo "docker-base-sha-tag=${{ format('base-{0}', github.sha) }}" >> $GITHUB_OUTPUT
-          echo "docker-main-tag=${{ format('{0}{1}', env.DOCKER_TAG_PREFIX, env.DOCKER_TAG_SUFFIX) }}" >> $GITHUB_OUTPUT
-          echo "docker-main-sha-tag=${{ github.sha }}" >> $GITHUB_OUTPUT
+          echo "docker-base-tag=base-$DOCKER_TAG_PREFIX\$DOCKER_TAG_SUFFIX" >> $GITHUB_OUTPUT
+          echo "docker-base-fallback-tag=base-$DOCKER_TAG_PREFIX\master" >> $GITHUB_OUTPUT
+          echo "docker-base-sha-tag=base-$DOCKER_TAG_PREFIX\$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "docker-main-tag=$DOCKER_TAG_PREFIX\$DOCKER_TAG_SUFFIX" >> $GITHUB_OUTPUT
+          echo "docker-main-sha-tag=$DOCKER_TAG_PREFIX\$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           
       - name: Print tag names
         id: print-tags
