@@ -49,9 +49,9 @@ jobs:
         run: |
           echo "docker-base-tag=${{ steps.get-tags.outputs.docker-base-tag }}"
           echo "docker-base-fallback-tag=${{ steps.get-tags.outputs.docker-base-fallback-tag }}"
-          echo "docker-base-sha-tag=${{ steps.get-tags.outputs.docker-base-fallback-tag }}"
+          echo "docker-base-sha-tag=${{ steps.get-tags.outputs.docker-base-sha-tag }}"
           echo "docker-main-tag=${{ steps.get-tags.outputs.docker-main-tag }}"
-          echo "docker-main-sha-tag=${{ steps.get-tags.outputs.docker-main-tag }}"
+          echo "docker-main-sha-tag=${{ steps.get-tags.outputs.docker-main-sha-tag }}"
 
       - name: Build and push base Docker image
         if: steps.base-dockerfile-changed.outputs.any_changed == 'true'
