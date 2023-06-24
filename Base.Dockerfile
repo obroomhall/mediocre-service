@@ -37,6 +37,22 @@ RUN wget -q -O cmake-linux.sh https://github.com/Kitware/CMake/releases/download
 ENV PATH=$PATH:$CMAKE_INSTALL_PREFIX_CMAKE/bin
 
 
+# install opencv
+
+RUN wget -q -O opencv.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSION.zip \
+    && unzip opencv.zip \
+    && mkdir -p opencv-$OPENCV_VERSION/build $CMAKE_INSTALL_PREFIX_OPENCV \
+    && pushd opencv-$OPENCV_VERSION/build \
+    && cmake -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX_OPENCV .. \
+    && cmake --build . \
+    && make -j 4 \
+    && make install \
+    && popd \
+    && rm -rf opencv-$OPENCV_VERSION opencv.zip
+
+ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$CMAKE_INSTALL_PREFIX_OPENCV/lib/cmake
+
+
 # install grpc and protobuf
 
 RUN apt-get update  \
@@ -55,22 +71,6 @@ RUN git clone --recurse-submodules -b v$GRPC_VERSION --depth 1 --shallow-submodu
     && rm -rf grpc
 
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$CMAKE_INSTALL_PREFIX_GRPC/lib/cmake
-
-
-# install opencv
-
-RUN wget -q -O opencv.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSION.zip \
-    && unzip opencv.zip \
-    && mkdir -p opencv-$OPENCV_VERSION/build $CMAKE_INSTALL_PREFIX_OPENCV \
-    && pushd opencv-$OPENCV_VERSION/build \
-    && cmake -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX_OPENCV .. \
-    && cmake --build . \
-    && make -j 4 \
-    && make install \
-    && popd \
-    && rm -rf opencv-$OPENCV_VERSION opencv.zip
-
-ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$CMAKE_INSTALL_PREFIX_OPENCV/lib/cmake
 
 
 # install tesseract and leptonica
