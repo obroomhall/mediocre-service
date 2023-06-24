@@ -4,9 +4,19 @@ on:
   pull_request:
     branches:
       - "master"
+    paths:
+      - "*.?Dockerfile"
+      - "CMakeLists.txt"
+      - "libmediocre/**"
+      - ".github/workflows/docker.yml"
   push:
     branches:
       - "master"
+    paths:
+      - "*.?Dockerfile"
+      - "CMakeLists.txt"
+      - "libmediocre/**"
+      - ".github/workflows/docker.yml"
   release:
     types:
       - "published"
