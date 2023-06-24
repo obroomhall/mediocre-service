@@ -10,3 +10,4 @@ RUN cmake ..
 RUN cmake --build .
 
 ENTRYPOINT ["./mediocre"]
+EXPOSE 50051
