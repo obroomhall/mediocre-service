@@ -12,7 +12,6 @@ ARG CMAKE_INSTALL_PREFIX=$HOME/local
 ARG CMAKE_INSTALL_PREFIX_CMAKE=$CMAKE_INSTALL_PREFIX/cmake
 ARG CMAKE_INSTALL_PREFIX_GRPC=$CMAKE_INSTALL_PREFIX/grpc
 ARG CMAKE_INSTALL_PREFIX_OPENCV=$CMAKE_INSTALL_PREFIX/opencv
-ARG CMAKE_INSTALL_PREFIX_LEPTONICA=$CMAKE_INSTALL_PREFIX/leptonica
 ARG CMAKE_INSTALL_PREFIX_TESSERACT=$CMAKE_INSTALL_PREFIX/tesseract
 ARG TESSDATA_PREFIX=/usr/local/share/tessdata/
 
@@ -77,9 +76,9 @@ RUN apt-get update \
 
 RUN wget -q -O leptonica.zip https://github.com/DanBloomberg/leptonica/archive/refs/tags/$LEPTONICA_VERSION.zip \
     && unzip leptonica.zip \
-    && mkdir -p leptonica-$LEPTONICA_VERSION/build $CMAKE_INSTALL_PREFIX_LEPTONICA \
+    && mkdir -p leptonica-$LEPTONICA_VERSION/build $CMAKE_INSTALL_PREFIX_TESSERACT \
     && pushd leptonica-$LEPTONICA_VERSION/build \
-    && cmake -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX_LEPTONICA .. \
+    && cmake -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX_TESSERACT .. \
     && make -j 4 \
     && make install \
     && popd \
@@ -89,9 +88,7 @@ RUN wget -q -O tesseract.zip https://github.com/tesseract-ocr/tesseract/archive/
     && unzip tesseract.zip \
     && mkdir -p tesseract-$TESSERACT_VERSION/build $CMAKE_INSTALL_PREFIX_TESSERACT \
     && pushd tesseract-$TESSERACT_VERSION/build \
-    && cmake -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX_TESSERACT \
-             -DLeptonica_DIR=$CMAKE_INSTALL_PREFIX_TESSERACT/lib/cmake \
-             .. \
+    && cmake -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX_TESSERACT .. \
     && make -j 4 \
     && make install \
     && popd \
