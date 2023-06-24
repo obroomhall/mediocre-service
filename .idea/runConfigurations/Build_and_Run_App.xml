@@ -3,14 +3,6 @@
     <deployment type="dockerfile">
       <settings>
         <option name="imageTag" value="mediocre:dev-local" />
-        <option name="buildArgs">
-          <list>
-            <DockerEnvVarImpl>
-              <option name="name" value="BASE_TAG" />
-              <option name="value" value="base-dev-local" />
-            </DockerEnvVarImpl>
-          </list>
-        </option>
         <option name="buildCliOptions" value="--force-rm " />
         <option name="containerName" value="mediocre" />
         <option name="entrypoint" value="/src/build/mediocre" />

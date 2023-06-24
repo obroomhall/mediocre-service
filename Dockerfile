@@ -1,5 +1,5 @@
-ARG BASE_REPO=obroomhall/mediocre
-ARG BASE_TAG=base-dev-master
+ARG BASE_REPO=mediocre
+ARG BASE_TAG=base-local
 FROM $BASE_REPO:$BASE_TAG
 
 COPY . /src

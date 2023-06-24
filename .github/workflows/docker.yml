@@ -78,5 +78,6 @@ jobs:
           file: Dockerfile
           push: true
           build-args:
+            BASE_REPO=${{ env.DOCKER_REPOSITORY }}
             BASE_TAG=${{ steps.find-base-image.outputs.base-image-exists == 'yes' && steps.get-tags.outputs.docker-base-tag || steps.get-tags.outputs.docker-base-fallback-tag }}
           tags: ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-main-tag }},${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-main-sha-tag }}
