@@ -51,11 +51,11 @@ jobs:
         name: Get tag names
         id: get-tags
         run: |
-          export docker_base_sha_tag=base-${DOCKER_TAG_PREFIX}$(git rev-parse --short HEAD)
+          docker_base_sha_tag=base-${DOCKER_TAG_PREFIX}$(git rev-parse --short HEAD)
           echo "docker-base-sha-tag=$docker_base_sha_tag" >> $GITHUB_OUTPUT
           echo "docker-base-sha-name=obroomhall/mediocre:$docker_base_sha_tag" >> $GITHUB_OUTPUT
           
-          export docker_base_tag=base-${DOCKER_TAG_PREFIX}${DOCKER_TAG_SUFFIX}
+          docker_base_tag=base-${DOCKER_TAG_PREFIX}${DOCKER_TAG_SUFFIX}
           echo "docker-base-tag=$docker_base_tag" >> $GITHUB_OUTPUT
           echo "docker-base-name=obroomhall/mediocre:$docker_base_tag" >> $GITHUB_OUTPUT
           
@@ -77,10 +77,10 @@ jobs:
         name: Determine base image to use
         id: find-base-image
         run: |
-          export base_image_file_changed=${{ steps.base-dockerfile-changed.outputs.any_changed }}
-          export base_image_exists=$(docker manifest inspect ${{ steps.get-tags.outputs.docker-base-name }} >/dev/null 2>&1 && echo yes)
+          base_image_file_changed=${{ steps.base-dockerfile-changed.outputs.any_changed }}
+          base_image_exists=$(docker manifest inspect ${{ steps.get-tags.outputs.docker-base-name }} >/dev/null 2>&1 && echo yes)
           
-          export base_image=$([[ $base_image_file_changed == 'true' ]] && echo ${{ steps.get-tags.outputs.docker-base-sha-tag }} \
+          base_image=$([[ $base_image_file_changed == 'true' ]] && echo ${{ steps.get-tags.outputs.docker-base-sha-tag }} \
             || ([[ $base_image_exists == 'yes' ]] && echo ${{ steps.get-tags.outputs.docker-base-tag }} \
             || echo ${{ steps.get-tags.outputs.docker-base-fallback-tag }}))
           
@@ -174,16 +174,16 @@ jobs:
         name: Re-tag and push base image
         if: needs.preliminary.outputs.docker-base-changed == 'true'
         run: |
-          export intermediate_image=${{ needs.preliminary.outputs.docker-base-sha-name }}
-          export final_image=${{ needs.preliminary.outputs.docker-base-name }}
+          intermediate_image=${{ needs.preliminary.outputs.docker-base-sha-name }}
+          final_image=${{ needs.preliminary.outputs.docker-base-name }}
           docker pull $intermediate_image
           docker image tag $intermediate_image $final_image
           docker push $final_image
       -
         name: Re-tag and push main image
         run: |
-          export intermediate_image=${{ needs.preliminary.outputs.docker-main-sha-name }}
-          export final_image=${{ needs.preliminary.outputs.docker-main-name }}
+          intermediate_image=${{ needs.preliminary.outputs.docker-main-sha-name }}
+          final_image=${{ needs.preliminary.outputs.docker-main-name }}
           docker pull $intermediate_image
           docker image tag $intermediate_image $final_image
           docker push $final_image
