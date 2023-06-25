@@ -77,11 +77,11 @@ jobs:
         name: Determine base image to use
         id: find-base-image
         run: |
-          base_image_file_changed=${{ steps.base-dockerfile-changed.outputs.any_changed }}
-          base_image_exists=$(docker manifest inspect ${{ steps.get-tags.outputs.docker-base-name }} >/dev/null 2>&1 && echo yes)
+          base_image_file_changed="${{ steps.base-dockerfile-changed.outputs.any_changed }}"
+          base_image_exists="$(docker manifest inspect ${{ steps.get-tags.outputs.docker-base-name }} >/dev/null 2>&1 && echo true)"
           
           base_image=$([[ $base_image_file_changed == 'true' ]] && echo ${{ steps.get-tags.outputs.docker-base-sha-tag }} \
-            || ([[ $base_image_exists == 'yes' ]] && echo ${{ steps.get-tags.outputs.docker-base-tag }} \
+            || ([[ $base_image_exists == 'true' ]] && echo ${{ steps.get-tags.outputs.docker-base-tag }} \
             || echo ${{ steps.get-tags.outputs.docker-base-fallback-tag }}))
           
           echo "Using $base_image"
