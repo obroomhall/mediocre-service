@@ -41,13 +41,6 @@ jobs:
         name: Check out the repo
         uses: actions/checkout@v3
       -
-        name: Check if base dockerfile has changed
-        id: base-dockerfile-changed
-        uses: tj-actions/changed-files@v36
-        with:
-          files: "Base.Dockerfile"
-          since_last_remote_commit: true
-      -
         name: Get tag names
         id: get-tags
         run: |
@@ -74,18 +67,28 @@ jobs:
           echo "  docker-main-sha-name=${{ steps.get-tags.outputs.docker-main-sha-name }}"
           echo "  docker-main-name=${{ steps.get-tags.outputs.docker-main-name }}"
       -
+        name: Check if base dockerfile has changed
+        id: base-dockerfile-changed
+        uses: tj-actions/changed-files@v36
+        with:
+          files: "Base.Dockerfile"
+          since_last_remote_commit: true
+      -
         name: Determine base image to use
         id: find-base-image
         run: |
           export base_image_file_changed=${{ steps.base-dockerfile-changed.outputs.any_changed }}
           export base_image_exists=$(docker manifest inspect ${{ steps.get-tags.outputs.docker-base-name }} >/dev/null 2>&1 && echo true)
           
+          echo "Base image file changed? $base_image_file_changed"
+          echo "Base image exists? $base_image_exists"
+          
           export base_image=$([[ $base_image_file_changed == 'true' ]] && echo ${{ steps.get-tags.outputs.docker-base-sha-tag }} \
             || ([[ $base_image_exists == 'true' ]] && echo ${{ steps.get-tags.outputs.docker-base-tag }} \
             || echo ${{ steps.get-tags.outputs.docker-base-fallback-tag }}))
           
           echo "Using $base_image"
-          echo build-args-base-tag=$base_image >> $GITHUB_OUTPUT
+          echo "build-args-base-tag=$base_image" >> $GITHUB_OUTPUT
 
   intermediate-build-push:
     name: Build intermediate images
