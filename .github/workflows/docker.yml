@@ -211,7 +211,7 @@ jobs:
           docker push $final_image
 
   final-test:
-    name: Test intermediate images
+    name: Test final images
     runs-on: ubuntu-latest
     needs: [ preliminary ]
     if: needs.preliminary.outputs.docker-main-changed != 'true' && needs.preliminary.outputs.docker-base-changed != 'true'
