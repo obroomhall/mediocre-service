@@ -170,12 +170,6 @@ jobs:
         run: |
           export intermediate_image=${{ needs.preliminary.outputs.docker-main-sha-name }}
           export final_image=${{ needs.preliminary.outputs.docker-main-name }}
-          
-          echo "docker -H registry-1.docker.io tag docker.io/$intermediate_image docker.io/$final_image"
-          docker -H registry-1.docker.io tag docker.io/$intermediate_image docker.io/$final_image
-          
-          echo "docker -H registry-1.docker.io push docker.io/$final_image"
-          docker -H registry-1.docker.io push docker.io/$final_image
-#          docker pull $intermediate_image
-#          docker image tag $intermediate_image $final_image
-#          docker push $final_image
+          docker pull $intermediate_image
+          docker image tag $intermediate_image $final_image
+          docker push $final_image
