@@ -170,7 +170,7 @@ jobs:
           docker container ls
           docker run -d --rm -p 127.0.0.1:$port:50051/tcp $DOCKER_IMAGE_NAME
           docker container ls
-          grpc-client-cli health localhost:$port
+          grpc-client-cli health 127.0.0.1:$port
       -
         name: Check OpenCV
         run: |
@@ -178,7 +178,7 @@ jobs:
           docker container ls
           docker run -d --rm -p 127.0.0.1:$port:50051/tcp $DOCKER_IMAGE_NAME
           docker container ls
-          check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV localhost:$port)
+          check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV 127.0.0.1:$port)
           echo $check_opencv && [[ $(echo $check_opencv | jq '.healthy') == 'true' ]]
       -
         name: Check Tesseract
