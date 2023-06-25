@@ -21,13 +21,78 @@ on:
     types:
       - "published"
 
+env:
+  DOCKER_REPOSITORY: obroomhall/mediocre
+
 jobs:
-  build_and_push:
+
+  preliminary:
+    name: Output useful variables
     runs-on: ubuntu-latest
+    outputs:
+      docker-base-changed: ${{ steps.base-dockerfile-changed.outputs.any_changed == 'true' }}
+      build-args-base-tag: ${{ steps.find-base-image.outputs.build-args-base-tag }}
+      docker-base-sha-tag: ${{ steps.get-tags.outputs.docker-base-sha-tag }}
+      docker-base-tag: ${{ steps.get-tags.outputs.docker-base-tag }}
+      docker-base-fallback-tag: ${{ steps.get-tags.outputs.docker-base-fallback-tag }}
+      docker-main-sha-tag: ${{ steps.get-tags.outputs.docker-main-sha-tag }}
+      docker-main-tag: ${{ steps.get-tags.outputs.docker-main-tag }}
     env:
       DOCKER_TAG_PREFIX: ${{ github.event_name == 'release' && '' || 'dev-' }}
       DOCKER_TAG_SUFFIX: ${{ github.head_ref || github.ref_name }}
-      DOCKER_REPOSITORY: obroomhall/mediocre
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Check if base dockerfile has changed
+        id: base-dockerfile-changed
+        uses: tj-actions/changed-files@v36
+        with:
+          files: "Base.Dockerfile"
+          since_last_remote_commit: true
+
+      - name: Get tag names
+        id: get-tags
+        run: |
+          echo "docker-base-sha-tag=base-${DOCKER_TAG_PREFIX}$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "docker-base-tag=base-${DOCKER_TAG_PREFIX}${DOCKER_TAG_SUFFIX}" >> $GITHUB_OUTPUT
+          echo "docker-base-fallback-tag=base-${DOCKER_TAG_PREFIX}master" >> $GITHUB_OUTPUT
+          echo "docker-main-sha-tag=${DOCKER_TAG_PREFIX}$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "docker-main-tag=${DOCKER_TAG_PREFIX}${DOCKER_TAG_SUFFIX}" >> $GITHUB_OUTPUT
+
+      - name: Print tag names
+        id: print-tags
+        run: |
+          echo "Base tags:"
+          echo "docker-base-sha-tag=${{ steps.get-tags.outputs.docker-base-sha-tag }}"
+          echo "docker-base-tag=${{ steps.get-tags.outputs.docker-base-tag }}"
+          echo "docker-base-fallback-tag=${{ steps.get-tags.outputs.docker-base-fallback-tag }}"
+          echo "\nMain tags:"
+          echo "docker-main-sha-tag=${{ steps.get-tags.outputs.docker-main-sha-tag }}"
+          echo "docker-main-tag=${{ steps.get-tags.outputs.docker-main-tag }}"
+
+      - name: Check base image exists, otherwise use fallback
+        id: find-base-image
+        run: |
+          export intermediate_base_image_name=${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-sha-tag }}
+          export base_image_file_changed=${{ steps.base-dockerfile-changed.outputs.any_changed }}
+        
+          export base_image_name=${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-tag }}
+          export base_image_exists=$(docker manifest inspect $base_image_name >/dev/null 2>&1 && echo yes)
+          
+          export base_image=$([[ $base_image_file_changed == 'true' ]] && echo ${{ steps.get-tags.outputs.docker-base-sha-tag }} \
+            || ([[ $base_image_exists == 'yes' ]] && echo ${{ steps.get-tags.outputs.docker-base-tag }} \
+            || echo ${{ steps.get-tags.outputs.docker-base-fallback-tag }}))
+          
+          echo "Using $base_image"
+          echo build-args-base-tag=$base_image >> $GITHUB_OUTPUT
+
+  intermediate:
+    name: Build and push intermediate docker images
+    runs-on: ubuntu-latest
+    outputs:
+      base-image: ${{ env.DOCKER_REPOSITORY }}:${{ needs.preliminary.outputs.docker-base-sha-tag }}
+      main-image: ${{ env.DOCKER_REPOSITORY }}:${{ needs.preliminary.outputs.docker-main-sha-tag }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v3
@@ -38,52 +103,14 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-      - name: Check if base dockerfile has changed
-        id: base-dockerfile-changed
-        uses: tj-actions/changed-files@v36
-        with:
-          files: "Base.Dockerfile"
-          since_last_remote_commit: true
-          
-      - name: Get tag names
-        id: get-tags
-        run: |
-          echo "docker-base-tag=base-${DOCKER_TAG_PREFIX}${DOCKER_TAG_SUFFIX}" >> $GITHUB_OUTPUT
-          echo "docker-base-fallback-tag=base-${DOCKER_TAG_PREFIX}master" >> $GITHUB_OUTPUT
-          echo "docker-base-sha-tag=base-${DOCKER_TAG_PREFIX}$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          echo "docker-main-tag=${DOCKER_TAG_PREFIX}${DOCKER_TAG_SUFFIX}" >> $GITHUB_OUTPUT
-          echo "docker-main-sha-tag=${DOCKER_TAG_PREFIX}$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          
-      - name: Print tag names
-        id: print-tags
-        run: |
-          echo "docker-base-tag=${{ steps.get-tags.outputs.docker-base-tag }}"
-          echo "docker-base-fallback-tag=${{ steps.get-tags.outputs.docker-base-fallback-tag }}"
-          echo "docker-base-sha-tag=${{ steps.get-tags.outputs.docker-base-sha-tag }}"
-          echo "docker-main-tag=${{ steps.get-tags.outputs.docker-main-tag }}"
-          echo "docker-main-sha-tag=${{ steps.get-tags.outputs.docker-main-sha-tag }}"
-
-      - name: Build and push intermediate base Docker image
-        if: steps.base-dockerfile-changed.outputs.any_changed == 'true'
+      - name: Build and push base Docker image
+        if: needs.preliminary.outputs.docker-base-changed
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
           context: .
           file: Base.Dockerfile
           push: true
-          tags: ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-sha-tag }}
-
-      - name: Check base image exists, otherwise use fallback
-        id: find-base-image
-        run: |
-          export base_image_name=${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-tag }}
-          export intermediate_base_image_name=${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-sha-tag }}
-          export base_image_exists=$(docker manifest inspect $base_image_name >/dev/null 2>&1 && echo yes)
-          export intermediate_base_image_exists=$(docker manifest inspect $intermediate_base_image_name >/dev/null 2>&1 && echo yes)
-          export base_image=$([[ $base_image_exists == 'yes' ]] && echo ${{ steps.get-tags.outputs.docker-base-tag }} \
-            || ([[ $intermediate_base_image_exists == 'yes' ]] && echo ${{ steps.get-tags.outputs.docker-base-sha-tag }} \
-            || echo ${{ steps.get-tags.outputs.docker-base-fallback-tag }}))
-          echo "Using $base_image"
-          echo base-image=$base_image >> $GITHUB_OUTPUT
+          tags: ${{ env.DOCKER_REPOSITORY }}:${{ needs.preliminary.outputs.docker-base-sha-tag }}
 
       - name: Build and push intermediate main Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
@@ -93,27 +120,45 @@ jobs:
           push: true
           build-args: |
             BASE_REPO=${{ env.DOCKER_REPOSITORY }}
-            BASE_TAG=${{ steps.find-base-image.outputs.base-image }}
-          tags: ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-main-sha-tag }}
+            BASE_TAG=${{ needs.preliminary.output.build-args-base-tag }}
+          tags: ${{ env.DOCKER_REPOSITORY }}:${{ needs.preliminary.outputs.docker-main-sha-tag }}
 
+  test:
+    name: Test intermediate docker images
+    runs-on: ubuntu-latest
+    needs: intermediate
+    env:
+      GRPC_CLIENT_CLI_VERSION: 1.18.0
+    steps:
       - name: Health check
         id: health-check
         run: |
-          docker run -d --rm -p 127.0.0.1:80:50051/tcp ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-main-sha-tag }}
-          docker container ls
+          docker run -d --rm -p 127.0.0.1:80:50051/tcp ${{ needs.intermediate.outputs.main-image }}
           curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
           grpc-client-cli health 127.0.0.1:80
-        env:
-          GRPC_CLIENT_CLI_VERSION: 1.18.0
+
+  push:
+    name: Push final docker images
+    runs-on: ubuntu-latest
+    needs: [ preliminary, test ]
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
       - name: Build and push base Docker image
-        if: steps.base-dockerfile-changed.outputs.any_changed == 'true'
+        if: needs.preliminary.outputs.docker-base-changed
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
           context: .
           file: Base.Dockerfile
           push: true
-          tags: ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-tag }}
+          tags: ${{ env.DOCKER_REPOSITORY }}:${{ needs.preliminary.outputs.docker-base-tag }}
 
       - name: Build and push main Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
@@ -123,5 +168,5 @@ jobs:
           push: true
           build-args: |
             BASE_REPO=${{ env.DOCKER_REPOSITORY }}
-            BASE_TAG=${{ steps.find-base-image.outputs.base-image }}
-          tags: ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-main-tag }}
+            BASE_TAG=${{ needs.preliminary.output.build-args-base-tag }}
+          tags: ${{ env.DOCKER_REPOSITORY }}:${{ needs.preliminary.outputs.docker-main-tag }}
