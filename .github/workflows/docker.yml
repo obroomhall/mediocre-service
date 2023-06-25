@@ -108,6 +108,7 @@ jobs:
           file: Base.Dockerfile
           push: true
           tags: ${{ needs.preliminary.outputs.docker-base-sha-name }}
+          outputs: type=docker,dest=/tmp/base.tar
 
       - name: Build and push main Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
@@ -119,6 +120,13 @@ jobs:
             BASE_REPO=obroomhall/mediocre
             BASE_TAG=${{ needs.preliminary.outputs.build-args-base-tag }}
           tags: ${{ needs.preliminary.outputs.docker-main-sha-name }}
+          outputs: type=docker,dest=/tmp/main.tar
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: images
+          path: /tmp/*.tar
 
   test:
     name: Test intermediate images
@@ -127,7 +135,19 @@ jobs:
     env:
       GRPC_CLIENT_CLI_VERSION: 1.18.0
     steps:
-      - name: Health check
+      -
+        name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: images
+          path: /tmp
+      -
+        name: Load image
+        run: |
+          docker load --input /tmp/main.tar
+          docker image ls -a
+      -
+        name: Health check
         id: health-check
         run: |
           docker run -d --rm -p 127.0.0.1:80:50051/tcp ${{ needs.preliminary.outputs.docker-main-sha-name }}
@@ -147,6 +167,17 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      -
+        name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: images
+          path: /tmp
+      -
+        name: Load image
+        run: |
+          docker load --input /tmp/*.tar
+          docker image ls -a
 
       - name: Build and push base Docker image
         if: needs.preliminary.outputs.docker-base-changed == 'true'
