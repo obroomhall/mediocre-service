@@ -126,7 +126,7 @@ jobs:
   intermediate-test:
     name: Test intermediate images
     runs-on: ubuntu-latest
-    needs: [ preliminary, intermediate-build ]
+    needs: [ preliminary, intermediate-build-push ]
     env:
       GRPC_CLIENT_CLI_VERSION: 1.18.0
     steps:
