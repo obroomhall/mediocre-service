@@ -2,7 +2,6 @@
 #include <grpcpp/server_builder.h>
 #include <iomanip>
 #include <libmediocre/dependency/v1/dependency.hpp>
-#include <libmediocre/functions/ocr/v1/ocr.hpp>
 #include <libmediocre/health/v1/health.hpp>
 #include <libmediocre/server/server.hpp>
 
