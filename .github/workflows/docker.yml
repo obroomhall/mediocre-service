@@ -166,25 +166,28 @@ jobs:
       -
         name: Check health
         run: |
+          export port=$(shuf -i 5000-5300 -n 1)
           docker container ls
-          docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
+          docker run -d --rm -p 127.0.0.1:$port:50051/tcp $DOCKER_IMAGE_NAME
           docker container ls
-          grpc-client-cli health localhost:80
+          grpc-client-cli health localhost:$port
       -
         name: Check OpenCV
         run: |
+          export port=$(shuf -i 5000-5300 -n 1)
           docker container ls
-          docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
+          docker run -d --rm -p 127.0.0.1:$port:50051/tcp $DOCKER_IMAGE_NAME
           docker container ls
-          check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV localhost:80)
+          check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV localhost:$port)
           echo $check_opencv && [[ $(echo $check_opencv | jq '.healthy') == 'true' ]]
       -
         name: Check Tesseract
         run: |
+          export port=$(shuf -i 5000-5300 -n 1)
           docker container ls
-          docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
+          docker run -d --rm -p 127.0.0.1:$port:50051/tcp $DOCKER_IMAGE_NAME
           docker container ls
-          check_tesseract=$(echo '{}' | grpc-client-cli -service Dependency -method CheckTesseract localhost:80)
+          check_tesseract=$(echo '{}' | grpc-client-cli -service Dependency -method CheckTesseract localhost:$port)
           echo $check_tesseract && [[ $(echo $check_tesseract | jq '.healthy') == 'true' ]]
 
   final-push:
