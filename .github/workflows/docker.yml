@@ -137,30 +137,6 @@ jobs:
       GRPC_CLIENT_CLI_VERSION: 1.18.0
     steps:
       -
-        name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-      -
-        name: Build base Docker image
-        if: needs.preliminary.outputs.docker-base-changed == 'true'
-        uses: docker/build-push-action@v4
-        with:
-          tags: ${{ needs.preliminary.outputs.docker-base-sha-name }}
-          pull: true
-          cache-from: type=gha
-      -
-        name: Build main Docker image
-        uses: docker/build-push-action@v4
-        with:
-          build-args: |
-            BASE_REPO=obroomhall/mediocre
-            BASE_TAG=${{ needs.preliminary.outputs.build-args-base-tag }}
-          tags: ${{ needs.preliminary.outputs.docker-main-sha-name }}
-          pull: true
-          cache-from: type=gha
-      -
         name: Health check
         id: health-check
         run: |
@@ -174,37 +150,15 @@ jobs:
     needs: [ preliminary, intermediate-test ]
     steps:
       -
-        name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-      -
-        name: Build and push base Docker image
-        if: needs.preliminary.outputs.docker-base-changed == 'true'
-        uses: docker/build-push-action@v4
-        with:
-          tags: ${{ needs.preliminary.outputs.docker-base-sha-name }}
-          pull: true
-          cache-from: type=gha
-      -
-        name: Build and push main Docker image
-        uses: docker/build-push-action@v4
-        with:
-          build-args: |
-            BASE_REPO=obroomhall/mediocre
-            BASE_TAG=${{ needs.preliminary.outputs.build-args-base-tag }}
-          tags: ${{ needs.preliminary.outputs.docker-main-sha-name }}
-          pull: true
-          cache-from: type=gha
-      -
-        name: Load and push base image
+        name: Re-tag and push base image
         if: needs.preliminary.outputs.docker-base-changed == 'true'
         run: |
+          docker pull ${{ needs.preliminary.outputs.docker-base-sha-name }}
           docker image tag ${{ needs.preliminary.outputs.docker-base-sha-name }} ${{ needs.preliminary.outputs.docker-base-name }}
           docker push ${{ needs.preliminary.outputs.docker-base-name }}
       -
-        name: Load and push main image
+        name: Re-tag and push main image
         run: |
+          docker pull ${{ needs.preliminary.outputs.docker-main-sha-name }}
           docker image tag ${{ needs.preliminary.outputs.docker-main-sha-name }} ${{ needs.preliminary.outputs.docker-main-name }}
           docker push ${{ needs.preliminary.outputs.docker-main-name }}
