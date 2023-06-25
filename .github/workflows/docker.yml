@@ -170,6 +170,7 @@ jobs:
           docker container ls
           docker run -d --rm --name mediocre -p 127.0.0.1:$port:50051/tcp $DOCKER_IMAGE_NAME
           docker container ls
+          sleep 2
           docker logs mediocre
           grpc-client-cli health 127.0.0.1:$port
       -
