@@ -113,7 +113,7 @@ jobs:
           push: true
           tags: ${{ env.DOCKER_REPOSITORY }}:${{ needs.preliminary.outputs.docker-base-sha-tag }}
 
-      - name: Build and push intermediate main Docker image
+      - name: Build and push main Docker image
         uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
         with:
           context: .
@@ -121,7 +121,7 @@ jobs:
           push: true
           build-args: |
             BASE_REPO=${{ env.DOCKER_REPOSITORY }}
-            BASE_TAG=${{ needs.preliminary.output.build-args-base-tag }}
+            BASE_TAG=${{ needs.preliminary.outputs.build-args-base-tag }}
           tags: ${{ env.DOCKER_REPOSITORY }}:${{ needs.preliminary.outputs.docker-main-sha-tag }}
 
   test:
@@ -169,5 +169,5 @@ jobs:
           push: true
           build-args: |
             BASE_REPO=${{ env.DOCKER_REPOSITORY }}
-            BASE_TAG=${{ needs.preliminary.output.build-args-base-tag }}
+            BASE_TAG=${{ needs.preliminary.outputs.build-args-base-tag }}
           tags: ${{ env.DOCKER_REPOSITORY }}:${{ needs.preliminary.outputs.docker-main-tag }}
