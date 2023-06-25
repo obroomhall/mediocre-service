@@ -1,5 +1,5 @@
-#ifndef server_h
-#define server_h
+#ifndef mediocre_server_h
+#define mediocre_server_h
 
 #include <cstdint>
 
@@ -9,4 +9,4 @@ namespace mediocre::server {
 
 }// namespace mediocre::server
 
-#endif// server_h
+#endif// mediocre_server_h

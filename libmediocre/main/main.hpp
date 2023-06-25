@@ -1,6 +1,6 @@
-#ifndef main_h
-#define main_h
+#ifndef mediocre_main_h
+#define mediocre_main_h
 
 int main(int argc, char *argv[]);
 
-#endif// main_h
+#endif// mediocre_main_h
