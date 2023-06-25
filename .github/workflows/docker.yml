@@ -166,12 +166,12 @@ jobs:
       -
         name: Check OpenCV
         run: |
-          check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV localhost:50051)
+          check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV localhost:80)
           echo $check_opencv && [[ $(echo $check_opencv | jq '.healthy') == 'true' ]]
       -
         name: Check Tesseract
         run: |
-          check_tesseract=$(echo '{}' | grpc-client-cli -service Dependency -method CheckTesseract localhost:50051)
+          check_tesseract=$(echo '{}' | grpc-client-cli -service Dependency -method CheckTesseract localhost:80)
           echo $check_tesseract && [[ $(echo $check_tesseract | jq '.healthy') == 'true' ]]
 
   final-push:
