@@ -168,8 +168,9 @@ jobs:
         run: |
           export port=$(shuf -i 5000-5301 -n 1)
           docker container ls
-          docker run -d --rm -p 127.0.0.1:$port:50051/tcp $DOCKER_IMAGE_NAME
+          docker run -d --rm --name mediocre -p 127.0.0.1:$port:50051/tcp $DOCKER_IMAGE_NAME
           docker container ls
+          docker logs mediocre
           grpc-client-cli health 127.0.0.1:$port
       -
         name: Check OpenCV
