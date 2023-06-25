@@ -168,18 +168,19 @@ jobs:
         run: |
           docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
           until [[ $(grpc-client-cli health 127.0.0.1:80 | jq -r '.status') == 'SERVING' ]]; do
-            sleep 0.1;
             echo "Waiting for a healthy container..."
+            sleep 0.05;
           done;
+          echo "Container is healthy!"
       -
         name: Check OpenCV
         run: |
-          check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV 127.0.0.1:$port)
+          check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV 127.0.0.1:80)
           echo $check_opencv && [[ $(echo $check_opencv | jq '.healthy') == 'true' ]]
       -
         name: Check Tesseract
         run: |
-          check_tesseract=$(echo '{}' | grpc-client-cli -service Dependency -method CheckTesseract localhost:$port)
+          check_tesseract=$(echo '{}' | grpc-client-cli -service Dependency -method CheckTesseract localhost:80)
           echo $check_tesseract && [[ $(echo $check_tesseract | jq '.healthy') == 'true' ]]
 
   final-push:
@@ -229,19 +230,21 @@ jobs:
         name: Install testing tools
         run: curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
       -
-        name: Check health
+        name: Start container
         run: |
           docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
-          grpc-client-cli health localhost:80
+          until [[ $(grpc-client-cli health 127.0.0.1:80 | jq -r '.status') == 'SERVING' ]]; do
+            echo "Waiting for a healthy container..."
+            sleep 0.05;
+          done;
+          echo "Container is healthy!"
       -
         name: Check OpenCV
         run: |
-          docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
-          check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV localhost:80)
+          check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV 127.0.0.1:80)
           echo $check_opencv && [[ $(echo $check_opencv | jq '.healthy') == 'true' ]]
       -
         name: Check Tesseract
         run: |
-          docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
           check_tesseract=$(echo '{}' | grpc-client-cli -service Dependency -method CheckTesseract localhost:80)
           echo $check_tesseract && [[ $(echo $check_tesseract | jq '.healthy') == 'true' ]]
