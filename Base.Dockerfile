@@ -48,6 +48,7 @@ RUN wget -q -O opencv.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSI
              -D BUILD_PROTOBUF=OFF \
              -D BUILD_TESTS=OFF \
              -D BUILD_PERF_TESTS=OFF \
+             -D BUILD_SHARED_LIBS=OFF \
              .. \
     && cmake --build . \
     && make -j 4 \
