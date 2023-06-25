@@ -153,26 +153,19 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ preliminary, intermediate-build-push ]
     env:
+      DOCKER_IMAGE_NAME: ${{ needs.preliminary.outputs.docker-main-sha-name }}
       GRPC_CLIENT_CLI_VERSION: 1.18.0
     steps:
       -
-        name: Determine main image name
-        id: determine-main-image
-        run: |
-          export main_image_name=$([[ ${{ needs.preliminary.outputs.docker-main-changed == 'true' || needs.preliminary.outputs.docker-base-changed == 'true' }} == 'true' ]] \
-            && echo ${{ needs.preliminary.outputs.docker-main-sha-name }} || echo ${{ needs.preliminary.outputs.docker-main-name }})
-          echo "Using $main_image_name"
-          echo "main-image-name=$main_image_name" >> $GITHUB_OUTPUT
-      -
         name: Pull main image
         run: |
-          docker pull ${{ steps.determine-main-image.outputs.main-image-name }}
+          docker pull $DOCKER_IMAGE_NAME
       -
         name: Install testing tools
         run: curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
       -
         name: Start main image
-        run: docker run -d --rm -p 127.0.0.1:80:50051/tcp ${{ steps.determine-main-image.outputs.main-image-name }}
+        run: docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
       -
         name: Check health
         run: grpc-client-cli health localhost:80
@@ -191,7 +184,6 @@ jobs:
     name: Push final images
     runs-on: ubuntu-latest
     needs: [ preliminary, intermediate-test ]
-    if: needs.preliminary.outputs.docker-main-changed == 'true' || needs.preliminary.outputs.docker-base-changed == 'true'
     steps:
       -
         name: Log in to Docker Hub
@@ -217,3 +209,36 @@ jobs:
           docker pull $intermediate_image
           docker image tag $intermediate_image $final_image
           docker push $final_image
+
+  final-test:
+    name: Test intermediate images
+    runs-on: ubuntu-latest
+    needs: [ preliminary ]
+    if: needs.preliminary.outputs.docker-main-changed != 'true' && needs.preliminary.outputs.docker-base-changed != 'true'
+    env:
+      DOCKER_IMAGE_NAME: ${{ needs.preliminary.outputs.docker-main-name }}
+      GRPC_CLIENT_CLI_VERSION: 1.18.0
+    steps:
+      -
+        name: Pull main image
+        run: |
+          docker pull $DOCKER_IMAGE_NAME
+      -
+        name: Install testing tools
+        run: curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
+      -
+        name: Start main image
+        run: docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
+      -
+        name: Check health
+        run: grpc-client-cli health localhost:80
+      -
+        name: Check OpenCV
+        run: |
+          check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV localhost:80)
+          echo $check_opencv && [[ $(echo $check_opencv | jq '.healthy') == 'true' ]]
+      -
+        name: Check Tesseract
+        run: |
+          check_tesseract=$(echo '{}' | grpc-client-cli -service Dependency -method CheckTesseract localhost:80)
+          echo $check_tesseract && [[ $(echo $check_tesseract | jq '.healthy') == 'true' ]]
