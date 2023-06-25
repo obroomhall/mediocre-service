@@ -159,6 +159,7 @@ jobs:
             BASE_TAG=${{ needs.preliminary.outputs.build-args-base-tag }}
           tags: ${{ needs.preliminary.outputs.docker-main-sha-name }}
           cache-from: type=gha
+          load: true
       -
         name: Health check
         id: health-check
