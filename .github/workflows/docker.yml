@@ -151,7 +151,6 @@ jobs:
         name: Health check
         id: health-check
         run: |
-#          docker pull ${{ needs.preliminary.outputs.docker-main-sha-name }}
           docker run -d --rm -p 127.0.0.1:80:50051/tcp ${{ needs.preliminary.outputs.docker-main-sha-name }}
           curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
           grpc-client-cli health 127.0.0.1:80
