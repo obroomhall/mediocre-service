@@ -152,19 +152,27 @@ jobs:
     name: Test intermediate images
     runs-on: ubuntu-latest
     needs: [ preliminary, intermediate-build-push ]
-    if: needs.preliminary.outputs.docker-main-changed == 'true' || needs.preliminary.outputs.docker-base-changed == 'true'
     env:
       GRPC_CLIENT_CLI_VERSION: 1.18.0
     steps:
       -
+        name: Determine main image name
+        id: determine-main-image
+        run: |
+          export main_image_name=$([[ ${{ needs.preliminary.outputs.docker-main-changed == 'true' || needs.preliminary.outputs.docker-base-changed == 'true' }} == 'true' ]] \
+            && echo ${{ needs.preliminary.outputs.docker-main-sha-name }} || echo ${{ needs.preliminary.outputs.docker-main-name }})
+          echo "Using $main_image_name"
+          echo "main-image-name=$main_image_name" >> $GITHUB_OUTPUT
+      -
         name: Pull main image
-        run: docker pull ${{ needs.preliminary.outputs.docker-main-sha-name }}
+        run: |
+          docker pull ${{ steps.determine-main-image.outputs.main-image-name }}
       -
         name: Install testing tools
         run: curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
       -
         name: Start main image
-        run: docker run -d --rm -p 127.0.0.1:80:50051/tcp ${{ needs.preliminary.outputs.docker-main-sha-name }}
+        run: docker run -d --rm -p 127.0.0.1:80:50051/tcp ${{ steps.determine-main-image.outputs.main-image-name }}
       -
         name: Check health
         run: grpc-client-cli health localhost:80
