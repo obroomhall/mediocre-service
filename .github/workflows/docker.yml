@@ -37,17 +37,18 @@ jobs:
       DOCKER_TAG_PREFIX: ${{ github.event_name == 'release' && '' || 'dev-' }}
       DOCKER_TAG_SUFFIX: ${{ github.head_ref || github.ref_name }}
     steps:
-      - name: Check out the repo
+      -
+        name: Check out the repo
         uses: actions/checkout@v3
-
-      - name: Check if base dockerfile has changed
+      -
+        name: Check if base dockerfile has changed
         id: base-dockerfile-changed
         uses: tj-actions/changed-files@v36
         with:
           files: "Base.Dockerfile"
           since_last_remote_commit: true
-
-      - name: Get tag names
+      -
+        name: Get tag names
         id: get-tags
         run: |
           export docker_base_sha_tag=base-${DOCKER_TAG_PREFIX}$(git rev-parse --short HEAD)
@@ -62,8 +63,8 @@ jobs:
           
           echo "docker-main-sha-name=obroomhall/mediocre:${DOCKER_TAG_PREFIX}$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           echo "docker-main-name=obroomhall/mediocre:${DOCKER_TAG_PREFIX}${DOCKER_TAG_SUFFIX}" >> $GITHUB_OUTPUT
-
-      - name: Print tag names
+      -
+        name: Print tag names
         id: print-tags
         run: |
           echo "Base images:"
@@ -72,8 +73,8 @@ jobs:
           echo "Main images:"
           echo "  docker-main-sha-name=${{ steps.get-tags.outputs.docker-main-sha-name }}"
           echo "  docker-main-name=${{ steps.get-tags.outputs.docker-main-name }}"
-
-      - name: Check base image exists, otherwise use fallback
+      -
+        name: Determine base image to use
         id: find-base-image
         run: |
           export base_image_file_changed=${{ steps.base-dockerfile-changed.outputs.any_changed }}
@@ -91,10 +92,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: preliminary
     steps:
-      - name: Check out the repo
+      -
+        name: Check out the repo
         uses: actions/checkout@v3
-
-      - name: Build and push base Docker image
+      -
+        name: Build base Docker image
         if: needs.preliminary.outputs.docker-base-changed == 'true'
         uses: docker/build-push-action@v4
         with:
@@ -102,8 +104,8 @@ jobs:
           file: Base.Dockerfile
           tags: ${{ needs.preliminary.outputs.docker-base-sha-name }}
           outputs: type=local,dest=/tmp/base.tar
-
-      - name: Build and push main Docker image
+      -
+        name: Build main Docker image
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -113,8 +115,8 @@ jobs:
             BASE_TAG=${{ needs.preliminary.outputs.build-args-base-tag }}
           tags: ${{ needs.preliminary.outputs.docker-main-sha-name }}
           outputs: type=local,dest=/tmp/main.tar
-
-      - name: Upload artifact
+      -
+        name: Upload artifact images
         uses: actions/upload-artifact@v3
         with:
           name: images
@@ -125,25 +127,26 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ preliminary, intermediate-build ]
     steps:
-      - name: Log in to Docker Hub
+      -
+        name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-
-      - name: Download artifact images
+      -
+        name: Download artifact images
         uses: actions/download-artifact@v3
         with:
           name: images
           path: /tmp
-
-      - name: Load and push base image
+      -
+        name: Load and push base image
         if: needs.preliminary.outputs.docker-base-changed == 'true'
         run: |
           docker load --input /tmp/base.tar
           docker push ${{ needs.preliminary.outputs.docker-base-sha-name }}
-
-      - name: Load and push main image
+      -
+        name: Load and push main image
         run: |
           docker load --input /tmp/main.tar
           docker push ${{ needs.preliminary.outputs.docker-main-sha-name }}
@@ -178,26 +181,27 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ preliminary, intermediate-test ]
     steps:
-      - name: Log in to Docker Hub
+      -
+        name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-
-      - name: Download artifact images
+      -
+        name: Download artifact images
         uses: actions/download-artifact@v3
         with:
           name: images
           path: /tmp
-
-      - name: Load and push base image
+      -
+        name: Load and push base image
         if: needs.preliminary.outputs.docker-base-changed == 'true'
         run: |
           docker load --input /tmp/base.tar
           docker image tag ${{ needs.preliminary.outputs.docker-base-sha-name }} ${{ needs.preliminary.outputs.docker-base-name }}
           docker push ${{ needs.preliminary.outputs.docker-base-name }}
-
-      - name: Load and push main image
+      -
+        name: Load and push main image
         run: |
           docker load --input /tmp/main.tar
           docker image tag ${{ needs.preliminary.outputs.docker-main-sha-name }} ${{ needs.preliminary.outputs.docker-main-name }}
