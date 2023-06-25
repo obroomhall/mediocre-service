@@ -4,19 +4,9 @@ on:
   pull_request:
     branches:
       - "master"
-    paths:
-      - "*.?Dockerfile"
-      - "CMakeLists.txt"
-      - "libmediocre/**"
-      - ".github/workflows/docker.yml"
   push:
     branches:
       - "master"
-    paths:
-      - "*.?Dockerfile"
-      - "CMakeLists.txt"
-      - "libmediocre/**"
-      - ".github/workflows/docker.yml"
   release:
     types:
       - "published"
@@ -31,6 +21,7 @@ jobs:
     name: Variables
     runs-on: ubuntu-latest
     outputs:
+      docker-main-changed: ${{ steps.main-dockerfile-changed.outputs.any_changed }}
       docker-base-changed: ${{ steps.base-dockerfile-changed.outputs.any_changed }}
       build-args-base-tag: ${{ steps.find-base-image.outputs.build-args-base-tag }}
       docker-base-sha-name: ${{ steps.get-tags.outputs.docker-base-sha-name }}
@@ -79,11 +70,22 @@ jobs:
           echo "  docker-main-sha-name=${{ steps.get-tags.outputs.docker-main-sha-name }}"
           echo "  docker-main-name=${{ steps.get-tags.outputs.docker-main-name }}"
       -
+        name: Check if main dockerfile has changed
+        id: main-dockerfile-changed
+        uses: tj-actions/changed-files@v36
+        with:
+          files: |
+            *.?Dockerfile
+            CMakeLists.txt
+            libmediocre/**
+            .github/workflows/docker.yml
+          since_last_remote_commit: true
+      -
         name: Check if base dockerfile has changed
         id: base-dockerfile-changed
         uses: tj-actions/changed-files@v36
         with:
-          files: "Base.Dockerfile"
+          files: Base.Dockerfile
           since_last_remote_commit: true
       -
         name: Determine base image to use
@@ -106,6 +108,7 @@ jobs:
     name: Build intermediate images
     runs-on: ubuntu-latest
     needs: preliminary
+    if: needs.preliminary.outputs.docker-main-changed == 'true' || needs.preliminary.outputs.docker-base-changed == 'true'
     steps:
       -
         name: Checkout
@@ -132,6 +135,7 @@ jobs:
           cache-to: type=gha,mode=max
       -
         name: Build and push main image
+        if: needs.preliminary.outputs.docker-main-changed == 'true'
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -148,6 +152,7 @@ jobs:
     name: Test intermediate images
     runs-on: ubuntu-latest
     needs: [ preliminary, intermediate-build-push ]
+    if: needs.preliminary.outputs.docker-main-changed == 'true' || needs.preliminary.outputs.docker-base-changed == 'true'
     env:
       GRPC_CLIENT_CLI_VERSION: 1.18.0
     steps:
@@ -178,6 +183,7 @@ jobs:
     name: Push final images
     runs-on: ubuntu-latest
     needs: [ preliminary, intermediate-test ]
+    if: needs.preliminary.outputs.docker-main-changed == 'true' || needs.preliminary.outputs.docker-base-changed == 'true'
     steps:
       -
         name: Log in to Docker Hub
@@ -196,6 +202,7 @@ jobs:
           docker push $final_image
       -
         name: Re-tag and push main image
+        if: needs.preliminary.outputs.docker-main-changed == 'true'
         run: |
           export intermediate_image=${{ needs.preliminary.outputs.docker-main-sha-name }}
           export final_image=${{ needs.preliminary.outputs.docker-main-name }}
