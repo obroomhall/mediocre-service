@@ -144,7 +144,7 @@ jobs:
         run: curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
       -
         name: Start main image
-        run: docker run -d --rm -p localhost:80:50051/tcp ${{ needs.preliminary.outputs.docker-main-sha-name }}
+        run: docker run -d --rm -p 127.0.0.1:80:50051/tcp ${{ needs.preliminary.outputs.docker-main-sha-name }}
       -
         name: Check health
         run: grpc-client-cli health localhost:80
