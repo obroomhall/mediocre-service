@@ -103,7 +103,7 @@ jobs:
           context: .
           file: Base.Dockerfile
           tags: ${{ needs.preliminary.outputs.docker-base-sha-name }}
-          outputs: type=local,dest=/tmp/base.tar
+          outputs: type=tar,dest=/tmp/base.tar
       -
         name: Build main Docker image
         uses: docker/build-push-action@v4
@@ -114,7 +114,7 @@ jobs:
             BASE_REPO=obroomhall/mediocre
             BASE_TAG=${{ needs.preliminary.outputs.build-args-base-tag }}
           tags: ${{ needs.preliminary.outputs.docker-main-sha-name }}
-          outputs: type=local,dest=/tmp/main.tar
+          outputs: type=tar,dest=/tmp/main.tar
       -
         name: Upload artifact images
         uses: actions/upload-artifact@v3
