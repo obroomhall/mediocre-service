@@ -40,6 +40,7 @@ namespace mediocre::server {
         // Define services.
         std::vector<grpc::Service *> services({
                 new dependency::v1::DependencyServiceImpl(),
+                new functions::ocr::v1::OcrServiceImpl(),
         });
 
         // Register services.
