@@ -13,8 +13,6 @@ namespace mediocre::server {
         server_address_stream << "0.0.0.0:" << port;
         std::string server_address = server_address_stream.str();
 
-        // Why doesn't the default health check server work?
-        // grpc::EnableDefaultHealthCheckService(true);
         grpc::reflection::InitProtoReflectionServerBuilderPlugin();
         grpc::ServerBuilder builder;
 
@@ -32,10 +30,6 @@ namespace mediocre::server {
         // Finally assemble the server.
         std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
         std::cout << "Server listening on " << server_address << std::endl;
-
-        // Setup health checks.
-        //    grpc::HealthCheckServiceInterface *server = server->GetHealthCheckService();
-        //    server->SetServingStatus("healthy_service", true);
 
         // Wait for the server to shutdown. Note that some other thread must be
         // responsible for shutting down the server for this call to ever return.
