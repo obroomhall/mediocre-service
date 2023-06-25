@@ -5,7 +5,7 @@
 
 namespace mediocre::server {
 
-    void run(uint16_t port);
+    void run_server(uint16_t port);
 
 }// namespace mediocre::server
 

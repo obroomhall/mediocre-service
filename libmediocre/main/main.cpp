@@ -3,6 +3,6 @@
 #include <libmediocre/server/server.hpp>
 
 int main(int argc, char *argv[]) {
-    mediocre::server::run(50051);
+    mediocre::server::run_server(50051);
     return EXIT_SUCCESS;
 }
