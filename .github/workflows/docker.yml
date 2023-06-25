@@ -166,7 +166,7 @@ jobs:
       -
         name: Check health
         run: |
-          export port=$(shuf -i 5000-5300 -n 1)
+          export port=$(shuf -i 5000-5301 -n 1)
           docker container ls
           docker run -d --rm -p 127.0.0.1:$port:50051/tcp $DOCKER_IMAGE_NAME
           docker container ls
