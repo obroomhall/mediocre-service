@@ -105,7 +105,7 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       -
-        name: Build and push base Docker image
+        name: Build and push base image
         if: needs.preliminary.outputs.docker-base-changed == 'true'
         uses: docker/build-push-action@v4
         with:
@@ -116,7 +116,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       -
-        name: Build and push main Docker image
+        name: Build and push main image
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -149,7 +149,7 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       -
-        name: Build and push main Docker image
+        name: Build main image
         uses: docker/build-push-action@v4
         with:
           context: .
