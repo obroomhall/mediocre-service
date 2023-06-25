@@ -164,31 +164,21 @@ jobs:
         name: Install testing tools
         run: curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
       -
-        name: Check health
+        name: Start container
         run: |
-          export port=$(shuf -i 5000-5301 -n 1)
-          docker container ls
-          docker run -d --rm --name mediocre -p 127.0.0.1:$port:50051/tcp $DOCKER_IMAGE_NAME
-          docker container ls
-          sleep 2
-          docker logs mediocre
-          grpc-client-cli health 127.0.0.1:$port
+          docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
+          until [[ grpc-client-cli health 127.0.0.1:80 ]]; do
+            sleep 0.1;
+            echo "Waiting for a healthy container..."
+          done;
       -
         name: Check OpenCV
         run: |
-          export port=$(shuf -i 5000-5300 -n 1)
-          docker container ls
-          docker run -d --rm -p 127.0.0.1:$port:50051/tcp $DOCKER_IMAGE_NAME
-          docker container ls
           check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV 127.0.0.1:$port)
           echo $check_opencv && [[ $(echo $check_opencv | jq '.healthy') == 'true' ]]
       -
         name: Check Tesseract
         run: |
-          export port=$(shuf -i 5000-5300 -n 1)
-          docker container ls
-          docker run -d --rm -p 127.0.0.1:$port:50051/tcp $DOCKER_IMAGE_NAME
-          docker container ls
           check_tesseract=$(echo '{}' | grpc-client-cli -service Dependency -method CheckTesseract localhost:$port)
           echo $check_tesseract && [[ $(echo $check_tesseract | jq '.healthy') == 'true' ]]
 
