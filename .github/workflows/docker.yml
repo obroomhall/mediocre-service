@@ -86,7 +86,7 @@ jobs:
           echo "Using $base_image"
           echo build-args-base-tag=$base_image >> $GITHUB_OUTPUT
 
-  intermediate:
+  intermediate-build:
     name: Build intermediate images
     runs-on: ubuntu-latest
     needs: preliminary
@@ -106,7 +106,6 @@ jobs:
         with:
           context: .
           file: Base.Dockerfile
-          push: true
           tags: ${{ needs.preliminary.outputs.docker-base-sha-name }}
           outputs: type=docker,dest=/tmp/base.tar
 
@@ -115,7 +114,6 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          push: true
           build-args: |
             BASE_REPO=obroomhall/mediocre
             BASE_TAG=${{ needs.preliminary.outputs.build-args-base-tag }}
@@ -128,24 +126,51 @@ jobs:
           name: images
           path: /tmp/*.tar
 
-  test:
+  intermediate-push:
+    name: Push intermediate images
+    runs-on: ubuntu-latest
+    needs: [ preliminary, intermediate-build ]
+    steps:
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: Download artifact images
+        uses: actions/download-artifact@v3
+        with:
+          name: images
+          path: /tmp
+
+      - name: Load and push base image
+        if: needs.preliminary.outputs.docker-base-changed == 'true'
+        run: |
+          docker load --input /tmp/base.tar
+          docker push ${{ needs.preliminary.outputs.docker-base-sha-name }}
+
+      - name: Load and push main image
+        run: |
+          docker load --input /tmp/main.tar
+          docker push ${{ needs.preliminary.outputs.docker-main-sha-name }}
+
+  intermediate-test:
     name: Test intermediate images
     runs-on: ubuntu-latest
-    needs: [ preliminary, intermediate ]
+    needs: [ preliminary, intermediate-build ]
     env:
       GRPC_CLIENT_CLI_VERSION: 1.18.0
     steps:
       -
-        name: Download artifact
+        name: Download artifact images
         uses: actions/download-artifact@v3
         with:
           name: images
           path: /tmp
       -
-        name: Load image
+        name: Load main image
         run: |
           docker load --input /tmp/main.tar
-          docker image ls -a
       -
         name: Health check
         id: health-check
@@ -154,47 +179,32 @@ jobs:
           curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
           grpc-client-cli health 127.0.0.1:80
 
-  push:
+  final-push:
     name: Push final images
     runs-on: ubuntu-latest
-    needs: [ preliminary, test ]
+    needs: [ preliminary, intermediate-test ]
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v3
-
       - name: Log in to Docker Hub
         uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-      -
-        name: Download artifact
+
+      - name: Download artifact images
         uses: actions/download-artifact@v3
         with:
           name: images
           path: /tmp
-      -
-        name: Load image
-        run: |
-          docker load --input /tmp/*.tar
-          docker image ls -a
 
-      - name: Build and push base Docker image
+      - name: Load and push base image
         if: needs.preliminary.outputs.docker-base-changed == 'true'
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
-        with:
-          context: .
-          file: Base.Dockerfile
-          push: true
-          tags: ${{ needs.preliminary.outputs.docker-base-name }}
+        run: |
+          docker load --input /tmp/base.tar
+          docker image tag ${{ needs.preliminary.outputs.docker-base-sha-name }} ${{ needs.preliminary.outputs.docker-base-name }}
+          docker push ${{ needs.preliminary.outputs.docker-base-name }}
 
-      - name: Build and push main Docker image
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
-        with:
-          context: .
-          file: Dockerfile
-          push: true
-          build-args: |
-            BASE_REPO=obroomhall/mediocre
-            BASE_TAG=${{ needs.preliminary.outputs.build-args-base-tag }}
-          tags: ${{ needs.preliminary.outputs.docker-main-name }}
+      - name: Load and push main image
+        run: |
+          docker load --input /tmp/main.tar
+          docker image tag ${{ needs.preliminary.outputs.docker-main-sha-name }} ${{ needs.preliminary.outputs.docker-main-name }}
+          docker push ${{ needs.preliminary.outputs.docker-main-name }}
