@@ -151,6 +151,12 @@ jobs:
     needs: [ preliminary, intermediate-test ]
     steps:
       -
+        name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      -
         name: Re-tag and push base image
         if: needs.preliminary.outputs.docker-base-changed == 'true'
         run: |
