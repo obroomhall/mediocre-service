@@ -167,7 +167,7 @@ jobs:
         name: Start container
         run: |
           docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
-          until [[ grpc-client-cli health 127.0.0.1:80 ]]; do
+          until [[ $(grpc-client-cli health 127.0.0.1:80 | jq -r '.status') == 'SERVING' ]]; do
             sleep 0.1;
             echo "Waiting for a healthy container..."
           done;
