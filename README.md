@@ -6,7 +6,7 @@ Mediocre, or ***M**ediocre **E**xtraction of **D**ata **I**nvolving an **O**ptic
 
 ## Setup in CLion
 
-1. Run [pull-and-retag.ps1](pull-and-retag.ps1) to pull and re-tag the latest base image
+1. Run [pull-and-retag.ps1](pull-and-retag.ps1) to pull and retag the latest base image
 2. Go to `File > Settings > Build, Execution, Deployment` and add a `Docker` toolchain
    1. For image use `mediocre:base-dev-local`
    2. In container settings add a port binding for `50051`
