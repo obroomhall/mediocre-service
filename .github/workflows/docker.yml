@@ -166,18 +166,24 @@ jobs:
       -
         name: Check health
         run: |
+          docker container ls
           docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
+          docker container ls
           grpc-client-cli health localhost:80
       -
         name: Check OpenCV
         run: |
+          docker container ls
           docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
+          docker container ls
           check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV localhost:80)
           echo $check_opencv && [[ $(echo $check_opencv | jq '.healthy') == 'true' ]]
       -
         name: Check Tesseract
         run: |
+          docker container ls
           docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
+          docker container ls
           check_tesseract=$(echo '{}' | grpc-client-cli -service Dependency -method CheckTesseract localhost:80)
           echo $check_tesseract && [[ $(echo $check_tesseract | jq '.healthy') == 'true' ]]
 
