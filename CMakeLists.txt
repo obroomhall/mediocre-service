@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 add_executable(
         mediocre
         libmediocre/main/main.cpp
+        libmediocre/server/server.cpp
         libmediocre/health/v1/health.cpp
         libmediocre/dependency/v1/dependency.cpp
 )
