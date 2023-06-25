@@ -78,9 +78,12 @@ jobs:
         id: find-base-image
         run: |
           export base_image_file_changed=${{ steps.base-dockerfile-changed.outputs.any_changed }}
+          
+          docker manifest inspect ${{ steps.get-tags.outputs.docker-base-name }}
+          
           export base_image_exists=$(docker manifest inspect "${{ steps.get-tags.outputs.docker-base-name }}" >/dev/null 2>&1 && echo true)
           
-          echo "export base_image_exists=$(docker manifest inspect "${{ steps.get-tags.outputs.docker-base-name }}" >/dev/null 2>&1 && echo true)"
+          echo "export base_image_exists=\$(docker manifest inspect "${{ steps.get-tags.outputs.docker-base-name }}" >/dev/null 2>&1 && echo true)"
           echo "Base image file changed? $base_image_file_changed"
           echo "Base image exists? $base_image_exists"
           
