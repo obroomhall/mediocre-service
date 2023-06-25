@@ -137,13 +137,27 @@ jobs:
       GRPC_CLIENT_CLI_VERSION: 1.18.0
     steps:
       -
-        name: Health check
-        id: health-check
+        name: Pull main image
+        run: docker pull ${{ needs.preliminary.outputs.docker-main-sha-name }}
+      -
+        name: Install testing tools
+        run: curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
+      -
+        name: Start main image
+        run: docker run -d --rm -p localhost:80:50051/tcp ${{ needs.preliminary.outputs.docker-main-sha-name }}
+      -
+        name: Check health
+        run: grpc-client-cli health localhost:80
+      -
+        name: Check OpenCV
         run: |
-          docker pull ${{ needs.preliminary.outputs.docker-main-sha-name }}
-          docker run -d --rm -p 127.0.0.1:80:50051/tcp ${{ needs.preliminary.outputs.docker-main-sha-name }}
-          curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
-          grpc-client-cli health 127.0.0.1:80
+          check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV localhost:50051)
+          echo $check_opencv && [[ $(echo $check_opencv | jq '.healthy') == 'true' ]]
+      -
+        name: Check Tesseract
+        run: |
+          check_tesseract=$(echo '{}' | grpc-client-cli -service Dependency -method CheckTesseract localhost:50051)
+          echo $check_tesseract && [[ $(echo $check_tesseract | jq '.healthy') == 'true' ]]
 
   final-push:
     name: Push final images
