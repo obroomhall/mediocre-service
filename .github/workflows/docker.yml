@@ -24,10 +24,10 @@ on:
 jobs:
 
   preliminary:
-    name: Output useful variables
+    name: Variables
     runs-on: ubuntu-latest
     outputs:
-      docker-base-changed: ${{ steps.base-dockerfile-changed.outputs.any_changed == 'true' }}
+      docker-base-changed: ${{ steps.base-dockerfile-changed.outputs.any_changed }}
       build-args-base-tag: ${{ steps.find-base-image.outputs.build-args-base-tag }}
       docker-base-sha-name: ${{ steps.get-tags.outputs.docker-base-sha-name }}
       docker-base-name: ${{ steps.get-tags.outputs.docker-base-name }}
@@ -87,7 +87,7 @@ jobs:
           echo build-args-base-tag=$base_image >> $GITHUB_OUTPUT
 
   intermediate:
-    name: Build and push intermediate docker images
+    name: Build intermediate images
     runs-on: ubuntu-latest
     needs: preliminary
     steps:
@@ -121,7 +121,7 @@ jobs:
           tags: ${{ needs.preliminary.outputs.docker-main-sha-name }}
 
   test:
-    name: Test intermediate docker images
+    name: Test intermediate images
     runs-on: ubuntu-latest
     needs: [ preliminary, intermediate ]
     env:
@@ -135,7 +135,7 @@ jobs:
           grpc-client-cli health 127.0.0.1:80
 
   push:
-    name: Push final docker images
+    name: Push final images
     runs-on: ubuntu-latest
     needs: [ preliminary, test ]
     steps:
