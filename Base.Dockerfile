@@ -43,7 +43,12 @@ RUN wget -q -O opencv.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSI
     && unzip opencv.zip \
     && mkdir -p opencv-$OPENCV_VERSION/build $CMAKE_INSTALL_PREFIX_OPENCV \
     && pushd opencv-$OPENCV_VERSION/build \
-    && cmake -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX_OPENCV .. \
+    && cmake -D CMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX_OPENCV \
+             -D BUILD_opencv_highgui=OFF \
+             -D BUILD_PROTOBUF=OFF \
+             -D BUILD_TESTS=OFF \
+             -D BUILD_PERF_TESTS=OFF \
+             .. \
     && cmake --build . \
     && make -j 4 \
     && make install \
