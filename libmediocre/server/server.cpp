@@ -14,7 +14,7 @@ namespace mediocre::server {
 
     void run_server(uint16_t port) {
         std::string server_address = get_server_address(port);
-        std::cout << "Building server on " << server_address << std::endl;
+        std::cout << "Building server on " << server_address << "." << std::endl;
 
         grpc::reflection::InitProtoReflectionServerBuilderPlugin();
 
@@ -38,21 +38,21 @@ namespace mediocre::server {
 
     void register_services(grpc::ServerBuilder &builder) {
         // Define services.
-        std::vector<grpc::Service *> services;
-        services.push_back(new grpc::health::v1::HealthServiceImpl());
-        services.push_back(new dependency::v1::DependencyServiceImpl());
+        std::vector<grpc::Service *> services({new grpc::health::v1::HealthServiceImpl(),
+                                               new dependency::v1::DependencyServiceImpl()});
 
         // Register services.
         for (auto service: services) {
             builder.RegisterService(service);
         }
+
+        std::cout << "Registered " << services.size() << " services." << std::endl;
     }
 
     void start_and_wait(grpc::ServerBuilder &builder) {
         // Assemble the server.
         std::unique_ptr<grpc::Server> server(builder.BuildAndStart());
-
-        std::cout << "Server started" << std::endl;
+        std::cout << "Server started." << std::endl;
 
         // Wait for the server to shutdown. Note that some other thread must be
         // responsible for shutting down the server for this call to ever return.
