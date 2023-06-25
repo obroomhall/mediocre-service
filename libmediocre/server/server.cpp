@@ -2,6 +2,7 @@
 #include <grpcpp/server_builder.h>
 #include <iomanip>
 #include <libmediocre/dependency/v1/dependency.hpp>
+#include <libmediocre/functions/ocr/v1/ocr.hpp>
 #include <libmediocre/health/v1/health.hpp>
 #include <libmediocre/server/server.hpp>
 
@@ -38,8 +39,10 @@ namespace mediocre::server {
 
     void register_services(grpc::ServerBuilder &builder) {
         // Define services.
-        std::vector<grpc::Service *> services({new grpc::health::v1::HealthServiceImpl(),
-                                               new dependency::v1::DependencyServiceImpl()});
+        std::vector<grpc::Service *> services({
+                new grpc::health::v1::HealthServiceImpl(),
+                new dependency::v1::DependencyServiceImpl(),
+        });
 
         // Register services.
         for (auto service: services) {
