@@ -90,6 +90,7 @@ jobs:
   intermediate:
     name: Build and push intermediate docker images
     runs-on: ubuntu-latest
+    needs: preliminary
     outputs:
       base-image: ${{ env.DOCKER_REPOSITORY }}:${{ needs.preliminary.outputs.docker-base-sha-tag }}
       main-image: ${{ env.DOCKER_REPOSITORY }}:${{ needs.preliminary.outputs.docker-main-sha-tag }}
