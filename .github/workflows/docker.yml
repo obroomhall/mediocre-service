@@ -21,7 +21,7 @@ jobs:
     name: Variables
     runs-on: ubuntu-latest
     outputs:
-      docker-main-changed: ${{ steps.main-dockerfile-changed.outputs.any_changed }}
+      docker-main-changed: ${{ steps.main-dockerfile-changed.outputs.any_changed || steps.base-dockerfile-changed.outputs.any_changed }}
       docker-base-changed: ${{ steps.base-dockerfile-changed.outputs.any_changed }}
       build-args-base-tag: ${{ steps.find-base-image.outputs.build-args-base-tag }}
       docker-base-sha-name: ${{ steps.get-tags.outputs.docker-base-sha-name }}
