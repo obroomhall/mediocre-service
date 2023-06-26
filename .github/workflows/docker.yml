@@ -181,7 +181,6 @@ jobs:
             BASE_REPO=${{ env.DOCKER_REPOSITORY }}
             BASE_TAG=${{ needs.preliminary.outputs.build-args-base-tag }}
           tags: $DOCKER_IMAGE_NAME
-          push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
           load: true
