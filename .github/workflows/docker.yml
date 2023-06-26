@@ -168,7 +168,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ preliminary, intermediate-build-push ]
     env:
-      DOCKER_IMAGE_NAME: ${{ needs.preliminary.outputs.docker-main-sha-name }}
       GRPC_CLIENT_CLI_VERSION: 1.18.0
     steps:
       -
@@ -186,7 +185,7 @@ jobs:
           build-args: |
             BASE_REPO=${{ env.DOCKER_REPOSITORY }}
             BASE_TAG=${{ needs.preliminary.outputs.build-args-base-tag }}
-          tags: $DOCKER_IMAGE_NAME
+          tags: ${{ needs.preliminary.outputs.docker-main-sha-name }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           load: true
@@ -200,7 +199,7 @@ jobs:
       -
         name: Start container
         run: |
-          docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
+          docker run -d --rm -p 127.0.0.1:80:50051/tcp ${{ needs.preliminary.outputs.docker-main-sha-name }}
           export max_retries=20
           export cur_retries=0
           until [[ $(grpc-client-cli health 127.0.0.1:80 | jq -r '.status') == 'SERVING' ]]; do
