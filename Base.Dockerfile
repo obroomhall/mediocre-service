@@ -54,7 +54,7 @@ RUN --mount=type=cache,target=/var/cache/apt \
     && apt-get install -y autoconf libtool pkg-config
 RUN --mount=type=cache,target=./download \
     --mount=type=cache,target=./build \
-    && mkdir ./install \
+    mkdir ./install \
     && git clone --recurse-submodules -b v$GRPC_VERSION --depth 1 --shallow-submodules https://github.com/grpc/grpc ./download/grpc \
     && cmake -D gRPC_INSTALL=ON \
              -D gRPC_BUILD_TESTS=OFF \
