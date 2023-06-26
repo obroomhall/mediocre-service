@@ -172,9 +172,23 @@ jobs:
       GRPC_CLIENT_CLI_VERSION: 1.18.0
     steps:
       -
-        name: Pull main image
-        run: |
-          docker pull $DOCKER_IMAGE_NAME
+        name: Build and push main image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          build-args: |
+            BASE_REPO=${{ env.DOCKER_REPOSITORY }}
+            BASE_TAG=${{ needs.preliminary.outputs.build-args-base-tag }}
+          tags: $DOCKER_IMAGE_NAME
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          load: true
+#      -
+#        name: Pull main image
+#        run: |
+#          docker pull $DOCKER_IMAGE_NAME
       -
         name: Install testing tools
         run: curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
