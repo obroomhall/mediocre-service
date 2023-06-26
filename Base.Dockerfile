@@ -4,115 +4,114 @@ FROM ubuntu:22.04
 SHELL ["/bin/bash", "-c"]
 
 # installation tools
-RUN apt-get update  \
+RUN --mount=type=cache,target=/var/cache/apt \
+    apt-get update \
     && apt-get install -y wget git unzip
 
 # install build tools and debugger
-RUN apt-get update  \
+RUN --mount=type=cache,target=/var/cache/apt \
+    apt-get update \
     && apt-get install -y build-essential gdb
 
-
 # install cmake
-
-# check for CLion support before upgrading cmake
 ARG CMAKE_VERSION=3.25.3
-ARG CMAKE_INSTALL_PREFIX=$HOME/local
-ARG CMAKE_INSTALL_PREFIX_CMAKE=$CMAKE_INSTALL_PREFIX/cmake
-
-RUN wget -q -O cmake-linux.sh https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION\-linux-x86_64.sh \
-    && mkdir -p $CMAKE_INSTALL_PREFIX/cmake \
-    && sh cmake-linux.sh -- --skip-license --prefix=$CMAKE_INSTALL_PREFIX_CMAKE \
-    && rm cmake-linux.sh
-
-ENV PATH=$PATH:$CMAKE_INSTALL_PREFIX_CMAKE/bin
-
+ARG CMAKE_WORKDIR=/local/cmake
+WORKDIR $CMAKE_WORKDIR
+RUN --mount=type=cache,target=./download \
+    mkdir ./install \
+    && wget -q -O ./download/cmake-linux.sh https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION\-linux-x86_64.sh \
+    && sh ./download/cmake-linux.sh -- --skip-license --prefix=./install
+ENV PATH=$PATH:$CMAKE_WORKDIR/install/bin
 
 # install opencv
-
 ARG OPENCV_VERSION=4.7.0
-ARG CMAKE_INSTALL_PREFIX_OPENCV=$CMAKE_INSTALL_PREFIX/opencv
-
-RUN wget -q -O opencv.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSION.zip \
-    && unzip opencv.zip \
-    && mkdir -p opencv-$OPENCV_VERSION/build $CMAKE_INSTALL_PREFIX_OPENCV \
-    && pushd opencv-$OPENCV_VERSION/build \
-    && cmake -D CMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX_OPENCV \
+ARG OPENCV_WORKDIR=/local/opencv
+WORKDIR $OPENCV_WORKDIR
+RUN --mount=type=cache,target=./download \
+    --mount=type=cache,target=./build \
+    mkdir ./install \
+    && wget -q -O ./download/source.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSION.zip \
+    && ls ./download \
+    && unzip -o ./download/source.zip -d ./download \
+    && cmake -D CMAKE_INSTALL_PREFIX=./install \
              -D BUILD_opencv_highgui=OFF \
              -D BUILD_PROTOBUF=OFF \
              -D BUILD_TESTS=OFF \
              -D BUILD_PERF_TESTS=OFF \
-             -D BUILD_SHARED_LIBS=OFF \
-             .. \
-    && cmake --build . \
-    && make -j 4 \
-    && make install \
-    && popd \
-    && rm -rf opencv-$OPENCV_VERSION opencv.zip
+             -S ./download/opencv-$OPENCV_VERSION \
+             -B ./build \
+    && cmake --build ./build \
+    && make -j 4 -C ./build \
+    && make install -C ./build
+ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$OPENCV_WORKDIR/install/lib/cmake
 
-ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$CMAKE_INSTALL_PREFIX_OPENCV/lib/cmake
-
-
-# install grpc, protobuf and tools
-
+# install grpc and protobuf
 ARG GRPC_VERSION=1.55.1
-ARG GRPC_CLIENT_CLI_VERSION=1.18.0
-ARG CMAKE_INSTALL_PREFIX_GRPC=$CMAKE_INSTALL_PREFIX/grpc
-
-RUN apt-get update  \
+ARG GRPC_WORKDIR=/local/grpc
+WORKDIR $GRPC_WORKDIR
+RUN --mount=type=cache,target=/var/cache/apt \
+    apt-get update \
     && apt-get install -y autoconf libtool pkg-config
+RUN --mount=type=cache,target=./download \
+    --mount=type=cache,target=./build \
+    && mkdir ./install \
+    && git clone --recurse-submodules -b v$GRPC_VERSION --depth 1 --shallow-submodules https://github.com/grpc/grpc ./download/grpc \
+    && cmake -D gRPC_INSTALL=ON \
+             -D gRPC_BUILD_TESTS=OFF \
+             -D CMAKE_INSTALL_PREFIX=./install \
+             -S ./download/grpc \
+             -B ./build \
+    && make -j 4 -C ./build \
+    && make install -C ./build
+ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$GRPC_WORKDIR/install/lib/cmake
 
-RUN git clone --recurse-submodules -b v$GRPC_VERSION --depth 1 --shallow-submodules https://github.com/grpc/grpc \
-    && mkdir -p grpc/cmake/build $CMAKE_INSTALL_PREFIX_GRPC \
-    && pushd grpc/cmake/build \
-    && cmake -DgRPC_INSTALL=ON \
-             -DgRPC_BUILD_TESTS=OFF \
-             -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX_GRPC \
-             ../.. \
-    && make -j 4 \
-    && make install \
-    && popd \
-    && rm -rf grpc
+# install grpc client cli
+ARG GRPC_CLIENT_CLI_VERSION=1.18.0
+ARG GRPC_CLIENT_CLI_WORKDIR=/local/cmake
+WORKDIR $GRPC_CLIENT_CLI_WORKDIR
+WORKDIR /local/grpc-client-cli
+RUN --mount=type=cache,target=./download \
+    mkdir ./install \
+    && wget -q -O ./download/source.tar.gz https://github.com/vadimi/grpc-client-cli/releases/download/v$GRPC_CLIENT_CLI_VERSION/grpc-client-cli_linux_x86_64.tar.gz \
+    && tar -xz ./download/source.tar.gz -C ./install
+ENV PATH=$PATH:$GRPC_CLIENT_CLI_WORKDIR/install/bin
 
-ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$CMAKE_INSTALL_PREFIX_GRPC/lib/cmake
-
-RUN wget -O - https://github.com/vadimi/grpc-client-cli/releases/download/v$GRPC_CLIENT_CLI_VERSION/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
-
-
-# install tesseract and leptonica
-
+# install leptonica
 ARG LEPTONICA_VERSION=1.83.1
-ARG TESSERACT_VERSION=5.2.0
-
-ARG CMAKE_INSTALL_PREFIX_LEPTONICA=$CMAKE_INSTALL_PREFIX/leptonica
-ARG CMAKE_INSTALL_PREFIX_TESSERACT=$CMAKE_INSTALL_PREFIX/tesseract
-
-RUN apt-get update \
+ARG LEPTONICA_WORKDIR=/local/leptonica
+WORKDIR $LEPTONICA_WORKDIR
+RUN --mount=type=cache,target=/var/cache/apt \
+    apt-get update \
     && apt-get install -y libicu-dev libpango1.0-dev libcairo2-dev libtiff-dev libjpeg-dev
+RUN --mount=type=cache,target=./download \
+    --mount=type=cache,target=./build \
+    mkdir ./install \
+    && wget -q -O ./download/source.zip https://github.com/DanBloomberg/leptonica/archive/refs/tags/$LEPTONICA_VERSION.zip \
+    && unzip -o ./download/source.zip -d ./download \
+    && cmake -D CMAKE_INSTALL_PREFIX=./install \
+             -S ./download/leptonica-$LEPTONICA_VERSION \
+             -B ./build \
+    && make -j 4 -C ./build \
+    && make install -C ./build
+ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$LEPTONICA_WORKDIR/install/lib/cmake
 
-RUN wget -q -O leptonica.zip https://github.com/DanBloomberg/leptonica/archive/refs/tags/$LEPTONICA_VERSION.zip \
-    && unzip leptonica.zip \
-    && mkdir -p leptonica-$LEPTONICA_VERSION/build $CMAKE_INSTALL_PREFIX_LEPTONICA \
-    && pushd leptonica-$LEPTONICA_VERSION/build \
-    && cmake -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX_LEPTONICA .. \
-    && make -j 4 \
-    && make install \
-    && popd \
-    && rm -rf leptonica-$LEPTONICA_VERSION leptonica.zip
+# install tesseract
+ARG TESSERACT_VERSION=5.2.0
+ARG TESSERACT_WORKDIR=/local/tesseract
+WORKDIR $TESSERACT_WORKDIR
+RUN --mount=type=cache,target=./download \
+    --mount=type=cache,target=./build \
+    mkdir ./install \
+    && wget -q -O source.zip https://github.com/tesseract-ocr/tesseract/archive/refs/tags/$TESSERACT_VERSION.zip \
+    && unzip -o ./download/source.zip -d ./download \
+    && cmake -D CMAKE_INSTALL_PREFIX=./install \
+             -S ./download/tesseract-$TESSERACT_VERSION \
+             -B ./build \
+    && make -j 4 -C ./build \
+    && make install -C ./build
+ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$TESSERACT_WORKDIR/install/lib/cmake
 
-ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$CMAKE_INSTALL_PREFIX_LEPTONICA/lib/cmake
-
-RUN wget -q -O tesseract.zip https://github.com/tesseract-ocr/tesseract/archive/refs/tags/$TESSERACT_VERSION.zip \
-    && unzip tesseract.zip \
-    && mkdir -p tesseract-$TESSERACT_VERSION/build $CMAKE_INSTALL_PREFIX_TESSERACT \
-    && pushd tesseract-$TESSERACT_VERSION/build \
-    && cmake -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX_TESSERACT .. \
-    && make -j 4 \
-    && make install \
-    && popd \
-    && rm -rf tesseract-$TESSERACT_VERSION tesseract.zip \
-
-ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$CMAKE_INSTALL_PREFIX_TESSERACT/lib/cmake
-
+# install tesseract languages
 ARG TESSDATA_VERSION=4.1.0
-ENV TESSDATA_PREFIX=$CMAKE_INSTALL_PREFIX_TESSERACT/share/tessdata/
+ENV TESSDATA_PREFIX=/local/tesseract/install/share/tessdata/
 RUN wget -q -P $TESSDATA_PREFIX https://github.com/tesseract-ocr/tessdata_best/raw/$TESSDATA_VERSION/eng.traineddata
