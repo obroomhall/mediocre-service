@@ -11,107 +11,248 @@ on:
     types:
       - "published"
 
+env:
+  DOCKER_USERNAME: obroomhall
+  DOCKER_REPOSITORY: obroomhall/mediocre
+
 jobs:
-  build_and_push:
+
+  preliminary:
+    name: Variables
     runs-on: ubuntu-latest
+    outputs:
+      docker-main-changed: ${{ steps.main-dockerfile-changed.outputs.any_changed || steps.base-dockerfile-changed.outputs.any_changed }}
+      docker-base-changed: ${{ steps.base-dockerfile-changed.outputs.any_changed }}
+      build-args-base-tag: ${{ steps.find-base-image.outputs.build-args-base-tag }}
+      docker-base-sha-name: ${{ steps.get-tags.outputs.docker-base-sha-name }}
+      docker-base-name: ${{ steps.get-tags.outputs.docker-base-name }}
+      docker-main-sha-name: ${{ steps.get-tags.outputs.docker-main-sha-name }}
+      docker-main-name: ${{ steps.get-tags.outputs.docker-main-name }}
     env:
       DOCKER_TAG_PREFIX: ${{ github.event_name == 'release' && '' || 'dev-' }}
       DOCKER_TAG_SUFFIX: ${{ github.head_ref || github.ref_name }}
-      DOCKER_REPOSITORY: obroomhall/mediocre
     steps:
-      - name: Check out the repo
+      -
+        name: Check out the repo
         uses: actions/checkout@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+      -
+        name: Log in to Docker Hub
+        uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          username: ${{ env.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-
-      - name: Check if base dockerfile has changed
+      -
+        name: Get tag names
+        id: get-tags
+        run: |
+          export repo=${{ env.DOCKER_REPOSITORY }}
+          
+          export docker_base_sha_tag=base-${DOCKER_TAG_PREFIX}$(git rev-parse --short HEAD)
+          echo "docker-base-sha-tag=$docker_base_sha_tag" >> $GITHUB_OUTPUT
+          echo "docker-base-sha-name=$repo:$docker_base_sha_tag" >> $GITHUB_OUTPUT
+          
+          export docker_base_tag=base-${DOCKER_TAG_PREFIX}${DOCKER_TAG_SUFFIX}
+          echo "docker-base-tag=$docker_base_tag" >> $GITHUB_OUTPUT
+          echo "docker-base-name=$repo:$docker_base_tag" >> $GITHUB_OUTPUT
+          
+          echo "docker-base-fallback-tag=base-${DOCKER_TAG_PREFIX}master" >> $GITHUB_OUTPUT
+          
+          echo "docker-main-sha-name=$repo:${DOCKER_TAG_PREFIX}$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "docker-main-name=$repo:${DOCKER_TAG_PREFIX}${DOCKER_TAG_SUFFIX}" >> $GITHUB_OUTPUT
+      -
+        name: Print tag names
+        id: print-tags
+        run: |
+          echo "Base images:"
+          echo "  docker-base-sha-name=${{ steps.get-tags.outputs.docker-base-sha-name }}"
+          echo "  docker-base-name=${{ steps.get-tags.outputs.docker-base-name }}"
+          echo "Main images:"
+          echo "  docker-main-sha-name=${{ steps.get-tags.outputs.docker-main-sha-name }}"
+          echo "  docker-main-name=${{ steps.get-tags.outputs.docker-main-name }}"
+      -
+        name: Check if main dockerfile has changed
+        id: main-dockerfile-changed
+        uses: tj-actions/changed-files@v36
+        with:
+          files: |
+            *.?Dockerfile
+            CMakeLists.txt
+            libmediocre/**
+            .github/workflows/docker.yml
+          since_last_remote_commit: true
+      -
+        name: Check if base dockerfile has changed
         id: base-dockerfile-changed
         uses: tj-actions/changed-files@v36
         with:
-          files: "Base.Dockerfile"
+          files: Base.Dockerfile
           since_last_remote_commit: true
-          
-      - name: Get tag names
-        id: get-tags
-        run: |
-          echo "docker-base-tag=base-${DOCKER_TAG_PREFIX}${DOCKER_TAG_SUFFIX}" >> $GITHUB_OUTPUT
-          echo "docker-base-fallback-tag=base-${DOCKER_TAG_PREFIX}master" >> $GITHUB_OUTPUT
-          echo "docker-base-sha-tag=base-${DOCKER_TAG_PREFIX}$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          echo "docker-main-tag=${DOCKER_TAG_PREFIX}${DOCKER_TAG_SUFFIX}" >> $GITHUB_OUTPUT
-          echo "docker-main-sha-tag=${DOCKER_TAG_PREFIX}$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          
-      - name: Print tag names
-        id: print-tags
-        run: |
-          echo "docker-base-tag=${{ steps.get-tags.outputs.docker-base-tag }}"
-          echo "docker-base-fallback-tag=${{ steps.get-tags.outputs.docker-base-fallback-tag }}"
-          echo "docker-base-sha-tag=${{ steps.get-tags.outputs.docker-base-sha-tag }}"
-          echo "docker-main-tag=${{ steps.get-tags.outputs.docker-main-tag }}"
-          echo "docker-main-sha-tag=${{ steps.get-tags.outputs.docker-main-sha-tag }}"
-
-      - name: Build and push intermediate base Docker image
-        if: steps.base-dockerfile-changed.outputs.any_changed == 'true'
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
-        with:
-          context: .
-          file: Base.Dockerfile
-          push: true
-          tags: ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-sha-tag }}
-
-      - name: Check base image exists, otherwise use fallback
+      -
+        name: Determine base image to use
         id: find-base-image
         run: |
-          export base_image_name=${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-tag }}
-          export intermediate_base_image_name=${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-sha-tag }}
-          export base_image_exists=$(docker manifest inspect $base_image_name >/dev/null 2>&1 && echo yes)
-          export intermediate_base_image_exists=$(docker manifest inspect $intermediate_base_image_name >/dev/null 2>&1 && echo yes)
-          export base_image=$([[ $base_image_exists == 'yes' ]] && echo ${{ steps.get-tags.outputs.docker-base-tag }} \
-            || ([[ $intermediate_base_image_exists == 'yes' ]] && echo ${{ steps.get-tags.outputs.docker-base-sha-tag }} \
+          export base_image_file_changed=${{ steps.base-dockerfile-changed.outputs.any_changed }}
+          echo "Base image file changed? $base_image_file_changed"
+          
+          export base_image_exists=$(docker manifest inspect ${{ steps.get-tags.outputs.docker-base-name }} >/dev/null 2>&1 && echo true)
+          echo "Base image exists? $base_image_exists"
+          
+          export base_image=$([[ $base_image_file_changed == 'true' ]] && echo ${{ steps.get-tags.outputs.docker-base-sha-tag }} \
+            || ([[ $base_image_exists == 'true' ]] && echo ${{ steps.get-tags.outputs.docker-base-tag }} \
             || echo ${{ steps.get-tags.outputs.docker-base-fallback-tag }}))
+          
           echo "Using $base_image"
-          echo base-image=$base_image >> $GITHUB_OUTPUT
+          echo "build-args-base-tag=$base_image" >> $GITHUB_OUTPUT
 
-      - name: Build and push intermediate main Docker image
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+  intermediate-build-push:
+    name: Build intermediate images
+    runs-on: ubuntu-latest
+    needs: preliminary
+    if: needs.preliminary.outputs.docker-main-changed == 'true' || needs.preliminary.outputs.docker-base-changed == 'true'
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v3
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      -
+        name: Log in to Docker Hub
+        uses: docker/login-action@v2
         with:
-          context: .
-          file: Dockerfile
-          push: true
-          build-args: |
-            BASE_REPO=${{ env.DOCKER_REPOSITORY }}
-            BASE_TAG=${{ steps.find-base-image.outputs.base-image }}
-          tags: ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-main-sha-tag }}
-
-      - name: Health check
-        id: health-check
-        run: |
-          docker run -d --rm -p 127.0.0.1:80:50051/tcp ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-main-sha-tag }}
-          docker container ls
-          curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
-          grpc-client-cli health 127.0.0.1:80
-        env:
-          GRPC_CLIENT_CLI_VERSION: 1.18.0
-
-      - name: Build and push base Docker image
-        if: steps.base-dockerfile-changed.outputs.any_changed == 'true'
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      -
+        name: Build and push base image
+        if: needs.preliminary.outputs.docker-base-changed == 'true'
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: Base.Dockerfile
+          tags: ${{ needs.preliminary.outputs.docker-base-sha-name }}
           push: true
-          tags: ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-base-tag }}
-
-      - name: Build and push main Docker image
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      -
+        name: Build and push main image
+        if: needs.preliminary.outputs.docker-main-changed == 'true'
+        uses: docker/build-push-action@v4
         with:
           context: .
           file: Dockerfile
-          push: true
           build-args: |
             BASE_REPO=${{ env.DOCKER_REPOSITORY }}
-            BASE_TAG=${{ steps.find-base-image.outputs.base-image }}
-          tags: ${{ env.DOCKER_REPOSITORY }}:${{ steps.get-tags.outputs.docker-main-tag }}
+            BASE_TAG=${{ needs.preliminary.outputs.build-args-base-tag }}
+          tags: ${{ needs.preliminary.outputs.docker-main-sha-name }}
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  intermediate-test:
+    name: Test intermediate images
+    runs-on: ubuntu-latest
+    needs: [ preliminary, intermediate-build-push ]
+    env:
+      DOCKER_IMAGE_NAME: ${{ needs.preliminary.outputs.docker-main-sha-name }}
+      GRPC_CLIENT_CLI_VERSION: 1.18.0
+    steps:
+      -
+        name: Pull main image
+        run: |
+          docker pull $DOCKER_IMAGE_NAME
+      -
+        name: Install testing tools
+        run: curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
+      -
+        name: Start container
+        run: |
+          docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
+          export max_retries=20
+          export cur_retries=0
+          until [[ $(grpc-client-cli health 127.0.0.1:80 | jq -r '.status') == 'SERVING' ]]; do
+            if (( $cur_retries >= $max_retries )); then exit 1; fi
+            echo "Waiting for a healthy container...($cur_retries/$max_retries)"
+            sleep 0.05
+            export cur_retries=$((cur_retries+1))
+          done
+          echo "Container is healthy!"
+      -
+        name: Check OpenCV
+        run: |
+          check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV 127.0.0.1:80)
+          echo $check_opencv && [[ $(echo $check_opencv | jq '.healthy') == 'true' ]]
+      -
+        name: Check Tesseract
+        run: |
+          check_tesseract=$(echo '{}' | grpc-client-cli -service Dependency -method CheckTesseract localhost:80)
+          echo $check_tesseract && [[ $(echo $check_tesseract | jq '.healthy') == 'true' ]]
+
+  final-push:
+    name: Push final images
+    runs-on: ubuntu-latest
+    needs: [ preliminary, intermediate-test ]
+    steps:
+      -
+        name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+      -
+        name: Re-tag and push base image
+        if: needs.preliminary.outputs.docker-base-changed == 'true'
+        run: |
+          export intermediate_image=${{ needs.preliminary.outputs.docker-base-sha-name }}
+          export final_image=${{ needs.preliminary.outputs.docker-base-name }}
+          docker pull $intermediate_image
+          docker image tag $intermediate_image $final_image
+          docker push $final_image
+      -
+        name: Re-tag and push main image
+        if: needs.preliminary.outputs.docker-main-changed == 'true'
+        run: |
+          export intermediate_image=${{ needs.preliminary.outputs.docker-main-sha-name }}
+          export final_image=${{ needs.preliminary.outputs.docker-main-name }}
+          docker pull $intermediate_image
+          docker image tag $intermediate_image $final_image
+          docker push $final_image
+
+  final-test:
+    name: Test final images
+    runs-on: ubuntu-latest
+    needs: [ preliminary ]
+    if: needs.preliminary.outputs.docker-main-changed != 'true' && needs.preliminary.outputs.docker-base-changed != 'true'
+    env:
+      DOCKER_IMAGE_NAME: ${{ needs.preliminary.outputs.docker-main-name }}
+      GRPC_CLIENT_CLI_VERSION: 1.18.0
+    steps:
+      -
+        name: Pull main image
+        run: |
+          docker pull $DOCKER_IMAGE_NAME
+      -
+        name: Install testing tools
+        run: curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
+      -
+        name: Start container
+        run: |
+          docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
+          export max_retries=20
+          export cur_retries=0
+          until [[ $(grpc-client-cli health 127.0.0.1:80 | jq -r '.status') == 'SERVING' ]]; do
+            if (( $cur_retries >= $max_retries )); then exit 1; fi
+            echo "Waiting for a healthy container...($cur_retries/$max_retries)"
+            sleep 0.05
+            export cur_retries=$((cur_retries+1))
+          done
+          echo "Container is healthy!"
+      -
+        name: Check OpenCV
+        run: |
+          check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV 127.0.0.1:80)
+          echo $check_opencv && [[ $(echo $check_opencv | jq '.healthy') == 'true' ]]
+      -
+        name: Check Tesseract
+        run: |
+          check_tesseract=$(echo '{}' | grpc-client-cli -service Dependency -method CheckTesseract localhost:80)
+          echo $check_tesseract && [[ $(echo $check_tesseract | jq '.healthy') == 'true' ]]

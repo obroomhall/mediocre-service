@@ -1,5 +1,5 @@
-#ifndef dependency_h
-#define dependency_h
+#ifndef mediocre_dependency_v1_h
+#define mediocre_dependency_v1_h
 
 #include <libmediocre/dependency/v1/dependency.grpc.pb.h>
 
@@ -21,4 +21,4 @@ namespace mediocre::dependency::v1 {
 
 }// namespace mediocre::dependency::v1
 
-#endif// dependency_h
+#endif// mediocre_dependency_v1_h

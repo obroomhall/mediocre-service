@@ -3,6 +3,7 @@
   <component name="CMakeSharedSettings">
     <configurations>
       <configuration PROFILE_NAME="Debug-Docker" ENABLED="true" CONFIG_NAME="Debug" TOOLCHAIN_NAME="Docker" />
+      <configuration PROFILE_NAME="Release-Docker" ENABLED="false" CONFIG_NAME="Release" TOOLCHAIN_NAME="Docker" />
     </configurations>
   </component>
 </project>

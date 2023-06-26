@@ -7,6 +7,7 @@ ARG OPENCV_VERSION=4.7.0
 ARG LEPTONICA_VERSION=1.83.1
 ARG TESSERACT_VERSION=5.2.0
 ARG TESSDATA_VERSION=4.1.0
+ARG GRPC_CLIENT_CLI_VERSION=1.18.0
 
 ARG CMAKE_INSTALL_PREFIX=$HOME/local
 ARG CMAKE_INSTALL_PREFIX_CMAKE=$CMAKE_INSTALL_PREFIX/cmake
@@ -37,7 +38,29 @@ RUN wget -q -O cmake-linux.sh https://github.com/Kitware/CMake/releases/download
 ENV PATH=$PATH:$CMAKE_INSTALL_PREFIX_CMAKE/bin
 
 
-# install grpc and protobuf
+# install opencv
+
+RUN wget -q -O opencv.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSION.zip \
+    && unzip opencv.zip \
+    && mkdir -p opencv-$OPENCV_VERSION/build $CMAKE_INSTALL_PREFIX_OPENCV \
+    && pushd opencv-$OPENCV_VERSION/build \
+    && cmake -D CMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX_OPENCV \
+             -D BUILD_opencv_highgui=OFF \
+             -D BUILD_PROTOBUF=OFF \
+             -D BUILD_TESTS=OFF \
+             -D BUILD_PERF_TESTS=OFF \
+             -D BUILD_SHARED_LIBS=OFF \
+             .. \
+    && cmake --build . \
+    && make -j 4 \
+    && make install \
+    && popd \
+    && rm -rf opencv-$OPENCV_VERSION opencv.zip
+
+ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$CMAKE_INSTALL_PREFIX_OPENCV/lib/cmake
+
+
+# install grpc, protobuf and tools
 
 RUN apt-get update  \
     && apt-get install -y autoconf libtool pkg-config
@@ -56,21 +79,7 @@ RUN git clone --recurse-submodules -b v$GRPC_VERSION --depth 1 --shallow-submodu
 
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$CMAKE_INSTALL_PREFIX_GRPC/lib/cmake
 
-
-# install opencv
-
-RUN wget -q -O opencv.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSION.zip \
-    && unzip opencv.zip \
-    && mkdir -p opencv-$OPENCV_VERSION/build $CMAKE_INSTALL_PREFIX_OPENCV \
-    && pushd opencv-$OPENCV_VERSION/build \
-    && cmake -DCMAKE_INSTALL_PREFIX=$CMAKE_INSTALL_PREFIX_OPENCV .. \
-    && cmake --build . \
-    && make -j 4 \
-    && make install \
-    && popd \
-    && rm -rf opencv-$OPENCV_VERSION opencv.zip
-
-ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$CMAKE_INSTALL_PREFIX_OPENCV/lib/cmake
+RUN wget -O - https://github.com/vadimi/grpc-client-cli/releases/download/v$GRPC_CLIENT_CLI_VERSION/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
 
 
 # install tesseract and leptonica
