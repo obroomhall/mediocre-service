@@ -85,7 +85,9 @@ jobs:
         id: base-dockerfile-changed
         uses: tj-actions/changed-files@v36
         with:
-          files: Base.Dockerfile
+          files: |
+            Base.Dockerfile
+            .github/workflows/docker.yml
           since_last_remote_commit: true
       -
         name: Determine base image to use
@@ -150,7 +152,7 @@ jobs:
           cache-to: type=gha,mode=max
       -
         name: Build and push main image
-        if: needs.preliminary.outputs.docker-main-changed == 'true'
+        if: needs.preliminary.outputs.docker-main-changed == 'true' || needs.preliminary.outputs.docker-base-changed == 'true'
         uses: docker/build-push-action@v4
         with:
           context: .
@@ -224,7 +226,7 @@ jobs:
           docker push $final_image
       -
         name: Re-tag and push main image
-        if: needs.preliminary.outputs.docker-main-changed == 'true'
+        if: needs.preliminary.outputs.docker-main-changed == 'true' || needs.preliminary.outputs.docker-base-changed == 'true'
         run: |
           export intermediate_image=${{ needs.preliminary.outputs.docker-main-sha-name }}
           export final_image=${{ needs.preliminary.outputs.docker-main-name }}
