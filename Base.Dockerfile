@@ -58,7 +58,7 @@ RUN --mount=type=cache,target=/local/grpc/download \
             || echo "Tags are equal") \
           && popd) \
         || (git clone --recurse-submodules -b v$GRPC_VERSION --depth 1 --shallow-submodules https://github.com/grpc/grpc ../download/grpc)) \
-    && cmake -D BUILD_SHARED_LIBS=ON \
+    && cmake -D BUILD_SHARED_LIBS=OFF \
              -D gRPC_BUILD_TESTS=OFF \
              -D CMAKE_INSTALL_PREFIX=../install \
              -S ../download/grpc \
