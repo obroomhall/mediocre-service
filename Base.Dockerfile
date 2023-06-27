@@ -105,7 +105,7 @@ RUN --mount=type=cache,target=/local/tesseract/build \
              -B . \
     && make -j 4 \
     && make install
-ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$TESSERACT_WORKDIR/install/lib/cmake
+ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/tesseract/install/lib/cmake
 
 # install tesseract languages
 ARG TESSDATA_VERSION=4.1.0
