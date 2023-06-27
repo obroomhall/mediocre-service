@@ -56,11 +56,12 @@ RUN --mount=type=cache,target=./download \
     --mount=type=cache,target=./build \
     mkdir ./install \
     && git clone --recurse-submodules -b v$GRPC_VERSION --depth 1 --shallow-submodules https://github.com/grpc/grpc ./download/grpc \
-    && cmake -D gRPC_INSTALL=ON \
+    && cmake -D BUILD_SHARED_LIBS=ON \
              -D gRPC_BUILD_TESTS=OFF \
              -D CMAKE_INSTALL_PREFIX=./install \
              -S ./download/grpc \
              -B ./build \
+    && cmake --build ./build \
     && make -j 4 -C ./build \
     && make install -C ./build
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$GRPC_WORKDIR/install/lib/cmake
