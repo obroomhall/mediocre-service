@@ -38,24 +38,6 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       -
-        name: Get tag names
-        id: get-tags
-        env:
-          DOCKER_REPOSITORY: obroomhall/mediocre
-          DOCKER_TAG_PREFIX: ${{ github.event_name == 'release' && '' || 'dev-' }}
-          DOCKER_TAG_SUFFIX: ${{ github.head_ref || github.ref_name }}
-        run: |
-          export repo=${{ env.DOCKER_REPOSITORY }}
-          echo "docker-image-sha-name=$repo:${DOCKER_TAG_PREFIX}$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          echo "docker-image-name=$repo:${DOCKER_TAG_PREFIX}${DOCKER_TAG_SUFFIX}" >> $GITHUB_OUTPUT
-      -
-        name: Print tag names
-        id: print-tags
-        run: |
-          echo "Main images:"
-          echo "  docker-image-sha-name=${{ steps.get-tags.outputs.docker-image-sha-name }}"
-          echo "  docker-image-name=${{ steps.get-tags.outputs.docker-image-name }}"
-      -
         name: Docker meta sha
         id: meta-sha
         uses: docker/metadata-action@v4
