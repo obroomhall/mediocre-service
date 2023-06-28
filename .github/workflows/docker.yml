@@ -22,9 +22,6 @@ jobs:
   build_test_push:
     name: Build, test and push image
     runs-on: ubuntu-latest
-    outputs:
-      docker-image-sha-name: ${{ steps.get-tags.outputs.docker-image-sha-name }}
-      docker-image-name: ${{ steps.get-tags.outputs.docker-image-name }}
     steps:
       -
         name: Check out the repo
@@ -59,19 +56,13 @@ jobs:
           echo "  docker-image-sha-name=${{ steps.get-tags.outputs.docker-image-sha-name }}"
           echo "  docker-image-name=${{ steps.get-tags.outputs.docker-image-name }}"
       -
-        name: Docker meta
-        id: meta
+        name: Docker meta sha
+        id: meta-sha
         uses: docker/metadata-action@v4
         with:
           images: |
             obroomhall/mediocre
           tags: |
-            type=schedule
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
             type=sha
       -
         name: Build and push sha image
@@ -79,7 +70,8 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          tags: ${{ steps.get-tags.outputs.docker-image-sha-name }}
+          tags: ${{ steps.meta-sha.outputs.tags }}
+          labels: ${{ steps.meta-sha.outputs.labels }}
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
@@ -118,10 +110,24 @@ jobs:
         name: Stop container
         run: docker stop mediocre
       -
+        name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            obroomhall/mediocre
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=ref,event=pr
+      -
         name: Re-tag and push image
-        run: |
-          export intermediate_image=${{ steps.get-tags.outputs.docker-image-sha-name }}
-          export final_image=${{ steps.get-tags.outputs.docker-image-name }}
-          docker pull $intermediate_image
-          docker image tag $intermediate_image $final_image
-          docker push $final_image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          push: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
