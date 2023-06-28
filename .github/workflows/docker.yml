@@ -77,7 +77,7 @@ jobs:
           cache-to: type=gha,mode=max
       -
         name: Pull sha image # this is genuinely faster than load:true on previous step
-        run: docker pull ${{ steps.get-tags.outputs.docker-image-sha-name }}
+        run: docker pull ${{ steps.meta-sha.outputs.tags }} # should only be one tag
       -
         name: Install testing tools
         env:
@@ -86,7 +86,7 @@ jobs:
       -
         name: Start container
         run: |
-          docker run -d --rm --name mediocre -p 127.0.0.1:80:50051/tcp ${{ steps.get-tags.outputs.docker-image-sha-name }}
+          docker run -d --rm --name mediocre -p 127.0.0.1:80:50051/tcp ${{ steps.meta-sha.outputs.tags }}
           export max_retries=20
           export cur_retries=0
           until [[ $(grpc-client-cli health 127.0.0.1:80 | jq -r '.status') == 'SERVING' ]]; do
