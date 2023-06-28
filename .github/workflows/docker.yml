@@ -8,7 +8,7 @@ on:
       - CMakeLists.txt
       - libmediocre/**
   push:
-    branches:
+    paths:
       - .github/workflows/docker.yml
       - Dockerfile
       - CMakeLists.txt
