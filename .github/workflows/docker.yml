@@ -2,11 +2,17 @@ name: Docker
 
 on:
   pull_request:
-    branches:
-      - "master"
+    paths:
+      - .github/workflows/docker.yml
+      - Dockerfile
+      - CMakeLists.txt
+      - libmediocre/**
   push:
     branches:
-      - "master"
+      - .github/workflows/docker.yml
+      - Dockerfile
+      - CMakeLists.txt
+      - libmediocre/**
   release:
     types:
       - "published"
@@ -21,12 +27,8 @@ jobs:
     name: Variables
     runs-on: ubuntu-latest
     outputs:
-      docker-main-changed: ${{ steps.main-dockerfile-changed.outputs.any_changed }}
-      docker-main-sha-name: ${{ steps.get-tags.outputs.docker-main-sha-name }}
-      docker-main-name: ${{ steps.get-tags.outputs.docker-main-name }}
-    env:
-      DOCKER_TAG_PREFIX: ${{ github.event_name == 'release' && '' || 'dev-' }}
-      DOCKER_TAG_SUFFIX: ${{ github.head_ref || github.ref_name }}
+      docker-image-sha-name: ${{ steps.get-tags.outputs.docker-image-sha-name }}
+      docker-image-name: ${{ steps.get-tags.outputs.docker-image-name }}
     steps:
       -
         name: Check out the repo
@@ -40,34 +42,25 @@ jobs:
       -
         name: Get tag names
         id: get-tags
+        env:
+          DOCKER_TAG_PREFIX: ${{ github.event_name == 'release' && '' || 'dev-' }}
+          DOCKER_TAG_SUFFIX: ${{ github.head_ref || github.ref_name }}
         run: |
           export repo=${{ env.DOCKER_REPOSITORY }}
-          echo "docker-main-sha-name=$repo:${DOCKER_TAG_PREFIX}$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-          echo "docker-main-name=$repo:${DOCKER_TAG_PREFIX}${DOCKER_TAG_SUFFIX}" >> $GITHUB_OUTPUT
+          echo "docker-image-sha-name=$repo:${DOCKER_TAG_PREFIX}$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "docker-image-name=$repo:${DOCKER_TAG_PREFIX}${DOCKER_TAG_SUFFIX}" >> $GITHUB_OUTPUT
       -
         name: Print tag names
         id: print-tags
         run: |
           echo "Main images:"
-          echo "  docker-main-sha-name=${{ steps.get-tags.outputs.docker-main-sha-name }}"
-          echo "  docker-main-name=${{ steps.get-tags.outputs.docker-main-name }}"
-      -
-        name: Check if main dockerfile has changed
-        id: main-dockerfile-changed
-        uses: tj-actions/changed-files@v36
-        with:
-          files: |
-            Dockerfile
-            CMakeLists.txt
-            libmediocre/**
-            .github/workflows/docker.yml
-          since_last_remote_commit: true
+          echo "  docker-image-sha-name=${{ steps.get-tags.outputs.docker-image-sha-name }}"
+          echo "  docker-image-name=${{ steps.get-tags.outputs.docker-image-name }}"
 
   intermediate-build-push:
-    name: Build intermediate images
+    name: Build and push intermediate image
     runs-on: ubuntu-latest
     needs: preliminary
-    if: needs.preliminary.outputs.docker-main-changed == 'true'
     steps:
       -
         name: Checkout
@@ -97,36 +90,34 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
       -
-        name: Build and push main image
-        if: needs.preliminary.outputs.docker-main-changed == 'true'
+        name: Build and push image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: Dockerfile
-          tags: ${{ needs.preliminary.outputs.docker-main-sha-name }}
+          tags: ${{ needs.preliminary.outputs.docker-image-sha-name }}
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
   intermediate-test:
-    name: Test intermediate images
+    name: Test intermediate image
     runs-on: ubuntu-latest
     needs: [ preliminary, intermediate-build-push ]
-    env:
-      DOCKER_IMAGE_NAME: ${{ needs.preliminary.outputs.docker-main-sha-name }}
-      GRPC_CLIENT_CLI_VERSION: 1.18.0
     steps:
       - # Pull is faster than using cache from build-push-action and using `load: true`
-        name: Pull main image
+        name: Pull image
         run: |
-          docker pull $DOCKER_IMAGE_NAME
+          docker pull ${{ needs.preliminary.outputs.docker-image-sha-name }}
       -
         name: Install testing tools
+        env:
+          GRPC_CLIENT_CLI_VERSION: 1.18.0
         run: curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
       -
         name: Start container
         run: |
-          docker run -d --rm -p 127.0.0.1:80:50051/tcp $DOCKER_IMAGE_NAME
+          docker run -d --rm -p 127.0.0.1:80:50051/tcp ${{ needs.preliminary.outputs.docker-image-sha-name }}
           export max_retries=20
           export cur_retries=0
           until [[ $(grpc-client-cli health 127.0.0.1:80 | jq -r '.status') == 'SERVING' ]]; do
@@ -148,7 +139,7 @@ jobs:
           echo $check_tesseract && [[ $(echo $check_tesseract | jq '.healthy') == 'true' ]]
 
   final-push:
-    name: Push final images
+    name: Push final image
     runs-on: ubuntu-latest
     needs: [ preliminary, intermediate-test ]
     steps:
@@ -159,10 +150,10 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       -
-        name: Re-tag and push main image
+        name: Re-tag and push image
         run: |
-          export intermediate_image=${{ needs.preliminary.outputs.docker-main-sha-name }}
-          export final_image=${{ needs.preliminary.outputs.docker-main-name }}
+          export intermediate_image=${{ needs.preliminary.outputs.docker-image-sha-name }}
+          export final_image=${{ needs.preliminary.outputs.docker-image-name }}
           docker pull $intermediate_image
           docker image tag $intermediate_image $final_image
           docker push $final_image
