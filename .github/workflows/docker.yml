@@ -74,18 +74,18 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
       -
-        name: Build and load sha image
+        name: Build and push sha image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: Dockerfile
           tags: ${{ steps.get-tags.outputs.docker-image-sha-name }}
-          load: true
+          push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
       -
-        name: Push sha image
-        run: docker push ${{ steps.get-tags.outputs.docker-image-sha-name }}
+        name: Pull sha image # this is genuinely faster than load:true on previous step
+        run: docker pull ${{ steps.get-tags.outputs.docker-image-sha-name }}
       -
         name: Install testing tools
         env:
@@ -94,7 +94,7 @@ jobs:
       -
         name: Start container
         run: |
-          docker run -d --rm -p 127.0.0.1:80:50051/tcp ${{ steps.get-tags.outputs.docker-image-sha-name }}
+          docker run -d --rm --name mediocre -p 127.0.0.1:80:50051/tcp ${{ steps.get-tags.outputs.docker-image-sha-name }}
           export max_retries=20
           export cur_retries=0
           until [[ $(grpc-client-cli health 127.0.0.1:80 | jq -r '.status') == 'SERVING' ]]; do
@@ -116,7 +116,7 @@ jobs:
           echo $check_tesseract && [[ $(echo $check_tesseract | jq '.healthy') == 'true' ]]
       -
         name: Stop container
-        run: docker stop ${{ steps.get-tags.outputs.docker-image-sha-name }}
+        run: docker stop mediocre
       -
         name: Re-tag and push image
         run: |
