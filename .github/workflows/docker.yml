@@ -17,14 +17,10 @@ on:
     types:
       - "published"
 
-env:
-  DOCKER_USERNAME: obroomhall
-  DOCKER_REPOSITORY: obroomhall/mediocre
-
 jobs:
 
-  preliminary:
-    name: Variables
+  build_test_push:
+    name: Build, test and push image
     runs-on: ubuntu-latest
     outputs:
       docker-image-sha-name: ${{ steps.get-tags.outputs.docker-image-sha-name }}
@@ -34,8 +30,13 @@ jobs:
         name: Check out the repo
         uses: actions/checkout@v3
       -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      -
         name: Log in to Docker Hub
         uses: docker/login-action@v2
+        env:
+          DOCKER_USERNAME: obroomhall
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
@@ -43,6 +44,7 @@ jobs:
         name: Get tag names
         id: get-tags
         env:
+          DOCKER_REPOSITORY: obroomhall/mediocre
           DOCKER_TAG_PREFIX: ${{ github.event_name == 'release' && '' || 'dev-' }}
           DOCKER_TAG_SUFFIX: ${{ github.head_ref || github.ref_name }}
         run: |
@@ -56,24 +58,6 @@ jobs:
           echo "Main images:"
           echo "  docker-image-sha-name=${{ steps.get-tags.outputs.docker-image-sha-name }}"
           echo "  docker-image-name=${{ steps.get-tags.outputs.docker-image-name }}"
-
-  intermediate-build-push:
-    name: Build and push intermediate image
-    runs-on: ubuntu-latest
-    needs: preliminary
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v3
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      -
-        name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       -
         name: Docker meta
         id: meta
@@ -90,25 +74,18 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
       -
-        name: Build and push image
+        name: Build and load sha image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: Dockerfile
-          tags: ${{ needs.preliminary.outputs.docker-image-sha-name }}
-          push: true
+          tags: ${{ steps.get-tags.outputs.docker-image-sha-name }}
+          load: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  intermediate-test:
-    name: Test intermediate image
-    runs-on: ubuntu-latest
-    needs: [ preliminary, intermediate-build-push ]
-    steps:
-      - # Pull is faster than using cache from build-push-action and using `load: true`
-        name: Pull image
-        run: |
-          docker pull ${{ needs.preliminary.outputs.docker-image-sha-name }}
+      -
+        name: Push sha image
+        run: docker push ${{ steps.get-tags.outputs.docker-image-sha-name }}
       -
         name: Install testing tools
         env:
@@ -117,7 +94,7 @@ jobs:
       -
         name: Start container
         run: |
-          docker run -d --rm -p 127.0.0.1:80:50051/tcp ${{ needs.preliminary.outputs.docker-image-sha-name }}
+          docker run -d --rm -p 127.0.0.1:80:50051/tcp ${{ steps.get-tags.outputs.docker-image-sha-name }}
           export max_retries=20
           export cur_retries=0
           until [[ $(grpc-client-cli health 127.0.0.1:80 | jq -r '.status') == 'SERVING' ]]; do
@@ -137,23 +114,14 @@ jobs:
         run: |
           check_tesseract=$(echo '{}' | grpc-client-cli -service Dependency -method CheckTesseract localhost:80)
           echo $check_tesseract && [[ $(echo $check_tesseract | jq '.healthy') == 'true' ]]
-
-  final-push:
-    name: Push final image
-    runs-on: ubuntu-latest
-    needs: [ preliminary, intermediate-test ]
-    steps:
       -
-        name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+        name: Stop container
+        run: docker stop ${{ steps.get-tags.outputs.docker-image-sha-name }}
       -
         name: Re-tag and push image
         run: |
-          export intermediate_image=${{ needs.preliminary.outputs.docker-image-sha-name }}
-          export final_image=${{ needs.preliminary.outputs.docker-image-name }}
+          export intermediate_image=${{ steps.get-tags.outputs.docker-image-sha-name }}
+          export final_image=${{ steps.get-tags.outputs.docker-image-name }}
           docker pull $intermediate_image
           docker image tag $intermediate_image $final_image
           docker push $final_image
