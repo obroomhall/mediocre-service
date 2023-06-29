@@ -47,9 +47,6 @@ jobs:
           tags: |
             type=sha
       -
-        name: Pull related image
-        run: docker pull obroomhall/mediocre:more-docker
-      -
         name: Build and push sha image
         uses: docker/build-push-action@v4
         with:
@@ -58,7 +55,9 @@ jobs:
           tags: ${{ steps.meta-sha.outputs.tags }}
           labels: ${{ steps.meta-sha.outputs.labels }}
           push: true
-          cache-from: type=gha
+          cache-from: |
+            type=gha
+            type=registry,ref=obroomhall/mediocre 
           cache-to: type=gha,mode=max
       -
         name: Install testing tools
