@@ -43,7 +43,7 @@ target_include_directories(mediocre PUBLIC ${Leptonica_INCLUDE_DIRS})
 target_link_libraries(mediocre ${Leptonica_LIBRARIES})
 
 find_package(OpenCV CONFIG REQUIRED)
-message(STATUS "Using OpenCV ${OpenCV_VERSION}")
+message(STATUS "Using OpenCV ${OpenCV_VERSION} with libraries ${OpenCV_LIBS}")
 target_link_libraries(mediocre ${OpenCV_LIBS})
 
 find_package(Protobuf CONFIG REQUIRED)
