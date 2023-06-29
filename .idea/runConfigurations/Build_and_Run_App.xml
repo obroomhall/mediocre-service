@@ -3,7 +3,7 @@
     <deployment type="dockerfile">
       <settings>
         <option name="imageTag" value="mediocre:local" />
-        <option name="buildCliOptions" value="--rm --cache-from mediocre:local" />
+        <option name="buildCliOptions" value="--rm --progress=plain" />
         <option name="buildKitEnabled" value="true" />
         <option name="containerName" value="mediocre" />
         <option name="portBindings">
