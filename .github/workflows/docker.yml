@@ -62,7 +62,6 @@ jobs:
       -
         name: Setup docker layer caching
         uses: jpribyl/action-docker-layer-caching@v0.1.1
-        # Ignore the failure of a step and avoid terminating the job.
         continue-on-error: true
       -
         name: Pull sha image # this is genuinely faster than load:true on previous step
