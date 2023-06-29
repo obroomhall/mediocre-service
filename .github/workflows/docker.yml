@@ -57,7 +57,7 @@ jobs:
           push: true
           cache-from: |
             type=gha
-            type=registry,ref=obroomhall/mediocre 
+            type=registry,ref=obroomhall/mediocre:more-docker
           cache-to: type=gha,mode=max
       -
         name: Install testing tools
