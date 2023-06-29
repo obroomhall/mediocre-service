@@ -60,10 +60,15 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       -
+        name: Setup docker layer caching
+        uses: satackey/action-docker-layer-caching@v0.0.11
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
+      -
         name: Pull sha image # this is genuinely faster than load:true on previous step
         run: |
-          DOCKER_BUILDKIT=1 docker build --cache-from ${{ steps.meta-sha.outputs.tags }} .
-#          docker pull ${{ steps.meta-sha.outputs.tags }} # should only be one tag
+#          DOCKER_BUILDKIT=1 docker build --cache-from ${{ steps.meta-sha.outputs.tags }} .
+          docker pull ${{ steps.meta-sha.outputs.tags }} # should only be one tag
       -
         name: Install testing tools
         env:
