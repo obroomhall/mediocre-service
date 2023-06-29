@@ -62,6 +62,8 @@ jobs:
       -
         name: Pull sha image # this is genuinely faster than load:true on previous step
         run: |
+          ls -lh
+          ls -lh ..
           docker build --cache-from ${{ steps.meta-sha.outputs.tags }} Dockerfile
 #          docker pull ${{ steps.meta-sha.outputs.tags }} # should only be one tag
       -
