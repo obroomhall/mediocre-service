@@ -127,9 +127,10 @@ RUN --mount=type=bind,source=libmediocre,target=/local/mediocre/source/libmedioc
     && cmake --build . \
     && make -j 4 \
     && make install
+ENV PATH=$PATH:/local/mediocre/install/bin
 
 # run mediocre
-ENTRYPOINT ["/local/mediocre/install/bin/mediocre"]
+ENTRYPOINT ["mediocre"]
 EXPOSE 50051
 HEALTHCHECK --interval=30s --timeout=3s \
   CMD grpc-client-cli health 127.0.0.1:50051
