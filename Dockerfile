@@ -41,7 +41,7 @@ RUN --mount=type=cache,target=/local/opencv/build \
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/opencv/install/lib/cmake
 
 # need to point towards opencv shared libraries since cmake strips the rpath at installation, see https://stackoverflow.com/a/22209962/1081679
-# we should be staticly, but see https://github.com/opencv/opencv/issues/21447#issuecomment-1013088996
+# we should be building staticly, but see https://github.com/opencv/opencv/issues/21447#issuecomment-1013088996
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/local/opencv/install/lib/
 
 # install grpc and protobuf
