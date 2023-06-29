@@ -8,7 +8,7 @@ on:
       - CMakeLists.txt
       - libmediocre/**
   push:
-    branches:
+    paths:
       - .github/workflows/docker.yml
       - Dockerfile
       - CMakeLists.txt
@@ -57,9 +57,9 @@ jobs:
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      -
-        name: Pull sha image # this is genuinely faster than load:true on previous step
-        run: docker pull ${{ steps.meta-sha.outputs.tags }} # should only be one tag
+#      -
+#        name: Pull sha image # this is genuinely faster than load:true on previous step
+#        run: docker pull ${{ steps.meta-sha.outputs.tags }} # should only be one tag
       -
         name: Install testing tools
         env:
