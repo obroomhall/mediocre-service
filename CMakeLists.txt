@@ -15,6 +15,8 @@ add_executable(
         libmediocre/dependency/v1/dependency.cpp
 )
 
+install(TARGETS mediocre)
+
 # include all hpp files
 target_include_directories(mediocre PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 

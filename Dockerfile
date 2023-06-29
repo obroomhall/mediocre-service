@@ -40,6 +40,10 @@ RUN --mount=type=cache,target=/local/opencv/build \
     && make install
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/opencv/install/lib/cmake
 
+# need to point towards opencv shared libraries since cmake strips the rpath at installation, see https://stackoverflow.com/a/22209962/1081679
+# we should be staticly, but see https://github.com/opencv/opencv/issues/21447#issuecomment-1013088996
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/local/opencv/install/lib/
+
 # install grpc and protobuf
 ARG GRPC_VERSION=1.55.1
 RUN --mount=type=cache,target=/var/cache/apt \
@@ -111,17 +115,21 @@ ARG TESSDATA_VERSION=4.1.0
 ENV TESSDATA_PREFIX=/local/tesseract/install/share/tessdata/
 RUN wget -q -P $TESSDATA_PREFIX https://github.com/tesseract-ocr/tessdata_best/raw/$TESSDATA_VERSION/eng.traineddata
 
-# copy mediocre files
-COPY libmediocre/ /src/libmediocre/
-COPY CMakeLists.txt /src/
-WORKDIR /src/build/
+# install mediocre
+RUN --mount=type=bind,source=libmediocre,target=/local/mediocre/source/libmediocre \
+    --mount=type=bind,source=CMakeLists.txt,target=/local/mediocre/source/CMakeLists.txt \
+    --mount=type=cache,target=/local/mediocre/build \
+    cd /local/mediocre/build \
+    && mkdir ../install \
+    && cmake -D CMAKE_INSTALL_PREFIX=../install \
+             -S ../source \
+             -B . \
+    && cmake --build . \
+    && make -j 4 \
+    && make install
 
-# build mediocre
-RUN cmake ..
-RUN cmake --build .
-
-# run configuration
-ENTRYPOINT ["./mediocre"]
+# run mediocre
+ENTRYPOINT ["/local/mediocre/install/bin/mediocre"]
 EXPOSE 50051
 HEALTHCHECK --interval=30s --timeout=3s \
   CMD grpc-client-cli health 127.0.0.1:50051
