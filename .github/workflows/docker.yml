@@ -47,6 +47,9 @@ jobs:
           tags: |
             type=sha
       -
+        name: Pull related image
+        run: docker pull obroomhall/mediocre:more-docker
+      -
         name: Build and push sha image
         uses: docker/build-push-action@v4
         with:
@@ -57,9 +60,6 @@ jobs:
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-#      -
-#        name: Pull sha image # this is genuinely faster than load:true on previous step
-#        run: docker pull ${{ steps.meta-sha.outputs.tags }} # should only be one tag
       -
         name: Install testing tools
         env:
