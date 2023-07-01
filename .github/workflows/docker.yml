@@ -32,7 +32,7 @@ jobs:
         with:
           images: |
             obroomhall/mediocre
-          sep-tags: ",\n"
+          sep-tags: '","'
           # be aware of priorities here, since highest priority determines the label org.opencontainers.image.version
           # any tag with an unspecified priority receives a default, see https://github.com/docker/metadata-action#priority-attribute
           # they also determine the order of the output array
@@ -48,9 +48,10 @@ jobs:
       -
         name: Docker background pull
         env:
-          to_pull: ${{ format('{0}{1}{2}', '[', steps.meta.outputs.tags, ']') }}
+          to_pull: ${{ format('{0}{1}{2}', '["', steps.meta.outputs.tags, '"]') }}
         run: |
           echo $to_pull
+          echo ${{ fromJSON($to_pull) }}
           docker pull $to_pull
       -
         name: Check out the repo
