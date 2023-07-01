@@ -45,7 +45,7 @@ jobs:
             type=sha,priority=4
             type=sha,suffix=-cache,priority=3
             type=raw,value=master,priority=2
-            type=sha,value=master,suffix=-cache,priority=1
+            type=raw,value=master,suffix=-cache,priority=1
       -
         name: Docker meta parse
         id: tags
