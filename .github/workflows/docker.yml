@@ -54,8 +54,8 @@ jobs:
           echo "main-cache=${{ fromJSON(steps.meta.outputs.json).tags[1] }}" >> "$GITHUB_OUTPUT"
           echo "sha=${{ fromJSON(steps.meta.outputs.json).tags[2] }}" >> "$GITHUB_OUTPUT"
           echo "sha-cache=${{ fromJSON(steps.meta.outputs.json).tags[3] }}" >> "$GITHUB_OUTPUT"
-          echo "master=${{ fromJSON(steps.meta.outputs.json).tags[4] || obroomhall/mediocre:master }}" >> "$GITHUB_OUTPUT"
-          echo "master-cache=${{ fromJSON(steps.meta.outputs.json).tags[5] || obroomhall/mediocre:master-cache }}" >> "$GITHUB_OUTPUT"
+          echo "master=${{ fromJSON(steps.meta.outputs.json).tags[4] || 'obroomhall/mediocre:master' }}" >> "$GITHUB_OUTPUT"
+          echo "master-cache=${{ fromJSON(steps.meta.outputs.json).tags[5] || 'obroomhall/mediocre:master-cache' }}" >> "$GITHUB_OUTPUT"
       -
         name: Docker background pull
         # pre-pulling makes subsequent docker steps faster
