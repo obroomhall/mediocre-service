@@ -59,7 +59,7 @@ jobs:
       -
         name: Docker background pull
         run: |
-          docker pull ${{ steps.tags.outputs.sha }} || docker pull ${{ steps.tags.outputs.main }} || docker pull ${{ steps.tags.outputs.master }} &
+          docker pull ${{ steps.tags.outputs.sha }} || docker pull ${{ steps.tags.outputs.main }} || docker pull ${{ steps.tags.outputs.master }}
       -
         name: Check out the repo
         uses: actions/checkout@v3
