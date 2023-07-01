@@ -58,8 +58,12 @@ jobs:
           echo "master-cache=${{ fromJSON(steps.meta.outputs.json).tags[5] }}" >> "$GITHUB_OUTPUT"
       -
         name: Docker background pull
+        # pre-pulling makes subsequent docker steps faster
+        # only pre-pull the most relevant image (fallback if not found)
         run: |
-          docker pull ${{ steps.tags.outputs.sha }} || docker pull ${{ steps.tags.outputs.main }} || docker pull ${{ steps.tags.outputs.master }}
+          docker pull ${{ steps.tags.outputs.sha }} \
+            || docker pull ${{ steps.tags.outputs.main }} \
+            || docker pull ${{ steps.tags.outputs.master }} &
       -
         name: Check out the repo
         uses: actions/checkout@v3
