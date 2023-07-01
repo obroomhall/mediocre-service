@@ -21,29 +21,6 @@ RUN mkdir -p /local/cmake && cd "$_" \
     && sh ./download/cmake-linux.sh -- --skip-license --prefix=./install
 ENV PATH=$PATH:/local/cmake/install/bin
 
-# install opencv
-ARG OPENCV_VERSION=4.7.0
-RUN --mount=type=cache,target=/local/opencv/build \
-    cd /local/opencv/build \
-    && mkdir ../download && mkdir ../install \
-    && wget -q -O ../download/source.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSION.zip \
-    && unzip ../download/source.zip -d ../download \
-    && cmake -D CMAKE_INSTALL_PREFIX=../install \
-             -D BUILD_opencv_highgui=OFF \
-             -D BUILD_PROTOBUF=OFF \
-             -D BUILD_TESTS=OFF \
-             -D BUILD_PERF_TESTS=OFF \
-             -S ../download/opencv-$OPENCV_VERSION \
-             -B . \
-    && cmake --build . \
-    && make -j 4 \
-    && make install
-ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/opencv/install/lib/cmake
-
-# need to point towards opencv shared libraries since cmake strips the rpath at installation, see https://stackoverflow.com/a/22209962/1081679
-# we should be building staticly, but see https://github.com/opencv/opencv/issues/21447#issuecomment-1013088996
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/local/opencv/install/lib/
-
 # install grpc and protobuf
 ARG GRPC_VERSION=1.55.1
 RUN --mount=type=cache,target=/var/cache/apt \
@@ -71,13 +48,29 @@ RUN --mount=type=cache,target=/local/grpc/download \
     && make install
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/grpc/install/lib/cmake
 
-# install grpc client cli
-ARG GRPC_CLIENT_CLI_VERSION=1.18.0
-RUN mkdir -p /local/grpc-client-cli && cd "$_" \
-    && mkdir ./download && mkdir ./install \
-    && wget -q -O ./download/source.tar.gz https://github.com/vadimi/grpc-client-cli/releases/download/v$GRPC_CLIENT_CLI_VERSION/grpc-client-cli_linux_x86_64.tar.gz \
-    && tar -xzf ./download/source.tar.gz -C ./install
-ENV PATH=$PATH:/local/grpc-client-cli/install/bin
+# install opencv
+ARG OPENCV_VERSION=4.7.0
+RUN --mount=type=cache,target=/local/opencv/build \
+    cd /local/opencv/build \
+    && mkdir ../download && mkdir ../install \
+    && wget -q -O ../download/source.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSION.zip \
+    && unzip ../download/source.zip -d ../download \
+    && cmake -D CMAKE_INSTALL_PREFIX=../install \
+             -D BUILD_opencv_highgui=OFF \
+             -D WITH_PROTOBUF=ON \
+             -D BUILD_PROTOBUF=OFF \
+             -D BUILD_TESTS=OFF \
+             -D BUILD_PERF_TESTS=OFF \
+             -S ../download/opencv-$OPENCV_VERSION \
+             -B . \
+    && cmake --build . \
+    && make -j 4 \
+    && make install
+ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/opencv/install/lib/cmake
+
+# need to point towards opencv shared libraries since cmake strips the rpath at installation, see https://stackoverflow.com/a/22209962/1081679
+# we should be building staticly, but see https://github.com/opencv/opencv/issues/21447#issuecomment-1013088996
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/local/opencv/install/lib/
 
 # install leptonica
 ARG LEPTONICA_VERSION=1.83.1
@@ -114,6 +107,14 @@ ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/tesseract/install/lib/cmake
 ARG TESSDATA_VERSION=4.1.0
 ENV TESSDATA_PREFIX=/local/tesseract/install/share/tessdata/
 RUN wget -q -P $TESSDATA_PREFIX https://github.com/tesseract-ocr/tessdata_best/raw/$TESSDATA_VERSION/eng.traineddata
+
+# install grpc client cli
+ARG GRPC_CLIENT_CLI_VERSION=1.18.0
+RUN mkdir -p /local/grpc-client-cli && cd "$_" \
+    && mkdir ./download && mkdir ./install \
+    && wget -q -O ./download/source.tar.gz https://github.com/vadimi/grpc-client-cli/releases/download/v$GRPC_CLIENT_CLI_VERSION/grpc-client-cli_linux_x86_64.tar.gz \
+    && tar -xzf ./download/source.tar.gz -C ./install
+ENV PATH=$PATH:/local/grpc-client-cli/install/bin
 
 # install mediocre
 RUN --mount=type=bind,source=libmediocre,target=/local/mediocre/source/libmediocre \
