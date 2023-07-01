@@ -36,14 +36,16 @@ jobs:
           # any tag with an unspecified priority receives a default, see https://github.com/docker/metadata-action#priority-attribute
           # they also determine the order of the output array
           tags: |
-            type=ref,event=branch,priority=4
-            type=ref,event=tag,priority=4
-            type=ref,event=pr,priority=4
-            type=ref,event=branch,suffix=-cache,priority=3
-            type=ref,event=tag,suffix=-cache,priority=3
-            type=ref,event=pr,suffix=-cache,priority=3
-            type=sha,priority=2
-            type=sha,suffix=-cache,priority=1
+            type=ref,event=branch,priority=6
+            type=ref,event=tag,priority=6
+            type=ref,event=pr,priority=6
+            type=ref,event=branch,suffix=-cache,priority=5
+            type=ref,event=tag,suffix=-cache,priority=5
+            type=ref,event=pr,suffix=-cache,priority=5
+            type=sha,priority=4
+            type=sha,suffix=-cache,priority=3
+            type=raw,value=master,priority=2
+            type=sha,value=master,suffix=-cache,priority=1
       -
         name: Docker meta parse
         id: tags
@@ -52,14 +54,12 @@ jobs:
           echo "main-cache=${{ fromJSON(steps.meta.outputs.json).tags[1] }}" >> "$GITHUB_OUTPUT"
           echo "sha=${{ fromJSON(steps.meta.outputs.json).tags[2] }}" >> "$GITHUB_OUTPUT"
           echo "sha-cache=${{ fromJSON(steps.meta.outputs.json).tags[3] }}" >> "$GITHUB_OUTPUT"
+          echo "master=${{ fromJSON(steps.meta.outputs.json).tags[4] }}" >> "$GITHUB_OUTPUT"
+          echo "master-cache=${{ fromJSON(steps.meta.outputs.json).tags[5] }}" >> "$GITHUB_OUTPUT"
       -
         name: Docker background pull
         run: |
-          echo ${{ steps.tags.outputs.main }}
-          echo ${{ steps.tags.outputs.main-cache }}
-          echo ${{ steps.tags.outputs.sha }}
-          echo ${{ steps.tags.outputs.sha-cache }}
-          docker pull $to_pull &
+          docker pull ${{ steps.tags.outputs.sha }} || docker pull ${{ steps.tags.outputs.main }} || ${{ steps.tags.outputs.master }} &
       -
         name: Check out the repo
         uses: actions/checkout@v3
@@ -80,26 +80,26 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          tags: ${{ steps.meta-sha.outputs.tags }}
+          tags: ${{ steps.tags.outputs.sha }}
           labels: ${{ steps.meta-sha.outputs.labels }}
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      -
-        # This is genuinely faster than load:true on previous step
-        # I know, I can barely believe it either
-        name: Pull sha image
-        run: |
-          docker pull ${{ steps.meta-sha.outputs.tags }} # should only be one tag
+          cache-from: |
+            registry,ref=${{ steps.tags.outputs.sha-cache }}
+            registry,ref=${{ steps.tags.outputs.main-cache }}
+            registry,ref=${{ steps.tags.outputs.master-cache }}
+          cache-to: registry,ref=${{ steps.tags.outputs.sha-cache }}
       -
         name: Install testing tools
         env:
           GRPC_CLIENT_CLI_VERSION: 1.18.0
         run: curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
       -
+        name: Pull updated sha image
+        run: docker pull ${{ steps.tags.outputs.sha }}
+      -
         name: Start container
         run: |
-          docker run -d --rm --name mediocre -p 127.0.0.1:80:50051/tcp ${{ steps.meta-sha.outputs.tags }}
+          docker run -d --rm --name mediocre -p 127.0.0.1:80:50051/tcp ${{ steps.tags.outputs.sha }}
           export max_retries=20
           export cur_retries=0
           until [[ $(grpc-client-cli health 127.0.0.1:80 | jq -r '.status') == 'SERVING' ]]; do
@@ -129,8 +129,8 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.tags.outputs.main }}
           labels: ${{ steps.meta.outputs.labels }}
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: registry,ref=${{ steps.tags.outputs.sha-cache }}
+          cache-to: registry,ref=${{ steps.tags.outputs.main-cache }}
