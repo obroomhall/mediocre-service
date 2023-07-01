@@ -46,12 +46,22 @@ jobs:
             type=sha,priority=2
             type=sha,suffix=-cache,priority=1
       -
-        name: Docker background pull
+        name: Docker meta parse
+        id: tags
         env:
-          to_pull: ${{ format('{0}{1}{2}', '["', steps.meta.outputs.tags, '"]') }}
+          TAGS: ${{ format('{0}{1}{2}', '["', steps.meta.outputs.tags, '"]') }}
         run: |
-          echo $to_pull
-          echo ${{ fromJSON(format('{0}{1}{2}', '["', steps.meta.outputs.tags, '"]'))[0] }}
+          echo "main=${{ fromJSON(env.TAGS))[0] }}" >> "$GITHUB_OUTPUT"
+          echo "main-cache=${{ fromJSON(env.TAGS))[1] }}" >> "$GITHUB_OUTPUT"
+          echo "sha=${{ fromJSON(env.TAGS))[2] }}" >> "$GITHUB_OUTPUT"
+          echo "sha-cache=${{ fromJSON(env.TAGS))[4] }}" >> "$GITHUB_OUTPUT"
+      -
+        name: Docker background pull
+        run: |
+          echo ${{ steps.tags.outputs.main }}
+          echo ${{ steps.tags.outputs.main-cache }}
+          echo ${{ steps.tags.outputs.sha }}
+          echo ${{ steps.tags.outputs.sha-cache }}
           docker pull $to_pull
       -
         name: Check out the repo
