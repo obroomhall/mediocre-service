@@ -32,7 +32,6 @@ jobs:
         with:
           images: |
             obroomhall/mediocre
-          sep-tags: '","'
           # be aware of priorities here, since highest priority determines the label org.opencontainers.image.version
           # any tag with an unspecified priority receives a default, see https://github.com/docker/metadata-action#priority-attribute
           # they also determine the order of the output array
@@ -48,13 +47,11 @@ jobs:
       -
         name: Docker meta parse
         id: tags
-        env:
-          TAGS: ${{ format('{0}{1}{2}', '["', steps.meta.outputs.tags, '"]') }}
         run: |
-          echo "main=${{ fromJSON(env.TAGS)[0] }}" >> "$GITHUB_OUTPUT"
-          echo "main-cache=${{ fromJSON(env.TAGS)[1] }}" >> "$GITHUB_OUTPUT"
-          echo "sha=${{ fromJSON(env.TAGS)[2] }}" >> "$GITHUB_OUTPUT"
-          echo "sha-cache=${{ fromJSON(env.TAGS)[4] }}" >> "$GITHUB_OUTPUT"
+          echo "main=${{ fromJSON(steps.meta.outputs.json).tags[0] }}" >> "$GITHUB_OUTPUT"
+          echo "main-cache=${{ fromJSON(steps.meta.outputs.json).tags[1] }}" >> "$GITHUB_OUTPUT"
+          echo "sha=${{ fromJSON(steps.meta.outputs.json).tags[2] }}" >> "$GITHUB_OUTPUT"
+          echo "sha-cache=${{ fromJSON(steps.meta.outputs.json).tags[3] }}" >> "$GITHUB_OUTPUT"
       -
         name: Docker background pull
         run: |
@@ -62,7 +59,7 @@ jobs:
           echo ${{ steps.tags.outputs.main-cache }}
           echo ${{ steps.tags.outputs.sha }}
           echo ${{ steps.tags.outputs.sha-cache }}
-          docker pull $to_pull
+          docker pull $to_pull &
       -
         name: Check out the repo
         uses: actions/checkout@v3
