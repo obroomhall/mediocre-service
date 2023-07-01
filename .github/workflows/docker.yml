@@ -32,6 +32,7 @@ jobs:
         with:
           images: |
             obroomhall/mediocre
+          sep-tags: ",\n"
           tags: |
             type=sha
             type=sha,suffix=-cache
@@ -43,8 +44,10 @@ jobs:
             type=ref,event=pr,suffix=-cache
       -
         name: Docker background pull
+        env:
+          to_pull: ${{ format('{0}{1}{2}', '[', steps.meta.outputs.tags, ']') }}
         run: |
-          docker pull ${{ steps.meta.outputs.tags[0] }}
+          docker pull $to_pull
       -
         name: Check out the repo
         uses: actions/checkout@v3
