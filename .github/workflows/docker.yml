@@ -51,7 +51,7 @@ jobs:
           to_pull: ${{ format('{0}{1}{2}', '["', steps.meta.outputs.tags, '"]') }}
         run: |
           echo $to_pull
-          echo ${{ fromJSON($to_pull) }}
+          echo ${{ fromJSON(format('{0}{1}{2}', '["', steps.meta.outputs.tags, '"]')) }}
           docker pull $to_pull
       -
         name: Check out the repo
