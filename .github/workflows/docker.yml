@@ -51,10 +51,10 @@ jobs:
         env:
           TAGS: ${{ format('{0}{1}{2}', '["', steps.meta.outputs.tags, '"]') }}
         run: |
-          echo "main=${{ fromJSON(env.TAGS))[0] }}" >> "$GITHUB_OUTPUT"
-          echo "main-cache=${{ fromJSON(env.TAGS))[1] }}" >> "$GITHUB_OUTPUT"
-          echo "sha=${{ fromJSON(env.TAGS))[2] }}" >> "$GITHUB_OUTPUT"
-          echo "sha-cache=${{ fromJSON(env.TAGS))[4] }}" >> "$GITHUB_OUTPUT"
+          echo "main=${{ fromJSON(env.TAGS)[0] }}" >> "$GITHUB_OUTPUT"
+          echo "main-cache=${{ fromJSON(env.TAGS)[1] }}" >> "$GITHUB_OUTPUT"
+          echo "sha=${{ fromJSON(env.TAGS)[2] }}" >> "$GITHUB_OUTPUT"
+          echo "sha-cache=${{ fromJSON(env.TAGS)[4] }}" >> "$GITHUB_OUTPUT"
       -
         name: Docker background pull
         run: |
