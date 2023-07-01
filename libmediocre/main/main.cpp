@@ -3,6 +3,7 @@
 #include <libmediocre/server/server.hpp>
 
 int main(int argc, char *argv[]) {
-    mediocre::server::run_server(50051);
+    auto server = mediocre::server::Server(50051);
+    server.run_server();
     return EXIT_SUCCESS;
 }

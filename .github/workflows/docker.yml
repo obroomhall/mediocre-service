@@ -26,6 +26,45 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       -
+        name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            obroomhall/mediocre
+          # be aware of priorities here, since highest priority determines the label org.opencontainers.image.version
+          # any tag with an unspecified priority receives a default, see https://github.com/docker/metadata-action#priority-attribute
+          # they also determine the order of the output array
+          tags: |
+            type=ref,event=branch,priority=6
+            type=ref,event=tag,priority=6
+            type=ref,event=pr,priority=6
+            type=ref,event=branch,suffix=-cache,priority=5
+            type=ref,event=tag,suffix=-cache,priority=5
+            type=ref,event=pr,suffix=-cache,priority=5
+            type=sha,priority=4
+            type=sha,suffix=-cache,priority=3
+            type=raw,value=master,priority=2
+            type=raw,value=master,suffix=-cache,priority=1
+      -
+        name: Docker meta parse
+        id: tags
+        run: |
+          echo "main=${{ fromJSON(steps.meta.outputs.json).tags[0] }}" >> "$GITHUB_OUTPUT"
+          echo "main-cache=${{ fromJSON(steps.meta.outputs.json).tags[1] }}" >> "$GITHUB_OUTPUT"
+          echo "sha=${{ fromJSON(steps.meta.outputs.json).tags[2] }}" >> "$GITHUB_OUTPUT"
+          echo "sha-cache=${{ fromJSON(steps.meta.outputs.json).tags[3] }}" >> "$GITHUB_OUTPUT"
+          echo "master=${{ fromJSON(steps.meta.outputs.json).tags[4] }}" >> "$GITHUB_OUTPUT"
+          echo "master-cache=${{ fromJSON(steps.meta.outputs.json).tags[5] }}" >> "$GITHUB_OUTPUT"
+      -
+        name: Docker background pull
+        # pre-pulling makes subsequent docker steps faster
+        # only pre-pull the most relevant image (fallback if not found)
+        run: |
+          docker pull ${{ steps.tags.outputs.sha }} \
+            || docker pull ${{ steps.tags.outputs.main }} \
+            || docker pull ${{ steps.tags.outputs.master }} &
+      -
         name: Check out the repo
         uses: actions/checkout@v3
       -
@@ -40,37 +79,31 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       -
-        name: Docker meta sha
-        id: meta-sha
-        uses: docker/metadata-action@v4
-        with:
-          images: |
-            obroomhall/mediocre
-          tags: |
-            type=sha
-      -
         name: Build and push sha image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: Dockerfile
-          tags: ${{ steps.meta-sha.outputs.tags }}
+          tags: ${{ steps.tags.outputs.sha }}
           labels: ${{ steps.meta-sha.outputs.labels }}
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-#      -
-#        name: Pull sha image # this is genuinely faster than load:true on previous step
-#        run: docker pull ${{ steps.meta-sha.outputs.tags }} # should only be one tag
+          cache-from: |
+            type=registry,ref=${{ steps.tags.outputs.sha-cache }}
+            type=registry,ref=${{ steps.tags.outputs.main-cache }}
+            type=registry,ref=${{ steps.tags.outputs.master-cache }}
+          cache-to: type=registry,ref=${{ steps.tags.outputs.sha-cache }}
       -
         name: Install testing tools
         env:
           GRPC_CLIENT_CLI_VERSION: 1.18.0
         run: curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
       -
+        name: Pull updated sha image
+        run: docker pull ${{ steps.tags.outputs.sha }}
+      -
         name: Start container
         run: |
-          docker run -d --rm --name mediocre -p 127.0.0.1:80:50051/tcp ${{ steps.meta-sha.outputs.tags }}
+          docker run -d --rm --name mediocre -p 127.0.0.1:80:50051/tcp ${{ steps.tags.outputs.sha }}
           export max_retries=20
           export cur_retries=0
           until [[ $(grpc-client-cli health 127.0.0.1:80 | jq -r '.status') == 'SERVING' ]]; do
@@ -94,24 +127,14 @@ jobs:
         name: Stop container
         run: docker stop mediocre
       -
-        name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: |
-            obroomhall/mediocre
-          tags: |
-            type=ref,event=branch
-            type=ref,event=tag
-            type=ref,event=pr
-      -
+        # This doesn't actually build, since the cache was exported in the other docker/build-push-action step
         name: Re-tag and push image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: Dockerfile
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: ${{ steps.tags.outputs.main }}
           labels: ${{ steps.meta.outputs.labels }}
           push: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=registry,ref=${{ steps.tags.outputs.sha-cache }}
+          cache-to: type=registry,ref=${{ steps.tags.outputs.main-cache }}
