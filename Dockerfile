@@ -134,4 +134,4 @@ ENV PATH=$PATH:/local/mediocre/install/bin
 ENTRYPOINT ["mediocre"]
 EXPOSE 50051
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD grpc-client-cli health 127.0.0.1:50051
+  CMD /local/grpc-client-cli/install/grpc-client-cli health 127.0.0.1:50051
