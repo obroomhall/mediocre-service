@@ -62,14 +62,14 @@ jobs:
           echo "sha-cache=${sha_tag}-cache" >> "$GITHUB_OUTPUT"
           echo "fallback=$fallback_tag" >> "$GITHUB_OUTPUT"
           echo "fallback-cache=${fallback_tag}-cache" >> "$GITHUB_OUTPUT"
-      -
-        name: Docker background pull
-        # pre-pulling makes subsequent docker steps faster
-        # only pre-pull the most relevant image (fallback if not found)
-        run: |
-          docker pull ${{ steps.tags.outputs.sha }} \
-            || docker pull ${{ steps.tags.outputs.main }} \
-            || docker pull ${{ steps.tags.outputs.fallback }} &
+#      -
+#        name: Docker background pull
+#        # pre-pulling makes subsequent docker steps faster
+#        # only pre-pull the most relevant image (fallback if not found)
+#        run: |
+#          docker pull ${{ steps.tags.outputs.sha }} \
+#            || docker pull ${{ steps.tags.outputs.main }} \
+#            || docker pull ${{ steps.tags.outputs.fallback }} &
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
