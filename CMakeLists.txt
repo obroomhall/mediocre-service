@@ -15,8 +15,6 @@ add_executable(
         libmediocre/dependency/v1/dependency.cpp
 )
 
-install(TARGETS mediocre)
-
 # include all hpp files
 target_include_directories(mediocre PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
@@ -79,3 +77,10 @@ protobuf_generate(
         PLUGIN "protoc-gen-grpc=\$<TARGET_FILE:gRPC::grpc_cpp_plugin>"
         IMPORT_DIRS ${PROTO_IMPORT_DIRS}
         PROTOC_OUT_DIR ${PROTO_BINARY_DIR})
+
+
+## -- install project -- ##
+
+set_target_properties(mediocre PROPERTIES INSTALL_RPATH "\$ORIGIN/../lib")
+
+install(TARGETS mediocre RUNTIME_DEPENDENCIES DIRECTORIES ${OpenCV_INSTALL_PATH}/lib)
