@@ -18,6 +18,7 @@ namespace mediocre::server {
     public:
         explicit Server(uint16_t port);
         void run_server();
+        void shutdown_server();
     };
 
 
