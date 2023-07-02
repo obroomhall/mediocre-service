@@ -25,7 +25,7 @@ jobs:
     name: Build, test and push image
     runs-on: ubuntu-latest
     env:
-      DOCKER_REPOSITORY: obroomhall/mediocre
+      REPOSITORY: obroomhall/mediocre
     steps:
       -
         name: Check out the repo
@@ -36,7 +36,7 @@ jobs:
         uses: docker/metadata-action@v4
         with:
           images: |
-            ${{ env.DOCKER_REPOSITORY }}
+            ${{ env.REPOSITORY }}
           # be aware of priorities here, since highest priority determines the label org.opencontainers.image.version
           # any tag with an unspecified priority receives a default, see https://github.com/docker/metadata-action#priority-attribute
           # they also determine the order of the output array
@@ -47,14 +47,19 @@ jobs:
             type=sha,priority=4
             type=raw,value=master,priority=2
       -
+        name: Install parsing tools
+        run: |
+          sudo apt install -y jq
+      -
         name: Docker meta parse
         id: tags
         run: |
           export main_tag=${{ fromJSON(steps.meta.outputs.json).tags[0] }}
           export sha_tag=${{ fromJSON(steps.meta.outputs.json).tags[1] }}
-          export fallback_tag=${{ fromJSON(steps.meta.outputs.json).tags[2] || format('{0}:pr-{1}', env.DOCKER_REPOSITORY, github.event.number) }}
-          echo "${{ fromJSON(steps.meta.outputs.json).tags[100] || format('{0}:pr-{1}', env.DOCKER_REPOSITORY, github.event.number) }}"
-          echo "${{ toJson(github.event) }}"
+          echo "${{ github.head_ref }}"
+          export most_recent_closed_pr_number=$(curl -s https://api.github.com/repos/${REPOSITORY}/pulls?state=closed | jq ".[] | .number" | head -1)
+          echo $most_recent_closed_pr_number
+          export fallback_tag=${{ fromJSON(steps.meta.outputs.json).tags[2] || format('{0}:pr-{1}', env.REPOSITORY, env.most_recent_closed_pr_number) }}
           echo "main=$main_tag" >> "$GITHUB_OUTPUT"
           echo "main-cache=${main_tag}-cache" >> "$GITHUB_OUTPUT"
           echo "sha=$sha_tag" >> "$GITHUB_OUTPUT"
