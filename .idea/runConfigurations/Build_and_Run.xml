@@ -1,10 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Build and Run App" type="docker-deploy" factoryName="dockerfile" server-name="Docker">
-    <deployment type="dockerfile">
+  <configuration default="false" name="Build and Run" type="docker-deploy" factoryName="docker-image" server-name="Docker">
+    <deployment type="docker-image">
       <settings>
         <option name="imageTag" value="mediocre:local" />
-        <option name="buildCliOptions" value="--rm --progress=plain" />
-        <option name="buildKitEnabled" value="true" />
         <option name="containerName" value="mediocre" />
         <option name="portBindings">
           <list>
@@ -14,10 +12,10 @@
             </DockerPortBindingImpl>
           </list>
         </option>
-        <option name="showCommandPreview" value="true" />
-        <option name="sourceFilePath" value="Dockerfile" />
       </settings>
     </deployment>
-    <method v="2" />
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Pull and Retag" run_configuration_type="ShConfigurationType" />
+    </method>
   </configuration>
 </component>
