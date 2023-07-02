@@ -45,14 +45,13 @@ jobs:
         name: Get merge branch
         id: custom-vars
         uses: tonynguyenit18/github-action-custom-vars@v1
-        run: echo "merge-branch=$RECENT_MERGED_BRANCH_NAME" >> "$GITHUB_OUTPUT"
       -
         name: Docker meta parse
         id: tags
         run: |
           export main_tag=${{ fromJSON(steps.meta.outputs.json).tags[0] }}
           export sha_tag=${{ fromJSON(steps.meta.outputs.json).tags[1] }}
-          export fallback_tag=${{ fromJSON(steps.meta.outputs.json).tags[2] || steps.custom-vars.outputs.merge-branch }}
+          export fallback_tag=${{ fromJSON(steps.meta.outputs.json).tags[2] || $RECENT_MERGED_BRANCH_NAME }}
           echo "main=$main_tag" >> "$GITHUB_OUTPUT"
           echo "main-cache=${main_tag}-cache" >> "$GITHUB_OUTPUT"
           echo "sha=$sha_tag" >> "$GITHUB_OUTPUT"
