@@ -14,16 +14,14 @@ Other platforms can skip this step. Windows users must first configure CLion to 
 
 ### Build
 
-This is a little more complicated than I would have liked, but the docker run configurations are a big buggy at the moment.
-1. Edit the `Build and Run` docker run configuration
-   1. In `Before launch` add a reference to the `Docker Build` shell run configuration
-   2. You may need instead to configure an `External tool` to run the shell script via git bash
-2. Run the `Build and Run` docker run configuration to build the latest image as `mediocre:local`
-3. Go to `File > Settings > Build, Execution, Deployment` and add a `Docker` toolchain
+1. Run the `Docker Build with Cache` script run configuration to build the latest image as `mediocre:local`
+   1. This uses registry cache to speed up the initial build (should finish building in a matter of seconds)
+   2. Use this script if there have been any significant changes to the docker image (full rebuilds take about an hour)
+2. Go to `File > Settings > Build, Execution, Deployment` and add a `Docker` toolchain
    1. For image use the previously built `mediocre:local` image
    2. In container settings add `-p 0.0.0.0:50051:50051`
    3. For CMake use `cmake`
-4. Go to the `CMake` tab in the toolbar (usually pinned to the bottom of CLion) and reload the project
+3. Go to the `CMake` tab in the toolbar (usually pinned to the bottom of CLion) and reload the project
 
 ### Run
 

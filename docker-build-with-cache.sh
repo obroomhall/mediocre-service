@@ -1,4 +1,5 @@
 #!/bin/bash
+# Builds the library using registry cache
 
 repo='obroomhall/mediocre'
 branch=$(git branch --show-current)
