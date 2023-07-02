@@ -49,6 +49,7 @@ RUN --mount=type=cache,target=/local/grpc/download \
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/grpc/install/lib/cmake
 
 # install opencv
+# we should be building staticly, but see https://github.com/opencv/opencv/issues/21447#issuecomment-1013088996
 ARG OPENCV_VERSION=4.7.0
 RUN --mount=type=cache,target=/local/opencv/build \
     cd /local/opencv/build \
@@ -67,10 +68,6 @@ RUN --mount=type=cache,target=/local/opencv/build \
     && make -j 4 \
     && make install
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/opencv/install/lib/cmake
-
-# need to point towards opencv shared libraries since cmake strips the rpath at installation, see https://stackoverflow.com/a/22209962/1081679
-# we should be building staticly, but see https://github.com/opencv/opencv/issues/21447#issuecomment-1013088996
-ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/local/opencv/install/lib/
 
 # install leptonica
 ARG LEPTONICA_VERSION=1.83.1
@@ -134,4 +131,4 @@ ENV PATH=$PATH:/local/mediocre/install/bin
 ENTRYPOINT ["mediocre"]
 EXPOSE 50051
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD grpc-client-cli health 127.0.0.1:50051
+  CMD /local/grpc-client-cli/install/grpc-client-cli health 127.0.0.1:50051

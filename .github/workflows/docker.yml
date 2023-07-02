@@ -128,7 +128,9 @@ jobs:
           echo $check_tesseract && [[ $(echo $check_tesseract | jq '.healthy') == 'true' ]]
       -
         name: Stop container
-        run: docker stop mediocre
+        run: |
+          docker logs -f mediocre &
+          docker stop mediocre
       -
         # This doesn't actually build, since the cache was exported in the other docker/build-push-action step
         name: Re-tag and push image

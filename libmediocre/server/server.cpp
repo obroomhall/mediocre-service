@@ -22,7 +22,6 @@ namespace mediocre::server {
         server = builder.BuildAndStart();
         std::cout << "Server started." << std::endl;
 
-        // TODO listen to termination signals
         server->Wait();
     }
 
@@ -50,6 +49,11 @@ namespace mediocre::server {
         }
 
         std::cout << "Registered " << services.size() << " services." << std::endl;
+    }
+
+    void Server::shutdown_server() {
+        std::cout << "Shutting down server." << std::endl;
+        server->Shutdown();
     }
 
 }// namespace mediocre::server
