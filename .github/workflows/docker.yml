@@ -53,14 +53,13 @@ jobs:
           sudo apt install -y jq
           export most_recent_closed_pr_number=$(curl -s https://api.github.com/repos/${REPOSITORY}/pulls?state=closed | jq ".[] | .number" | head -1)
           echo "Last closed PR was: $most_recent_closed_pr_number"
-          echo "number=${most_recent_closed_pr_number}" >> "$GITHUB_OUTPUT"
+          echo "number=$most_recent_closed_pr_number" >> "$GITHUB_OUTPUT"
       -
         name: Docker meta parse
         id: tags
         run: |
           export main_tag=${{ fromJSON(steps.meta.outputs.json).tags[0] }}
           export sha_tag=${{ fromJSON(steps.meta.outputs.json).tags[1] }}
-          echo "${{ github.head_ref }}"
           export fallback_tag=${{ fromJSON(steps.meta.outputs.json).tags[2] || format('{0}:pr-', env.REPOSITORY, steps.last-pr.outputs.number) }}
           echo ${{ format('{0}:pr-', env.REPOSITORY, steps.last-pr.outputs.number) }}
           echo "main=$main_tag" >> "$GITHUB_OUTPUT"
