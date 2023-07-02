@@ -51,7 +51,7 @@ jobs:
         run: |
           export main_tag=${{ fromJSON(steps.meta.outputs.json).tags[0] }}
           export sha_tag=${{ fromJSON(steps.meta.outputs.json).tags[1] }}
-          export fallback_tag=${{ fromJSON(steps.meta.outputs.json).tags[2] || $RECENT_MERGED_BRANCH_NAME }}
+          export fallback_tag=${{ fromJSON(steps.meta.outputs.json).tags[2] || env.RECENT_MERGED_BRANCH_NAME }}
           echo "main=$main_tag" >> "$GITHUB_OUTPUT"
           echo "main-cache=${main_tag}-cache" >> "$GITHUB_OUTPUT"
           echo "sha=$sha_tag" >> "$GITHUB_OUTPUT"
