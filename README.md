@@ -22,9 +22,10 @@ Other platforms can skip this step. Windows users must first configure CLion to 
    2. In container settings add `-p 0.0.0.0:50051:50051`
    3. For CMake use `cmake`
 3. Go to the `CMake` tab in the toolbar (usually pinned to the bottom of CLion) and reload the project
+4. Build using the `mediocre` cmake run configuration (for intellisense)
 
 ### Run
 
-For library source file changes, use the `mediocre` cmake run configuration.
+For library source file changes, run the `mediocre` cmake run configuration.
 
-Otherwise, for docker changes, use the `Build and Run` docker run configuration.
+Otherwise, for docker changes, run the `Build and Run` docker run configuration.
