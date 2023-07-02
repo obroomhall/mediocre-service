@@ -26,6 +26,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       -
+        name: Check out the repo
+        uses: actions/checkout@v3
+      -
         name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
@@ -39,23 +42,26 @@ jobs:
             type=ref,event=branch,priority=6
             type=ref,event=tag,priority=6
             type=ref,event=pr,priority=6
-            type=ref,event=branch,suffix=-cache,priority=5
-            type=ref,event=tag,suffix=-cache,priority=5
-            type=ref,event=pr,suffix=-cache,priority=5
             type=sha,priority=4
-            type=sha,suffix=-cache,priority=3
             type=raw,value=master,priority=2
-            type=raw,value=master,suffix=-cache,priority=1
+      -
+        name: Get merge branch
+        id: custom-vars
+        uses: tonynguyenit18/github-action-custom-vars@v1
       -
         name: Docker meta parse
         id: tags
         run: |
-          echo "main=${{ fromJSON(steps.meta.outputs.json).tags[0] }}" >> "$GITHUB_OUTPUT"
-          echo "main-cache=${{ fromJSON(steps.meta.outputs.json).tags[1] }}" >> "$GITHUB_OUTPUT"
-          echo "sha=${{ fromJSON(steps.meta.outputs.json).tags[2] }}" >> "$GITHUB_OUTPUT"
-          echo "sha-cache=${{ fromJSON(steps.meta.outputs.json).tags[3] }}" >> "$GITHUB_OUTPUT"
-          echo "master=${{ fromJSON(steps.meta.outputs.json).tags[4] || 'obroomhall/mediocre:master' }}" >> "$GITHUB_OUTPUT"
-          echo "master-cache=${{ fromJSON(steps.meta.outputs.json).tags[5] || 'obroomhall/mediocre:master-cache' }}" >> "$GITHUB_OUTPUT"
+          export main_tag=${{ fromJSON(steps.meta.outputs.json).tags[0] }}
+          export sha_tag=${{ fromJSON(steps.meta.outputs.json).tags[1] }}
+          export fallback_tag=${{ fromJSON(steps.meta.outputs.json).tags[2] || env.RECENT_MERGED_BRANCH_NAME }}
+          echo ${{ env.RECENT_MERGED_BRANCH_NAME }}
+          echo "main=$main_tag" >> "$GITHUB_OUTPUT"
+          echo "main-cache=${main_tag}-cache" >> "$GITHUB_OUTPUT"
+          echo "sha=$sha_tag" >> "$GITHUB_OUTPUT"
+          echo "sha-cache=${sha_tag}-cache" >> "$GITHUB_OUTPUT"
+          echo "fallback=$fallback_tag" >> "$GITHUB_OUTPUT"
+          echo "fallback-cache=${fallback_tag}-cache" >> "$GITHUB_OUTPUT"
       -
         name: Docker background pull
         # pre-pulling makes subsequent docker steps faster
@@ -63,10 +69,7 @@ jobs:
         run: |
           docker pull ${{ steps.tags.outputs.sha }} \
             || docker pull ${{ steps.tags.outputs.main }} \
-            || docker pull ${{ steps.tags.outputs.master }} &
-      -
-        name: Check out the repo
-        uses: actions/checkout@v3
+            || docker pull ${{ steps.tags.outputs.fallback }} &
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -90,7 +93,7 @@ jobs:
           cache-from: |
             type=registry,ref=${{ steps.tags.outputs.sha-cache }}
             type=registry,ref=${{ steps.tags.outputs.main-cache }}
-            type=registry,ref=${{ steps.tags.outputs.master-cache }}
+            type=registry,ref=${{ steps.tags.outputs.fallback-cache }}
           cache-to: type=registry,ref=${{ steps.tags.outputs.sha-cache }}
       -
         name: Install testing tools
