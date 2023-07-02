@@ -64,7 +64,7 @@ jobs:
           echo "fallback-cache=${fallback_tag}-cache" >> "$GITHUB_OUTPUT"
 #      -
 #        name: Docker background pull
-#        # pre-pulling makes subsequent docker steps faster?
+#        # pre-pulling makes subsequent docker steps faster
 #        # only pre-pull the most relevant image (fallback if not found)
 #        run: |
 #          docker pull ${{ steps.tags.outputs.sha }} \
