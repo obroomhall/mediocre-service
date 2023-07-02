@@ -2,14 +2,11 @@ name: Docker
 
 on:
   pull_request:
-    paths:
-      - .github/workflows/docker.yml
-      - Dockerfile
-      - CMakeLists.txt
-      - libmediocre/**
-  push:
-    branches:
-      - master
+    types:
+      - opened
+      - synchronize
+      - closed
+      - reopened
     paths:
       - .github/workflows/docker.yml
       - Dockerfile
