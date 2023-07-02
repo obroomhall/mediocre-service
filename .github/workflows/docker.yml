@@ -58,8 +58,8 @@ jobs:
           export sha_tag=${{ fromJSON(steps.meta.outputs.json).tags[1] }}
           echo "${{ github.head_ref }}"
           export most_recent_closed_pr_number=$(curl -s https://api.github.com/repos/${REPOSITORY}/pulls?state=closed | jq ".[] | .number" | head -1)
-          echo $most_recent_closed_pr_number
           export fallback_tag=${{ fromJSON(steps.meta.outputs.json).tags[2] || format('{0}:pr-{1}', env.REPOSITORY, env.most_recent_closed_pr_number) }}
+          echo ${{ env.most_recent_closed_pr_number }}
           echo "main=$main_tag" >> "$GITHUB_OUTPUT"
           echo "main-cache=${main_tag}-cache" >> "$GITHUB_OUTPUT"
           echo "sha=$sha_tag" >> "$GITHUB_OUTPUT"
