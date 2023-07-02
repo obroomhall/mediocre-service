@@ -81,6 +81,11 @@ protobuf_generate(
 
 ## -- install project -- ##
 
-set_target_properties(mediocre PROPERTIES INSTALL_RPATH "\$ORIGIN/../lib")
+# add any path to linked shared libraries here
+set_property(
+        TARGET mediocre
+        PROPERTY INSTALL_RPATH
+        ${OpenCV_INSTALL_PATH}/lib
+)
 
-install(TARGETS mediocre RUNTIME_DEPENDENCIES DIRECTORIES ${OpenCV_INSTALL_PATH}/lib)
+install(TARGETS mediocre)
