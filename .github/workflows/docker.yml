@@ -143,12 +143,7 @@ jobs:
           docker stop mediocre
       - # This doesn't actually build, since the cache was exported in the other docker/build-push-action step
         name: Re-tag and push image
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: Dockerfile
-          tags: ${{ needs.build_push.outputs.main }}
-          labels: ${{ needs.build_push.outputs.labels }}
-          push: true
-          cache-from: type=registry,ref=${{ needs.build_push.outputs.sha-cache }}
-          cache-to: type=registry,ref=${{ needs.build_push.outputs.main-cache }}
+        run: |
+          docker tag ${{ needs.build_push.outputs.sha }} ${{ needs.build_push.outputs.main }}
+          docker push ${{ needs.build_push.outputs.main }}
+#          labels: ${{ needs.build_push.outputs.labels }}
