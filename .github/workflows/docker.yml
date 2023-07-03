@@ -112,7 +112,12 @@ jobs:
         run: curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
       -
         name: Pull updated sha image
-        run: docker pull ${{ needs.build_push.outputs.sha }}
+        run: |
+          ls -lh /var/lib/docker/
+          docker image ls
+          docker pull ${{ needs.build_push.outputs.sha }}
+          ls -lh /var/lib/docker/
+          docker image ls
       -
         name: Start container
         run: |
