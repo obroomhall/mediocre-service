@@ -113,10 +113,10 @@ jobs:
       -
         name: Pull updated sha image
         run: |
-          ls -lh /var/lib/docker/
+          sudo ls -lh /var/lib/docker/
           docker image ls
           docker pull ${{ needs.build_push.outputs.sha }}
-          ls -lh /var/lib/docker/
+          sudo ls -lh /var/lib/docker/
           docker image ls
       -
         name: Start container
