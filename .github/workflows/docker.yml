@@ -113,11 +113,10 @@ jobs:
       -
         name: Pull updated sha image
         run: |
-          sudo ls -lh /var/lib/docker/
-          docker image ls
           docker pull ${{ needs.build_push.outputs.sha }}
-          sudo ls -lh /var/lib/docker/
-          docker image ls
+          sudo ls -lh /var/lib/docker/image
+          sudo ls -lh /var/lib/docker/overlay2
+          docker image inspect ${{ needs.build_push.outputs.sha }}
       -
         name: Start container
         run: |
