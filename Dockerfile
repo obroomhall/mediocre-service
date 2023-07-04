@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:22.04 AS builder
 
 # use bash instead of sh
 SHELL ["/bin/bash", "-c"]
@@ -102,8 +102,7 @@ ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/tesseract/install/lib/cmake
 
 # install tesseract languages
 ARG TESSDATA_VERSION=4.1.0
-ENV TESSDATA_PREFIX=/local/tesseract/install/share/tessdata/
-RUN wget -q -P $TESSDATA_PREFIX https://github.com/tesseract-ocr/tessdata_best/raw/$TESSDATA_VERSION/eng.traineddata
+RUN wget -q -P /local/tesseract/install/share/tessdata/ https://github.com/tesseract-ocr/tessdata_best/raw/$TESSDATA_VERSION/eng.traineddata
 
 # install grpc client cli
 ARG GRPC_CLIENT_CLI_VERSION=1.18.0
@@ -126,6 +125,23 @@ RUN --mount=type=bind,source=libmediocre,target=/local/mediocre/source/libmedioc
     && make -j 4 \
     && make install
 ENV PATH=$PATH:/local/mediocre/install/bin
+
+
+FROM ubuntu:22.04
+
+# install required shared libraries
+RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
+    apt-get update \
+    && apt-get install -y libicu-dev libpango1.0-dev libcairo2-dev libtiff-dev libjpeg-dev
+
+# copy required files/settings from builder
+ENV TESSDATA_PREFIX=/local/tesseract/install/share/tessdata/
+COPY --from=builder $TESSDATA_PREFIX $TESSDATA_PREFIX
+COPY --from=builder /local/grpc-client-cli/install /app/bin
+# see "why can't you just be normal?" meme for why this is necessary
+COPY --from=builder /local/opencv/install/lib/libopencv_imgproc.so.* /local/opencv/install/lib/
+COPY --from=builder /local/mediocre/install /app
+ENV PATH=$PATH:/app/bin
 
 # run mediocre
 ENTRYPOINT ["mediocre"]
