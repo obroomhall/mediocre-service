@@ -21,6 +21,14 @@ RUN mkdir -p /local/cmake && cd "$_" \
     && sh ./download/cmake-linux.sh -- --skip-license --prefix=./install
 ENV PATH=$PATH:/local/cmake/install/bin
 
+# install ninja
+ARG NINJA_VERSION=1.11.1
+RUN mkdir -p /local/ninja && cd "$_" \
+    && mkdir ./download && mkdir ./install \
+    && wget -q -O ./download/source.zip https://github.com/ninja-build/ninja/releases/download/v$NINJA_VERSION/ninja-linux.zip \
+    && unzip ./download/source.zip -d ./install
+ENV PATH=$PATH:/local/ninja/install
+
 # install grpc and protobuf
 ARG GRPC_VERSION=1.55.1
 RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
@@ -39,13 +47,13 @@ RUN --mount=type=cache,target=/local/grpc/download \
             || echo "Tags are equal") \
           && popd) \
         || (git clone --recurse-submodules -b v$GRPC_VERSION --depth 1 --shallow-submodules https://github.com/grpc/grpc ../download/grpc)) \
+    && rm -rf * `# remove old Unix Makefiles cache` \
     && cmake -D gRPC_BUILD_TESTS=OFF \
              -D CMAKE_INSTALL_PREFIX=../install \
+             -G Ninja \
              -S ../download/grpc \
              -B . \
-    && cmake --build . \
-    && make -j 4 \
-    && make install
+    && ninja install
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/grpc/install/lib/cmake
 
 # install opencv
@@ -56,17 +64,17 @@ RUN --mount=type=cache,target=/local/opencv/build \
     && mkdir ../download && mkdir ../install \
     && wget -q -O ../download/source.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSION.zip \
     && unzip ../download/source.zip -d ../download \
+    && rm -rf * `# remove old Unix Makefiles cache` \
     && cmake -D CMAKE_INSTALL_PREFIX=../install \
              -D BUILD_opencv_highgui=OFF \
              -D WITH_PROTOBUF=ON \
              -D BUILD_PROTOBUF=OFF \
              -D BUILD_TESTS=OFF \
              -D BUILD_PERF_TESTS=OFF \
+             -G Ninja \
              -S ../download/opencv-$OPENCV_VERSION \
              -B . \
-    && cmake --build . \
-    && make -j 4 \
-    && make install
+    && ninja install
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/opencv/install/lib/cmake
 
 # install leptonica
@@ -79,11 +87,12 @@ RUN --mount=type=cache,target=/local/leptonica/build \
     && mkdir ../download && mkdir ../install \
     && wget -q -O ../download/source.zip https://github.com/DanBloomberg/leptonica/archive/refs/tags/$LEPTONICA_VERSION.zip \
     && unzip ../download/source.zip -d ../download \
+    && rm -rf * `# remove old Unix Makefiles cache` \
     && cmake -D CMAKE_INSTALL_PREFIX=../install \
+             -G Ninja \
              -S ../download/leptonica-$LEPTONICA_VERSION \
              -B . \
-    && make -j 4 \
-    && make install
+    && ninja install
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/leptonica/install/lib/cmake
 
 # install tesseract
@@ -93,11 +102,12 @@ RUN --mount=type=cache,target=/local/tesseract/build \
     && mkdir ../download && mkdir ../install \
     && wget -q -O ../download/source.zip https://github.com/tesseract-ocr/tesseract/archive/refs/tags/$TESSERACT_VERSION.zip \
     && unzip ../download/source.zip -d ../download \
+    && rm -rf * `# remove old Unix Makefiles cache` \
     && cmake -D CMAKE_INSTALL_PREFIX=../install \
+             -G Ninja \
              -S ../download/tesseract-$TESSERACT_VERSION \
              -B . \
-    && make -j 4 \
-    && make install
+    && ninja install
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/tesseract/install/lib/cmake
 
 # install tesseract languages
@@ -118,12 +128,12 @@ RUN --mount=type=bind,source=libmediocre,target=/local/mediocre/source/libmedioc
     --mount=type=cache,target=/local/mediocre/build \
     cd /local/mediocre/build \
     && mkdir ../install \
+    && rm -rf * `# remove old Unix Makefiles cache` \
     && cmake -D CMAKE_INSTALL_PREFIX=../install \
+             -G Ninja \
              -S ../source \
              -B . \
-    && cmake --build . \
-    && make -j 4 \
-    && make install
+    && ninja install
 ENV PATH=$PATH:/local/mediocre/install/bin
 
 
