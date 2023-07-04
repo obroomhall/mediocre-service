@@ -4,12 +4,12 @@ FROM ubuntu:22.04
 SHELL ["/bin/bash", "-c"]
 
 # installation tools
-RUN --mount=type=cache,target=/var/cache/apt \
+RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     apt-get update \
     && apt-get install -y wget git unzip
 
 # install build tools and debugger
-RUN --mount=type=cache,target=/var/cache/apt \
+RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     apt-get update \
     && apt-get install -y build-essential gdb
 
@@ -23,7 +23,7 @@ ENV PATH=$PATH:/local/cmake/install/bin
 
 # install grpc and protobuf
 ARG GRPC_VERSION=1.55.1
-RUN --mount=type=cache,target=/var/cache/apt \
+RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     apt-get update \
     && apt-get install -y autoconf libtool pkg-config
 RUN --mount=type=cache,target=/local/grpc/download \
@@ -71,7 +71,7 @@ ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/opencv/install/lib/cmake
 
 # install leptonica
 ARG LEPTONICA_VERSION=1.83.1
-RUN --mount=type=cache,target=/var/cache/apt \
+RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     apt-get update \
     && apt-get install -y libicu-dev libpango1.0-dev libcairo2-dev libtiff-dev libjpeg-dev
 RUN --mount=type=cache,target=/local/leptonica/build \
