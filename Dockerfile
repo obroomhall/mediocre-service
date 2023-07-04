@@ -111,7 +111,7 @@ RUN mkdir -p /local/grpc-client-cli && cd "$_" \
     && mkdir ./download && mkdir ./install \
     && wget -q -O ./download/source.tar.gz https://github.com/vadimi/grpc-client-cli/releases/download/v$GRPC_CLIENT_CLI_VERSION/grpc-client-cli_linux_x86_64.tar.gz \
     && tar -xzf ./download/source.tar.gz -C ./install
-ENV PATH=$PATH:/local/grpc-client-cli/install/bin
+ENV PATH=$PATH:/local/grpc-client-cli/install
 
 # install mediocre
 RUN --mount=type=bind,source=libmediocre,target=/local/mediocre/source/libmediocre \
@@ -131,4 +131,4 @@ ENV PATH=$PATH:/local/mediocre/install/bin
 ENTRYPOINT ["mediocre"]
 EXPOSE 50051
 HEALTHCHECK --interval=30s --timeout=3s \
-  CMD /local/grpc-client-cli/install/grpc-client-cli health 127.0.0.1:50051
+  CMD grpc-client-cli health 127.0.0.1:50051
