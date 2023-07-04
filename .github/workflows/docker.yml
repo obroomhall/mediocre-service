@@ -150,9 +150,9 @@ jobs:
         run: |
           docker logs -f mediocre &
           docker stop mediocre
-      - # This doesn't actually build, since the cache was exported in the other docker/build-push-action step
-        name: Re-tag and push image
-        run: |
-          docker tag ${{ needs.build_push.outputs.sha }} ${{ needs.build_push.outputs.main }}
-          docker push ${{ needs.build_push.outputs.main }}
-#          labels: ${{ needs.build_push.outputs.labels }}
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      -
+        name: Re-tag image
+        run: docker buildx imagetools create --tag ${{ needs.build_push.outputs.main }} ${{ needs.build_push.outputs.sha }}
