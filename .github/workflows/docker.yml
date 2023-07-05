@@ -154,5 +154,7 @@ jobs:
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       -
-        name: Re-tag image
-        run: docker buildx imagetools create --tag ${{ needs.build_push.outputs.main }} ${{ needs.build_push.outputs.sha }}
+        name: Re-tag image and cache
+        run: |
+          docker buildx imagetools create --tag ${{ needs.build_push.outputs.main-cache }} ${{ needs.build_push.outputs.sha-cache }}
+          docker buildx imagetools create --tag ${{ needs.build_push.outputs.main }} ${{ needs.build_push.outputs.sha }}
