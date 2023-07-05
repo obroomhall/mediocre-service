@@ -47,7 +47,6 @@ RUN --mount=type=cache,target=/local/grpc/download \
             || echo "Tags are equal") \
           && popd) \
         || (git clone --recurse-submodules -b v$GRPC_VERSION --depth 1 --shallow-submodules https://github.com/grpc/grpc ../download/grpc)) \
-    && rm -rf * `# remove old Unix Makefiles cache` \
     && cmake -D gRPC_BUILD_TESTS=OFF \
              -D CMAKE_INSTALL_PREFIX=../install \
              -G Ninja \
@@ -64,7 +63,6 @@ RUN --mount=type=cache,target=/local/opencv/build \
     && mkdir ../download && mkdir ../install \
     && wget -q -O ../download/source.zip https://github.com/opencv/opencv/archive/$OPENCV_VERSION.zip \
     && unzip ../download/source.zip -d ../download \
-    && rm -rf * `# remove old Unix Makefiles cache` \
     && cmake -D CMAKE_INSTALL_PREFIX=../install \
              -D BUILD_opencv_highgui=OFF \
              -D WITH_PROTOBUF=ON \
@@ -87,7 +85,6 @@ RUN --mount=type=cache,target=/local/leptonica/build \
     && mkdir ../download && mkdir ../install \
     && wget -q -O ../download/source.zip https://github.com/DanBloomberg/leptonica/archive/refs/tags/$LEPTONICA_VERSION.zip \
     && unzip ../download/source.zip -d ../download \
-    && rm -rf * `# remove old Unix Makefiles cache` \
     && cmake -D CMAKE_INSTALL_PREFIX=../install \
              -G Ninja \
              -S ../download/leptonica-$LEPTONICA_VERSION \
@@ -102,7 +99,6 @@ RUN --mount=type=cache,target=/local/tesseract/build \
     && mkdir ../download && mkdir ../install \
     && wget -q -O ../download/source.zip https://github.com/tesseract-ocr/tesseract/archive/refs/tags/$TESSERACT_VERSION.zip \
     && unzip ../download/source.zip -d ../download \
-    && rm -rf * `# remove old Unix Makefiles cache` \
     && cmake -D CMAKE_INSTALL_PREFIX=../install \
              -G Ninja \
              -S ../download/tesseract-$TESSERACT_VERSION \
@@ -128,7 +124,6 @@ RUN --mount=type=bind,source=libmediocre,target=/local/mediocre/source/libmedioc
     --mount=type=cache,target=/local/mediocre/build \
     cd /local/mediocre/build \
     && mkdir ../install \
-    && rm -rf * `# remove old Unix Makefiles cache` \
     && cmake -D CMAKE_INSTALL_PREFIX=../install \
              -G Ninja \
              -S ../source \

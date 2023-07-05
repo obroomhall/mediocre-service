@@ -57,6 +57,7 @@ jobs:
       -
         name: Get most recently closed PR
         id: last-pr
+        if: fromJSON(steps.meta.outputs.json).tags[2] == ''
         run: |
           sudo apt install -y jq
           export most_recent_closed_pr_number=$(curl -s https://api.github.com/repos/${REPOSITORY}/pulls?state=closed | jq ".[] | .number" | head -1)
