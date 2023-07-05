@@ -140,6 +140,7 @@ ENV PATH=$PATH:/local/mediocre/install/bin
 FROM ubuntu:22.04
 
 # install required shared libraries
+# opencv also builds these, can we use those instead?
 RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     apt-get update \
     && apt-get install -y libicu-dev libpango1.0-dev libcairo2-dev libtiff-dev libjpeg-dev
