@@ -11,8 +11,8 @@ add_executable(
         mediocre
         mediocre/main/main.cpp
         mediocre/server/server.cpp
-        mediocre/health/v1/health.cpp
         mediocre/dependency/v1/dependency.cpp
+        grpc/health/v1/health.cpp
 )
 
 # include all hpp files
@@ -21,8 +21,8 @@ target_include_directories(mediocre PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 # list all .proto files here
 add_library(
         proto-objects OBJECT
-        mediocre/health/v1/health.proto
         mediocre/dependency/v1/dependency.proto
+        grpc/health/v1/health.proto
 )
 
 target_link_libraries(mediocre proto-objects)
