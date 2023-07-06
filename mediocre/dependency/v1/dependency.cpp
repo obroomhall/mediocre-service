@@ -10,8 +10,8 @@ namespace mediocre::dependency::v1 {
 
     Status DependencyServiceImpl::CheckOpenCV(
             ServerContext *context,
-            const OpenCVCheckRequest *request,
-            OpenCVCheckResponse *response) {
+            const CheckOpenCVRequest *request,
+            CheckOpenCVResponse *response) {
 
         try {
             std::string version(cv::getVersionString());
@@ -26,8 +26,8 @@ namespace mediocre::dependency::v1 {
 
     Status DependencyServiceImpl::CheckTesseract(
             ServerContext *context,
-            const TesseractCheckRequest *request,
-            TesseractCheckResponse *response) {
+            const CheckTesseractRequest *request,
+            CheckTesseractResponse *response) {
 
         try {
             auto *api = new tesseract::TessBaseAPI();

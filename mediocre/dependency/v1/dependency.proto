@@ -1,26 +1,25 @@
 syntax = "proto3";
 
 package mediocre.dependency.v1;
-option csharp_namespace = "Mediocre.Dependency.v1";
 
-service Dependency {
-  rpc CheckOpenCV(OpenCVCheckRequest) returns (OpenCVCheckResponse);
-  rpc CheckTesseract(TesseractCheckRequest) returns (TesseractCheckResponse);
+service DependencyService {
+  rpc CheckOpenCV(CheckOpenCVRequest) returns (CheckOpenCVResponse);
+  rpc CheckTesseract(CheckTesseractRequest) returns (CheckTesseractResponse);
 }
 
-message OpenCVCheckRequest {
+message CheckOpenCVRequest {
 }
 
-message OpenCVCheckResponse {
+message CheckOpenCVResponse {
   bool healthy = 1;
   string version = 2;
   string error = 3;
 }
 
-message TesseractCheckRequest {
+message CheckTesseractRequest {
 }
 
-message TesseractCheckResponse {
+message CheckTesseractResponse {
   bool healthy = 1;
   string leptonica_version = 2;
   string error = 3;
