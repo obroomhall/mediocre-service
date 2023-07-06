@@ -1,7 +1,7 @@
 #include <csignal>
 #include <cstdlib>
-#include <libmediocre/main/main.hpp>
-#include <libmediocre/server/server.hpp>
+#include <mediocre/main/main.hpp>
+#include <mediocre/server/server.hpp>
 #include <thread>
 
 static auto server = mediocre::server::Server(50051);

@@ -1,8 +1,8 @@
 #include <csignal>
 #include <grpcpp/ext/proto_server_reflection_plugin.h>
-#include <libmediocre/dependency/v1/dependency.hpp>
-#include <libmediocre/health/v1/health.hpp>
-#include <libmediocre/server/server.hpp>
+#include <mediocre/dependency/v1/dependency.hpp>
+#include <mediocre/health/v1/health.hpp>
+#include <mediocre/server/server.hpp>
 
 namespace mediocre::server {
 

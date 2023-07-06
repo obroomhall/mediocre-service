@@ -9,10 +9,10 @@ set(CMAKE_CXX_STANDARD 17)
 # list all cpp files here
 add_executable(
         mediocre
-        libmediocre/main/main.cpp
-        libmediocre/server/server.cpp
-        libmediocre/health/v1/health.cpp
-        libmediocre/dependency/v1/dependency.cpp
+        mediocre/main/main.cpp
+        mediocre/server/server.cpp
+        mediocre/health/v1/health.cpp
+        mediocre/dependency/v1/dependency.cpp
 )
 
 # include all hpp files
@@ -21,8 +21,8 @@ target_include_directories(mediocre PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 # list all .proto files here
 add_library(
         proto-objects OBJECT
-        libmediocre/health/v1/health.proto
-        libmediocre/dependency/v1/dependency.proto
+        mediocre/health/v1/health.proto
+        mediocre/dependency/v1/dependency.proto
 )
 
 target_link_libraries(mediocre proto-objects)

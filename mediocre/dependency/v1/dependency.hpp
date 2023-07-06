@@ -1,7 +1,7 @@
 #ifndef mediocre_dependency_v1_h
 #define mediocre_dependency_v1_h
 
-#include <libmediocre/dependency/v1/dependency.grpc.pb.h>
+#include <mediocre/dependency/v1/dependency.grpc.pb.h>
 
 namespace mediocre::dependency::v1 {
 

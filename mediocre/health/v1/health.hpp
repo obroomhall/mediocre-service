@@ -1,7 +1,7 @@
 #ifndef mediocre_health_v1_h
 #define mediocre_health_v1_h
 
-#include <libmediocre/health/v1/health.grpc.pb.h>
+#include <mediocre/health/v1/health.grpc.pb.h>
 
 namespace grpc::health::v1 {
 

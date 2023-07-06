@@ -1,4 +1,4 @@
-#include <libmediocre/health/v1/health.hpp>
+#include <mediocre/health/v1/health.hpp>
 
 namespace grpc::health::v1 {
 

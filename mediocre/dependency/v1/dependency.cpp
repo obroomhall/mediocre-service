@@ -1,5 +1,5 @@
 #include <leptonica/allheaders.h>
-#include <libmediocre/dependency/v1/dependency.hpp>
+#include <mediocre/dependency/v1/dependency.hpp>
 #include <opencv2/opencv.hpp>
 #include <tesseract/baseapi.h>
 
