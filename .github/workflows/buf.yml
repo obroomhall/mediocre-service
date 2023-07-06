@@ -1,0 +1,34 @@
+name: Docker
+
+on:
+  pull_request:
+    paths:
+      - "**/*.proto"
+  push:
+    branches:
+      - master
+    paths:
+      - "**/*.proto"
+
+jobs:
+  buf:
+    name: Lint, breaking and push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: bufbuild/buf-setup-action@v1
+        with:
+          github_token: ${{ github.token }}
+      - uses: bufbuild/buf-lint-action@v1
+      - uses: bufbuild/buf-breaking-action@v1
+        if: github.event_name == 'pull_request'
+        with:
+          against: "https://github.com/obroomhall/mediocre.git#branch=master"
+      - uses: bufbuild/buf-breaking-action@v1
+        if: github.event_name == 'push'
+        with:
+          against: "https://github.com/obroomhall/mediocre.git#branch=master,ref=HEAD~1"
+      - uses: bufbuild/buf-push-action@v1
+        if: github.event_name == 'push'
+        with:
+          buf_token: ${{ secrets.BUF_TOKEN }}
