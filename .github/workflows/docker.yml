@@ -6,7 +6,7 @@ on:
       - .github/workflows/docker.yml
       - Dockerfile
       - CMakeLists.txt
-      - libmediocre/**
+      - mediocre/**
   push:
     branches:
       - master
@@ -14,7 +14,7 @@ on:
       - .github/workflows/docker.yml
       - Dockerfile
       - CMakeLists.txt
-      - libmediocre/**
+      - mediocre/**
   release:
     types:
       - "published"

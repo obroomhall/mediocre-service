@@ -119,7 +119,8 @@ RUN mkdir -p /local/grpc-client-cli && cd "$_" \
 ENV PATH=$PATH:/local/grpc-client-cli/install
 
 # install mediocre
-RUN --mount=type=bind,source=libmediocre,target=/local/mediocre/source/libmediocre \
+RUN --mount=type=bind,source=mediocre,target=/local/mediocre/source/mediocre \
+    --mount=type=bind,source=grpc,target=/local/mediocre/source/grpc \
     --mount=type=bind,source=CMakeLists.txt,target=/local/mediocre/source/CMakeLists.txt \
     --mount=type=cache,target=/local/mediocre/build \
     cd /local/mediocre/build \

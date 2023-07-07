@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package mediocre.dependency.v1;
+
+service DependencyService {
+  rpc CheckOpenCV(CheckOpenCVRequest) returns (CheckOpenCVResponse);
+  rpc CheckTesseract(CheckTesseractRequest) returns (CheckTesseractResponse);
+}
+
+message CheckOpenCVRequest {
+}
+
+message CheckOpenCVResponse {
+  bool healthy = 1;
+  string version = 2;
+  string error = 3;
+}
+
+message CheckTesseractRequest {
+}
+
+message CheckTesseractResponse {
+  bool healthy = 1;
+  string leptonica_version = 2;
+  string error = 3;
+}

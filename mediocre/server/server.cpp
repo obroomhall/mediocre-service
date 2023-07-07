@@ -1,8 +1,7 @@
 #include <csignal>
 #include <grpcpp/ext/proto_server_reflection_plugin.h>
-#include <libmediocre/dependency/v1/dependency.hpp>
-#include <libmediocre/health/v1/health.hpp>
-#include <libmediocre/server/server.hpp>
+#include <mediocre/dependency/v1/dependency.hpp>
+#include <mediocre/server/server.hpp>
 
 namespace mediocre::server {
 
@@ -13,6 +12,7 @@ namespace mediocre::server {
     void Server::run_server() {
         std::cout << "Building server on " << server_address << "." << std::endl;
 
+        grpc::EnableDefaultHealthCheckService(true);
         grpc::reflection::InitProtoReflectionServerBuilderPlugin();
 
         grpc::ServerBuilder builder;
@@ -39,7 +39,6 @@ namespace mediocre::server {
     void Server::register_services(grpc::ServerBuilder &builder) {
         // Define services.
         std::vector<grpc::Service *> services({
-                new grpc::health::v1::HealthServiceImpl(),
                 new dependency::v1::DependencyServiceImpl(),
         });
 
