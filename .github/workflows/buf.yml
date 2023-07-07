@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - "**/*.proto"
+      - .github/workflows/buf.yml
   push:
     branches:
       - master
     paths:
       - "**/*.proto"
+      - .github/workflows/buf.yml
 
 jobs:
   buf:
@@ -20,15 +22,15 @@ jobs:
         with:
           github_token: ${{ github.token }}
       - uses: bufbuild/buf-lint-action@v1
-#      - uses: bufbuild/buf-breaking-action@v1
-#        if: github.event_name == 'pull_request'
-#        with:
-#          against: "https://github.com/obroomhall/mediocre.git#branch=master"
-#      - uses: bufbuild/buf-breaking-action@v1
-#        if: github.event_name == 'push'
-#        with:
-#          against: "https://github.com/obroomhall/mediocre.git#branch=master,ref=HEAD~1"
-#      - uses: bufbuild/buf-push-action@v1
-#        if: github.event_name == 'push'
-#        with:
-#          buf_token: ${{ secrets.BUF_TOKEN }}
+      - uses: bufbuild/buf-breaking-action@v1
+        if: github.event_name == 'pull_request'
+        with:
+          against: "https://github.com/obroomhall/mediocre.git#branch=master"
+      - uses: bufbuild/buf-breaking-action@v1
+        if: github.event_name == 'push'
+        with:
+          against: "https://github.com/obroomhall/mediocre.git#branch=master,ref=HEAD~1"
+      - uses: bufbuild/buf-push-action@v1
+        if: github.event_name == 'push'
+        with:
+          buf_token: ${{ secrets.BUF_TOKEN }}
