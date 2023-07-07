@@ -5,12 +5,14 @@ on:
     paths:
       - "**/*.proto"
       - .github/workflows/buf.yml
+      - buf.yaml
   push:
     branches:
       - master
     paths:
       - "**/*.proto"
       - .github/workflows/buf.yml
+      - buf.yaml
 
 jobs:
   buf:
