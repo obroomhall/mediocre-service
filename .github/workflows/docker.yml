@@ -99,6 +99,8 @@ jobs:
             type=registry,ref=${{ steps.tags.outputs.main-cache }}
             type=registry,ref=${{ steps.tags.outputs.fallback-cache }}
           cache-to: type=registry,ref=${{ steps.tags.outputs.sha-cache }}
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
 
   test_push:
     name: Test and push image
