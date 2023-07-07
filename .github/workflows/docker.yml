@@ -92,7 +92,9 @@ jobs:
             type=registry,ref=${{ steps.tags.outputs.sha }}-builder-cache
             type=registry,ref=${{ steps.tags.outputs.main }}-builder-cache
             type=registry,ref=${{ steps.tags.outputs.fallback }}-builder-cache
-          cache-to: type=registry,ref=${{ steps.tags.outputs.sha }}-builder-cache
+          cache-to: |
+            type=registry,ref=${{ steps.tags.outputs.sha }}-builder-cache
+            type=registry,ref=${{ steps.tags.outputs.main }}-builder-cache
           target: builder
       -
         name: Build and push sha image
