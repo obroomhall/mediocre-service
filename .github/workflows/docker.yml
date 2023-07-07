@@ -40,6 +40,8 @@ jobs:
         name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
+        env:
+          DOCKER_METADATA_PR_HEAD_SHA: true
         with:
           images: |
             ${{ env.REPOSITORY }}
