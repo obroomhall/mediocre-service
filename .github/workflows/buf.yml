@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - "**/*.proto"
+      - .github/workflows/buf.yml
   push:
     branches:
       - master
     paths:
       - "**/*.proto"
+      - .github/workflows/buf.yml
 
 jobs:
   buf:
