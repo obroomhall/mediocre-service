@@ -31,9 +31,7 @@ jobs:
     outputs:
       labels: ${{ steps.meta.outputs.labels }}
       main: ${{ steps.tags.outputs.main }}
-      main-cache: ${{ steps.tags.outputs.main-cache }}
       sha: ${{ steps.tags.outputs.sha }}
-      sha-cache: ${{ steps.tags.outputs.sha-cache }}
     steps:
       -
         name: Check out the repo
@@ -42,6 +40,8 @@ jobs:
         name: Docker meta
         id: meta
         uses: docker/metadata-action@v4
+        env:
+          DOCKER_METADATA_PR_HEAD_SHA: true
         with:
           images: |
             ${{ env.REPOSITORY }}
@@ -67,15 +67,9 @@ jobs:
         name: Docker meta parse
         id: tags
         run: |
-          export main_tag=${{ fromJSON(steps.meta.outputs.json).tags[0] }}
-          export sha_tag=${{ fromJSON(steps.meta.outputs.json).tags[1] }}
-          export fallback_tag=${{ fromJSON(steps.meta.outputs.json).tags[2] || format('{0}:pr-{1}', env.REPOSITORY, steps.last-pr.outputs.number) }}
-          echo "main=$main_tag" >> "$GITHUB_OUTPUT"
-          echo "main-cache=${main_tag}-cache" >> "$GITHUB_OUTPUT"
-          echo "sha=$sha_tag" >> "$GITHUB_OUTPUT"
-          echo "sha-cache=${sha_tag}-cache" >> "$GITHUB_OUTPUT"
-          echo "fallback=$fallback_tag" >> "$GITHUB_OUTPUT"
-          echo "fallback-cache=${fallback_tag}-cache" >> "$GITHUB_OUTPUT"
+          echo "main=${{ fromJSON(steps.meta.outputs.json).tags[0] }}" >> "$GITHUB_OUTPUT"
+          echo "sha=${{ fromJSON(steps.meta.outputs.json).tags[1] }}" >> "$GITHUB_OUTPUT"
+          echo "fallback=${{ fromJSON(steps.meta.outputs.json).tags[2] || format('{0}:pr-{1}', env.REPOSITORY, steps.last-pr.outputs.number) }}" >> "$GITHUB_OUTPUT"
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -86,6 +80,23 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       -
+        name: Build and push sha image builder
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          file: Dockerfile
+          tags: ${{ steps.tags.outputs.sha }}-builder
+          labels: ${{ steps.meta-sha.outputs.labels }}
+          push: true
+          cache-from: |
+            type=registry,ref=${{ steps.tags.outputs.sha }}-builder-cache
+            type=registry,ref=${{ steps.tags.outputs.main }}-builder-cache
+            type=registry,ref=${{ steps.tags.outputs.fallback }}-builder-cache
+          cache-to: |
+            type=registry,ref=${{ steps.tags.outputs.sha }}-builder-cache
+            type=registry,ref=${{ steps.tags.outputs.main }}-builder-cache
+          target: builder
+      -
         name: Build and push sha image
         uses: docker/build-push-action@v4
         with:
@@ -95,12 +106,10 @@ jobs:
           labels: ${{ steps.meta-sha.outputs.labels }}
           push: true
           cache-from: |
-            type=registry,ref=${{ steps.tags.outputs.sha-cache }}
-            type=registry,ref=${{ steps.tags.outputs.main-cache }}
-            type=registry,ref=${{ steps.tags.outputs.fallback-cache }}
-          cache-to: type=registry,ref=${{ steps.tags.outputs.sha-cache }}
-          build-args: |
-            BUILDKIT_INLINE_CACHE=1
+            type=registry,ref=${{ steps.tags.outputs.sha }}-cache
+            type=registry,ref=${{ steps.tags.outputs.main }}-cache
+            type=registry,ref=${{ steps.tags.outputs.fallback }}-cache
+          cache-to: type=registry,ref=${{ steps.tags.outputs.sha }}-cache
 
   test_push:
     name: Test and push image
@@ -120,11 +129,7 @@ jobs:
         run: curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
       -
         name: Pull updated sha image
-        run: |
-          docker pull ${{ needs.build_push.outputs.sha }}
-          sudo ls -lh /var/lib/docker/image
-          sudo ls -lh /var/lib/docker/overlay2
-          docker image inspect ${{ needs.build_push.outputs.sha }}
+        run: docker pull ${{ needs.build_push.outputs.sha }}
       -
         name: Start container
         run: |
@@ -159,5 +164,5 @@ jobs:
       -
         name: Re-tag image and cache
         run: |
-          docker buildx imagetools create --tag ${{ needs.build_push.outputs.main-cache }} ${{ needs.build_push.outputs.sha-cache }}
+          docker buildx imagetools create --tag ${{ needs.build_push.outputs.main }}-cache ${{ needs.build_push.outputs.sha }}-cache
           docker buildx imagetools create --tag ${{ needs.build_push.outputs.main }} ${{ needs.build_push.outputs.sha }}
