@@ -15,6 +15,7 @@ if [[ $branch != 'master' ]]; then
             --cache-from type=registry,ref=${repo}:master-cache \
             --target builder \
             -t mediocre:local-builder .
+
 else
     docker buildx build \
         --force-rm \
