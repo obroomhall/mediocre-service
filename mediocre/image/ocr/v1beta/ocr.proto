@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package mediocre.image.ocr.v1beta;
+
+service OcrService {
+  rpc GetCharacters(GetCharactersRequest) returns (GetCharactersResponse);
+}
+
+message GetCharactersRequest {
+}
+
+message GetCharactersResponse {
+}

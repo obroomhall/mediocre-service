@@ -12,7 +12,7 @@ add_executable(
         mediocre/main/main.cpp
         mediocre/server/server.cpp
         mediocre/dependency/v1/dependency.cpp
-        libmediocre/functions/ocr/v1/ocr.cpp
+        mediocre/image/ocr/v1beta/ocr.cpp
         grpc/health/v1/health.cpp
 )
 
@@ -23,7 +23,7 @@ target_include_directories(mediocre PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 add_library(
         proto-objects OBJECT
         mediocre/dependency/v1/dependency.proto
-        libmediocre/functions/ocr/v1/ocr.proto
+        mediocre/image/ocr/v1beta/ocr.proto
         grpc/health/v1/health.proto
 )
 
