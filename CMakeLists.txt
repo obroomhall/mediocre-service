@@ -23,6 +23,7 @@ target_include_directories(mediocre PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 add_library(
         proto-objects OBJECT
         mediocre/dependency/v1/dependency.proto
+        mediocre/image/v1beta/image.proto
         mediocre/image/ocr/v1beta/ocr.proto
         grpc/health/v1/health.proto
 )
