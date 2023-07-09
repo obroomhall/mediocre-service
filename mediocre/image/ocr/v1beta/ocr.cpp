@@ -12,6 +12,11 @@ namespace mediocre::image::ocr::v1beta {
             const GetCharactersRequest *request,
             GetCharactersResponse *response) {
 
+        std::ostringstream characters;
+        const image::v1beta::Image& image = request->image();
+        characters << image.height() << "h " << image.width() << "w " << image.image_data().length();
+
+        response->set_characters(characters.str());
 
         return Status::OK;
     }
