@@ -12,13 +12,52 @@ namespace mediocre::image::ocr::v1beta {
             const GetCharactersRequest *request,
             GetCharactersResponse *response) {
 
-        std::ostringstream characters;
-        const image::v1beta::Image& image = request->image();
-        characters << image.height() << "h " << image.width() << "w " << image.image_data().length();
+        const auto& image_data_string = request->image().image_data();
 
-        response->set_characters(characters.str());
+        const auto* image_data = reinterpret_cast<const uint8_t*>(image_data_string.c_str());
+        const auto* characters = GetCharacters(image_data, image_data_string.length());
+
+        response->set_characters(characters);
 
         return Status::OK;
     }
+
+    char* OcrServiceImpl::GetCharacters(const uint8_t* input, size_t length)
+    {
+        // Do we need to initialise on every use?
+        auto *api = new tesseract::TessBaseAPI();
+        if (api->Init(nullptr, "eng")) {
+            fprintf(stderr, "Could not initialize tesseract.\n");
+            exit(1);
+        }
+
+        Pix *image = pixReadMemPng(input, length);
+        api->SetImage(image);
+        char *outText = api->GetUTF8Text();
+
+        api->End();
+        delete api;
+        pixDestroy(&image);
+
+        return outText;
+    }
+
+    void OcrServiceImpl::SaveImage(const uint8_t* input, int32_t length)
+    {
+        auto *api = new tesseract::TessBaseAPI();
+        if (api->Init(nullptr, "eng")) {
+            fprintf(stderr, "Could not initialize tesseract.\n");
+            exit(1);
+        }
+
+        Pix *image = pixReadMemPng(input, length);
+        pixWrite("/tmp/mediocre/out.png", image, pixChooseOutputFormat(image));
+
+        // Destroy used object and release memory
+        api->End();
+        delete api;
+        pixDestroy(&image);
+    }
+    
 
 }// namespace mediocre::image::ocr::v1beta
