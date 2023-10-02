@@ -1,0 +1,5 @@
+﻿# buf.gen.yaml
+version: v1
+plugins:
+  - plugin: buf.build/bufbuild/es:v1.3.1
+    out: ../web/src/proto
