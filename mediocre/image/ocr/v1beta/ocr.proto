@@ -10,6 +10,11 @@ service OcrService {
 
 message GetCharactersRequest {
   image.v1beta.Image image = 1;
+  GetCharactersParams params = 2;
+}
+
+message GetCharactersParams {
+  
 }
 
 message GetCharactersResponse {
