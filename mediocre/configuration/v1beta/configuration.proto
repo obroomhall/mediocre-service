@@ -5,27 +5,35 @@ import "mediocre/image/ocr/v1beta/ocr.proto";
 package mediocre.configuration.v1beta;
 
 message Configuration {
-  repeated Stage stage = 1;
+  string id = 1;
   string name = 2;
+  repeated Stage stage = 3;
 }
 
 message Stage {
-  repeated Zone zone = 1;
+  string id = 1;
   string name = 2;
+  repeated Zone zone = 3;
 }
 
 message Zone {
-  repeated Region region = 1;
+  string id = 1;
   string name = 2;
+  int32 x = 3;
+  int32 y = 4;
+  int32 width = 5;
+  int32 height = 6;
+  repeated Region region = 7;
 }
 
 message Region {
-  int32 x = 1;
-  int32 y = 2;
-  int32 width = 3;
-  int32 height = 4;
-  repeated Transformer transformer = 5;
-  string name = 6;
+  string id = 1;
+  string name = 2;
+  int32 x = 3;
+  int32 y = 4;
+  int32 width = 5;
+  int32 height = 6;
+  repeated Transformer transformer = 7;
 }
 
 message Transformer {
