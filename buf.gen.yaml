@@ -1,7 +1,0 @@
-﻿# buf.gen.yaml
-version: v1
-plugins:
-  - name: ts
-    out: ../web/src/proto
-    strategy: all
-    path: ../web/node_modules/ts-proto/protoc-gen-ts_proto
