@@ -7,8 +7,6 @@ on:
       - .github/workflows/buf.yml
       - buf.yaml
   push:
-    branches:
-      - master
     paths:
       - "**/*.proto"
       - .github/workflows/buf.yml
@@ -25,14 +23,17 @@ jobs:
           github_token: ${{ github.token }}
       - uses: bufbuild/buf-lint-action@v1
       - uses: bufbuild/buf-breaking-action@v1
+        name: Check breaking against the base branch
         if: github.event_name == 'pull_request'
         with:
-          against: "https://github.com/obroomhall/mediocre.git#branch=master"
+          against: https://github.com/obroomhall/mediocre.git#branch=${{ github.base_ref }}
       - uses: bufbuild/buf-breaking-action@v1
-        if: github.event_name == 'push'
+        name: Check breaking against previous master commit
+        if: github.event_name == 'push' && github.ref_name == 'master'
         with:
           against: "https://github.com/obroomhall/mediocre.git#branch=master,ref=HEAD~1"
       - uses: bufbuild/buf-push-action@v1
         if: github.event_name == 'push'
         with:
           buf_token: ${{ secrets.BUF_TOKEN }}
+          draft: ${{ github.ref_name != 'main' }}
