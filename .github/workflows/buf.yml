@@ -36,4 +36,4 @@ jobs:
         if: github.event_name == 'push'
         with:
           buf_token: ${{ secrets.BUF_TOKEN }}
-          draft: ${{ github.ref_name != 'main' }}
+          draft: ${{ github.ref_name != 'master' }}
