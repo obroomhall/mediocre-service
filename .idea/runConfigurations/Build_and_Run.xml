@@ -2,8 +2,8 @@
   <configuration default="false" name="Build and Run" type="docker-deploy" factoryName="dockerfile" server-name="Docker">
     <deployment type="dockerfile">
       <settings>
-        <option name="imageTag" value="mediocre:local-runner" />
-        <option name="buildCliOptions" value="--force-rm --progress plain --cache-from mediocre:local-builder" />
+        <option name="imageTag" value="mediocre:local-release" />
+        <option name="buildCliOptions" value="--force-rm --progress plain --cache-from mediocre:local-develop" />
         <option name="buildKitEnabled" value="true" />
         <option name="containerName" value="mediocre" />
         <option name="portBindings">

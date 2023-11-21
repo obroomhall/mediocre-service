@@ -10,16 +10,16 @@ if [[ $branch != 'master' ]]; then
     docker buildx build \
             --force-rm \
             --progress plain \
-            --cache-from type=registry,ref=${repo}:sha-${sha}-builder-cache \
-            --cache-from type=registry,ref=${repo}:pr-${pr}-builder-cache \
-            --cache-from type=registry,ref=${repo}:master-builder-cache \
-            --target builder \
-            -t mediocre:local-builder .
+            --cache-from type=registry,ref=${repo}:sha-${sha}-develop-cache \
+            --cache-from type=registry,ref=${repo}:pr-${pr}-develop-cache \
+            --cache-from type=registry,ref=${repo}:master-develop-cache \
+            --target develop \
+            -t mediocre:local-develop .
 else
     docker buildx build \
         --force-rm \
         --progress plain \
-        --cache-from type=registry,ref=${repo}:master-builder-cache \
-        --target builder \
-        -t mediocre:local-builder .
+        --cache-from type=registry,ref=${repo}:master-develop-cache \
+        --target develop \
+        -t mediocre:local-develop .
 fi

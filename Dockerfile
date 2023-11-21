@@ -1,4 +1,5 @@
-FROM ubuntu:22.04 AS builder
+ARG UBUNTU_VERSION=22.04
+FROM ubuntu:$UBUNTU_VERSION AS develop
 
 # use bash instead of sh
 SHELL ["/bin/bash", "-c"]
@@ -118,6 +119,9 @@ RUN mkdir -p /local/grpc-client-cli && cd "$_" \
     && tar -xzf ./download/source.tar.gz -C ./install
 ENV PATH=$PATH:/local/grpc-client-cli/install
 
+
+FROM develop AS build
+
 # install mediocre
 RUN --mount=type=bind,source=mediocre,target=/local/mediocre/source/mediocre \
     --mount=type=bind,source=grpc,target=/local/mediocre/source/grpc \
@@ -133,7 +137,7 @@ RUN --mount=type=bind,source=mediocre,target=/local/mediocre/source/mediocre \
 ENV PATH=$PATH:/local/mediocre/install/bin
 
 
-FROM ubuntu:22.04
+FROM ubuntu:$UBUNTU_VERSION AS release
 
 # install required shared libraries
 # opencv also builds these, can we use those instead?
@@ -141,13 +145,14 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     apt-get update \
     && apt-get install -y libicu-dev libpango1.0-dev libcairo2-dev libtiff-dev libjpeg-dev
 
-# copy required files/settings from builder
+# copy required files/settings from build stage
+# TESSDATA_PREFIX is required for tesseract at runtime
 ENV TESSDATA_PREFIX=/local/tesseract/install/share/tessdata/
-COPY --from=builder $TESSDATA_PREFIX $TESSDATA_PREFIX
-COPY --from=builder /local/grpc-client-cli/install /app/bin
+COPY --from=build $TESSDATA_PREFIX $TESSDATA_PREFIX
+COPY --from=build /local/grpc-client-cli/install /app/bin
 # see "why can't you just be normal?" meme for why this is necessary
-COPY --from=builder /local/opencv/install/lib/libopencv_imgproc.so.* /local/opencv/install/lib/
-COPY --from=builder /local/mediocre/install /app
+COPY --from=build /local/opencv/install/lib/libopencv_imgproc.so.* /local/opencv/install/lib/
+COPY --from=build /local/mediocre/install /app
 ENV PATH=$PATH:/app/bin
 
 # run mediocre

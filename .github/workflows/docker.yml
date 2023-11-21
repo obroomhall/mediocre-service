@@ -80,22 +80,22 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
       -
-        name: Build and push sha image builder
+        name: Build and push sha image develop
         uses: docker/build-push-action@v4
         with:
           context: .
           file: Dockerfile
-          tags: ${{ steps.tags.outputs.sha }}-builder
+          tags: ${{ steps.tags.outputs.sha }}-develop
           labels: ${{ steps.meta-sha.outputs.labels }}
           push: true
           cache-from: |
-            type=registry,ref=${{ steps.tags.outputs.sha }}-builder-cache
-            type=registry,ref=${{ steps.tags.outputs.main }}-builder-cache
-            type=registry,ref=${{ steps.tags.outputs.fallback }}-builder-cache
+            type=registry,ref=${{ steps.tags.outputs.sha }}-develop-cache
+            type=registry,ref=${{ steps.tags.outputs.main }}-develop-cache
+            type=registry,ref=${{ steps.tags.outputs.fallback }}-develop-cache
           cache-to: |
-            type=registry,ref=${{ steps.tags.outputs.sha }}-builder-cache
-            type=registry,ref=${{ steps.tags.outputs.main }}-builder-cache
-          target: builder
+            type=registry,ref=${{ steps.tags.outputs.sha }}-develop-cache
+            type=registry,ref=${{ steps.tags.outputs.main }}-develop-cache
+          target: develop
       -
         name: Build and push sha image
         uses: docker/build-push-action@v4
