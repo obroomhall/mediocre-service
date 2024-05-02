@@ -81,13 +81,14 @@ instructions below are tailored towards building and running in CLion.
 
 ### Build
 
-1. Run the `Docker Build with Cache` script run configuration to build the latest image as `mediocre:local-builder`
+1. Run the `Docker Toolchain with Cache` script run configuration to build the latest image as `mediocre:local-develop`
    1. This uses registry cache to speed up the initial build (should finish building in a matter of seconds)
    2. Use this script if there have been any significant changes to the docker image (full rebuilds take about an hour)
 2. Go to `File > Settings > Build, Execution, Deployment` and add a `Docker` toolchain
-   1. For image use the previously built `mediocre:local-builder` image
+   1. For image use the previously built `mediocre:local-develop` image
    2. In container settings add `-p 0.0.0.0:50051:50051`
    3. For CMake use `cmake`
+   4. For debugger, use `\local\gdb\install\bin\gdb`
 3. Build the protobuf files using the `proto-objects` cmake run configuration
 
 ### Run
