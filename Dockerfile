@@ -1,4 +1,4 @@
-ARG UBUNTU_VERSION=22.04
+ARG UBUNTU_VERSION=24.04
 FROM ubuntu:$UBUNTU_VERSION AS develop
 
 # use bash instead of sh
@@ -9,13 +9,28 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     apt-get update \
     && apt-get install -y wget git unzip
 
-# install build tools and debugger
+# install build tools
 RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     apt-get update \
-    && apt-get install -y build-essential gdb
+    && apt-get install -y build-essential
+
+# install gdb (CLion does not yet support >14.1)
+ARG GDB_VERSION=14.1
+RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
+    apt-get update \
+    && apt-get install -y libgmp-dev libmpfr-dev texinfo
+RUN --mount=type=cache,target=/local/gdb/build \
+    cd /local/gdb/build \
+    && mkdir ../download && mkdir ../install \
+    && wget -q -O ../download/source.tar.gz https://ftp.gnu.org/gnu/gdb/gdb-$GDB_VERSION.tar.gz \
+    && tar -xvzf ../download/source.tar.gz \
+    && sh ./gdb-$GDB_VERSION/configure --prefix=/local/gdb/install \
+    && make -j4 && make install
+ENV PATH=$PATH:/local/gdb/install/bin
 
 # install cmake
-ARG CMAKE_VERSION=3.25.3
+# check support in Clion > Build, Execution, Deployment > Toolchains before upgrading cmake
+ARG CMAKE_VERSION=3.28.4
 RUN mkdir -p /local/cmake && cd "$_" \
     && mkdir ./download && mkdir ./install \
     && wget -q -O ./download/cmake-linux.sh https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION\-linux-x86_64.sh \
@@ -23,7 +38,7 @@ RUN mkdir -p /local/cmake && cd "$_" \
 ENV PATH=$PATH:/local/cmake/install/bin
 
 # install ninja
-ARG NINJA_VERSION=1.11.1
+ARG NINJA_VERSION=1.12.0
 RUN mkdir -p /local/ninja && cd "$_" \
     && mkdir ./download && mkdir ./install \
     && wget -q -O ./download/source.zip https://github.com/ninja-build/ninja/releases/download/v$NINJA_VERSION/ninja-linux.zip \
@@ -31,7 +46,7 @@ RUN mkdir -p /local/ninja && cd "$_" \
 ENV PATH=$PATH:/local/ninja/install
 
 # install grpc and protobuf
-ARG GRPC_VERSION=1.55.1
+ARG GRPC_VERSION=1.63.0
 RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     apt-get update \
     && apt-get install -y autoconf libtool pkg-config
@@ -58,7 +73,7 @@ ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/grpc/install/lib/cmake
 
 # install opencv
 # we should be building staticly, but see https://github.com/opencv/opencv/issues/21447#issuecomment-1013088996
-ARG OPENCV_VERSION=4.7.0
+ARG OPENCV_VERSION=4.9.0
 RUN --mount=type=cache,target=/local/opencv/build \
     cd /local/opencv/build \
     && mkdir ../download && mkdir ../install \
@@ -94,7 +109,7 @@ RUN --mount=type=cache,target=/local/leptonica/build \
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/leptonica/install/lib/cmake
 
 # install tesseract
-ARG TESSERACT_VERSION=5.2.0
+ARG TESSERACT_VERSION=5.3.4
 RUN --mount=type=cache,target=/local/tesseract/build \
     cd /local/tesseract/build \
     && mkdir ../download && mkdir ../install \
@@ -112,7 +127,7 @@ ARG TESSDATA_VERSION=4.1.0
 RUN wget -q -P /local/tesseract/install/share/tessdata/ https://github.com/tesseract-ocr/tessdata_best/raw/$TESSDATA_VERSION/eng.traineddata
 
 # install grpc client cli
-ARG GRPC_CLIENT_CLI_VERSION=1.18.0
+ARG GRPC_CLIENT_CLI_VERSION=1.20.2
 RUN mkdir -p /local/grpc-client-cli && cd "$_" \
     && mkdir ./download && mkdir ./install \
     && wget -q -O ./download/source.tar.gz https://github.com/vadimi/grpc-client-cli/releases/download/v$GRPC_CLIENT_CLI_VERSION/grpc-client-cli_linux_x86_64.tar.gz \
