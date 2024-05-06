@@ -1,0 +1,9 @@
+services:
+  mediocre:
+    image: mediocre:local-release
+    container_name: mediocre
+    pull_policy: build
+    build:
+      dockerfile: ./Dockerfile
+    ports:
+    - 50051:50051
