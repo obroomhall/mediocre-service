@@ -7,3 +7,10 @@ services:
       dockerfile: ./Dockerfile
     ports:
     - 50051:50051
+  mediocre-proxy:
+    image: envoyproxy/envoy:v1.22.0
+    container_name: mediocre-proxy
+    ports:
+      - 50050:50050
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
