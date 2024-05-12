@@ -12,7 +12,7 @@ Key libraries used:
 
 ## Install and Run
 
-### Docker
+### Docker (for insecure non-web requests)
 
 Currently, the best way to run mediocre is via the pre-built docker images, though there are plans to provide 
 executables for various platforms in the future.
@@ -31,6 +31,18 @@ You should expose port `50051` for the gRPC server, for example:
 ```commandline
 docker run -p 50051:50051 --name mediocre obroomhall/mediocre:master
 ```
+
+### Docker (for secure web requests)
+
+The C++ implementation of gRPC 
+[cannot handle gRPC-Web requests directly.](https://github.com/grpc/grpc-web/discussions/1348#discussioncomment-6569324)
+Therefore, if you wish to query mediocre from the web, you must use a proxy which can receive gRPC-Web requests, and
+pass them to mediocre as standard gRPC requests. You can either follow the 
+[documentation for gRPC-Web](https://github.com/grpc/grpc-web), or try the docker-compose setup in [compose.yaml](proxy/compose.yaml):
+
+1. Change to the proxy directory `cd proxy`
+2. Start up the docker containers `docker-compose up -d`
+3. Add [minica.pem](proxy/certificates/minica.pem) to your browsers trusted certificates (or supply your own)
 
 ## Usage
 
