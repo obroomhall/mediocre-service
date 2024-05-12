@@ -1,0 +1,39 @@
+services:
+
+  # Insecure GRPC server
+  mediocre:
+    image: mediocre:local-release
+    container_name: mediocre
+    pull_policy: build
+    build:
+      context: ../
+      dockerfile: Dockerfile
+
+  # Proxies secure web requests to insecure grpc requests
+  proxy:
+    image: mediocre-proxy
+    container_name: mediocre-proxy
+    pull_policy: build
+    build:
+      dockerfile: grpcwebproxy.Dockerfile
+    ports:
+      - 8443:8443
+    environment:
+      - GRPC_SERVER_ADDRESS=mediocre:50051
+      - ALLOWED_ORIGINS=https://localhost:5173
+    volumes:
+      - ./certificates/localhost:/certificates
+    depends_on:
+      - mediocre
+    restart: on-failure:3
+
+  # Generates TLS certificates
+  certs:
+    image: mediocre-certs
+    container_name: mediocre-certs
+    pull_policy: build
+    build:
+      dockerfile: minica.Dockerfile
+    volumes:
+      - ./certificates:/certificates
+    command: --domains localhost
