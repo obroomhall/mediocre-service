@@ -1,4 +1,4 @@
-ARG UBUNTU_VERSION=24.04
+ARG UBUNTU_VERSION=22.04
 FROM ubuntu:$UBUNTU_VERSION AS develop
 
 # use bash instead of sh
@@ -12,21 +12,7 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
 # install build tools
 RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     apt-get update \
-    && apt-get install -y build-essential
-
-# install gdb (CLion does not yet support >14.1)
-ARG GDB_VERSION=14.1
-RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
-    apt-get update \
-    && apt-get install -y libgmp-dev libmpfr-dev texinfo
-RUN --mount=type=cache,target=/local/gdb/build \
-    cd /local/gdb/build \
-    && mkdir ../download && mkdir ../install \
-    && wget -q -O ../download/source.tar.gz https://ftp.gnu.org/gnu/gdb/gdb-$GDB_VERSION.tar.gz \
-    && tar -xvzf ../download/source.tar.gz \
-    && sh ./gdb-$GDB_VERSION/configure --prefix=/local/gdb/install \
-    && make -j4 && make install
-ENV PATH=$PATH:/local/gdb/install/bin
+    && apt-get install -y build-essential gdb
 
 # install cmake
 # check support in Clion > Build, Execution, Deployment > Toolchains before upgrading cmake
