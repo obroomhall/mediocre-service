@@ -5,8 +5,6 @@ command=(
   "--backend_addr=0.0.0.0:8081"
 )
 
-TLS_CERT_PATH=${TLS_CERT_PATH:-/certificates/cert.pem}
-TLS_KEY_PATH=${TLS_KEY_PATH:-/certificates/key.pem}
 if [[ -f $TLS_CERT_PATH && -f $TLS_KEY_PATH ]]; then
   command+=(
     "--server_tls_cert_file=$TLS_CERT_PATH"
