@@ -4,7 +4,7 @@
 #include <mediocre/server/server.hpp>
 #include <thread>
 
-static auto server = mediocre::server::Server(50051);
+static auto server = mediocre::server::Server(8081);
 
 void shutdown() {
     server.shutdown_server();
