@@ -50,9 +50,6 @@ certificates. The general steps are:
 3. Import the root certificate `Import-Certificate -FilePath .\minica.pem -CertStoreLocation cert:\CurrentUser\Root`
 4. Mount the end certificates to your docker container `-v /path/to/your/certs/localhost:/certificates:ro`
 
-They recommend using  and then importing the generated root
-certificate to your machine
-
 ## Usage
 
 ### gRPC Tools
