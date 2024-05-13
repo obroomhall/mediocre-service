@@ -133,7 +133,7 @@ jobs:
       -
         name: Start container
         run: |
-          docker run -d --rm --name mediocre -p 127.0.0.1:80:50051/tcp ${{ needs.build_push.outputs.sha }}
+          docker run -d --rm --name mediocre -p 127.0.0.1:80:8081/tcp ${{ needs.build_push.outputs.sha }}
           export max_retries=20
           export cur_retries=0
           until [[ $(grpc-client-cli health 127.0.0.1:80 | jq -r '.status') == 'SERVING' ]]; do
