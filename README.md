@@ -42,14 +42,6 @@ If you want to connect securely, you must provide valid TLS certificates.
 docker run -p 8081:8081 --name mediocre obroomhall/mediocre:master -v /path/to/your/certs:/certificates:ro
 ```
 
-If you do not have your own TLS certificates, you can generate your own self-signed certificates. You can follow the 
-[Let's Encrypt guide](https://letsencrypt.org/docs/certificates-for-localhost/) for making and trusting your own
-certificates. The general steps are:
-1. Install [minica](https://github.com/jsha/minica)
-2. Generate root and end certificates `minica --domains localhost`
-3. Import the root certificate `Import-Certificate -FilePath .\minica.pem -CertStoreLocation cert:\CurrentUser\Root`
-4. Mount the end certificates to your docker container `-v /path/to/your/certs/localhost:/certificates:ro`
-
 ## Usage
 
 ### gRPC Tools
@@ -104,8 +96,9 @@ instructions below are tailored towards building and running in CLion.
    2. Use this script if there have been any significant changes to the docker image (full rebuilds take about an hour)
 2. Go to `File > Settings > Build, Execution, Deployment` and add a `Docker` toolchain
    1. For image use the previously built `mediocre:local-develop` image
-   2. For CMake use `cmake`
-   3. For debugger, use `\local\gdb\install\bin\gdb`
+   2. For container settings, expose the port mediocre listens on `-p 0.0.0.0:8081:8081 --rm`
+   3. For CMake use `cmake`
+   4. For debugger, use `\local\gdb\install\bin\gdb`
 3. Build the protobuf files using the `proto-objects` cmake run configuration
 
 ### Run
@@ -113,3 +106,16 @@ instructions below are tailored towards building and running in CLion.
 For library source file changes, run the `mediocre` cmake run configuration.
 
 Otherwise, for docker changes, run the `Build and Run` docker run configuration.
+
+### Proxy
+
+You can run the proxy alongside by [downloading the latest release](https://github.com/improbable-eng/grpc-web/releases),
+adding it to your PATH, and then running the `Proxy` run configuration. You can run the proxy with or without TLS certificates.
+
+If you do not have your own TLS certificates, you can generate your own self-signed certificates. You can follow the
+[Let's Encrypt guide](https://letsencrypt.org/docs/certificates-for-localhost/) for making and trusting your own
+certificates. The general steps are:
+1. Install [minica](https://github.com/jsha/minica)
+2. Generate root and end certificates `minica --domains localhost`
+3. Import the root certificate `Import-Certificate -FilePath .\minica.pem -CertStoreLocation cert:\CurrentUser\Root`
+4. Mount the end certificates to your docker container `-v /path/to/your/certs/localhost:/certificates:ro`

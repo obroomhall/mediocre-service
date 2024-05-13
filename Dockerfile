@@ -165,11 +165,11 @@ COPY --from=build /local/opencv/install/lib/libopencv_imgproc.so.* /local/opencv
 COPY --from=build /local/mediocre/install /app
 ENV PATH=$PATH:/app/bin
 
-COPY ./scripts/commands.sh /scripts/commands.sh
-RUN ["chmod", "+x", "/scripts/commands.sh"]
+COPY scripts/run-proxy.sh /scripts/run-proxy.sh
+RUN ["chmod", "+x", "/scripts/run-proxy.sh"]
 
 # run mediocre
-ENTRYPOINT ["/scripts/commands.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "mediocre & /scripts/run-proxy.sh"]
 EXPOSE 8080
 EXPOSE 8443
 
