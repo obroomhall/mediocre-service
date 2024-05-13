@@ -165,7 +165,7 @@ COPY --from=build /local/opencv/install/lib/libopencv_imgproc.so.* /local/opencv
 COPY --from=build /local/mediocre/install /app
 ENV PATH=$PATH:/app/bin
 
-COPY ./commands.sh /scripts/commands.sh
+COPY ./scripts/commands.sh /scripts/commands.sh
 RUN ["chmod", "+x", "/scripts/commands.sh"]
 
 # run mediocre
