@@ -42,14 +42,6 @@ If you want to connect securely, you must provide valid TLS certificates.
 docker run -p 8081:8081 --name mediocre obroomhall/mediocre:master -v /path/to/your/certs:/certificates:ro
 ```
 
-If you do not have your own TLS certificates, you can generate your own self-signed certificates. You can follow the 
-[Let's Encrypt guide](https://letsencrypt.org/docs/certificates-for-localhost/) for making and trusting your own
-certificates. The general steps are:
-1. Install [minica](https://github.com/jsha/minica)
-2. Generate root and end certificates `minica --domains localhost`
-3. Import the root certificate `Import-Certificate -FilePath .\minica.pem -CertStoreLocation cert:\CurrentUser\Root`
-4. Mount the end certificates to your docker container `-v /path/to/your/certs/localhost:/certificates:ro`
-
 ## Usage
 
 ### gRPC Tools
@@ -113,7 +105,17 @@ instructions below are tailored towards building and running in CLion.
 
 For library source file changes, run the `mediocre` cmake run configuration.
 
-You can run the proxy alongside by [downloading the latest release](https://github.com/improbable-eng/grpc-web/releases),
-adding it to your PATH, and then running the `Proxy` run configuration.
-
 Otherwise, for docker changes, run the `Build and Run` docker run configuration.
+
+### Proxy
+
+You can run the proxy alongside by [downloading the latest release](https://github.com/improbable-eng/grpc-web/releases),
+adding it to your PATH, and then running the `Proxy` run configuration. You can run the proxy with or without TLS certificates.
+
+If you do not have your own TLS certificates, you can generate your own self-signed certificates. You can follow the
+[Let's Encrypt guide](https://letsencrypt.org/docs/certificates-for-localhost/) for making and trusting your own
+certificates. The general steps are:
+1. Install [minica](https://github.com/jsha/minica)
+2. Generate root and end certificates `minica --domains localhost`
+3. Import the root certificate `Import-Certificate -FilePath .\minica.pem -CertStoreLocation cert:\CurrentUser\Root`
+4. Mount the end certificates to your docker container `-v /path/to/your/certs/localhost:/certificates:ro`
