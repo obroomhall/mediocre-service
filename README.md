@@ -12,7 +12,7 @@ Key libraries used:
 
 ## Install and Run
 
-### Docker (for insecure non-web requests)
+### Docker
 
 Currently, the best way to run mediocre is via the pre-built docker images, though there are plans to provide 
 executables for various platforms in the future.
@@ -26,23 +26,32 @@ Tag convention:
 - `obroomhall/mediocre:*-cache` exist to speed up subsequent builds, these are not runnable
 - There will also be some `vX.Y.Z` tags after the first release
 
-You should expose port `50051` for the gRPC server, for example:
+#### Insecure
+
+You should expose port `8081` for the gRPC server, for example:
 
 ```commandline
-docker run -p 50051:50051 --name mediocre obroomhall/mediocre:master
+docker run -p 8081:8081 --name mediocre obroomhall/mediocre:master
 ```
 
-### Docker (for secure web requests)
+### Secure
 
-The C++ implementation of gRPC 
-[cannot handle gRPC-Web requests directly.](https://github.com/grpc/grpc-web/discussions/1348#discussioncomment-6569324)
-Therefore, if you wish to query mediocre from the web, you must use a proxy which can receive gRPC-Web requests, and
-pass them to mediocre as standard gRPC requests. You can either follow the 
-[documentation for gRPC-Web](https://github.com/grpc/grpc-web), or try the docker-compose setup in [compose.yaml](proxy/compose.yaml):
+If you want to connect securely, you must provide valid TLS certificates.
 
-1. Change to the proxy directory `cd proxy`
-2. Start up the docker containers `docker-compose up -d`
-3. Add [minica.pem](proxy/certificates/minica.pem) to your browsers trusted certificates (or supply your own)
+```commandline
+docker run -p 8081:8081 --name mediocre obroomhall/mediocre:master -v /path/to/your/certs:/certificates:ro
+```
+
+If you do not have your own TLS certificates, you can generate your own self-signed certificates. You can follow the 
+[Let's Encrypt guide](https://letsencrypt.org/docs/certificates-for-localhost/) for making and trusting your own
+certificates. The general steps are:
+1. Install [minica](https://github.com/jsha/minica)
+2. Generate root and end certificates `minica --domains localhost`
+3. Import the root certificate `Import-Certificate -FilePath .\minica.pem -CertStoreLocation cert:\CurrentUser\Root`
+4. Mount the end certificates to your docker container `-v /path/to/your/certs/localhost:/certificates:ro`
+
+They recommend using  and then importing the generated root
+certificate to your machine
 
 ## Usage
 
@@ -98,9 +107,8 @@ instructions below are tailored towards building and running in CLion.
    2. Use this script if there have been any significant changes to the docker image (full rebuilds take about an hour)
 2. Go to `File > Settings > Build, Execution, Deployment` and add a `Docker` toolchain
    1. For image use the previously built `mediocre:local-develop` image
-   2. In container settings add `-p 0.0.0.0:50051:50051`
-   3. For CMake use `cmake`
-   4. For debugger, use `\local\gdb\install\bin\gdb`
+   2. For CMake use `cmake`
+   3. For debugger, use `\local\gdb\install\bin\gdb`
 3. Build the protobuf files using the `proto-objects` cmake run configuration
 
 ### Run
