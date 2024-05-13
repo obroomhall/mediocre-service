@@ -120,6 +120,14 @@ RUN mkdir -p /local/grpc-client-cli && cd "$_" \
     && tar -xzf ./download/source.tar.gz -C ./install
 ENV PATH=$PATH:/local/grpc-client-cli/install
 
+# install grpc web proxy
+ARG GRPC_WEB_PROXY_VERSION=0.15.0
+RUN mkdir -p /local/grpcwebproxy && cd "$_" \
+    && mkdir ./download && mkdir ./install \
+    && wget -q -O ./download/source.zip https://github.com/improbable-eng/grpc-web/releases/download/v$GRPC_WEB_PROXY_VERSION/grpcwebproxy-v$GRPC_WEB_PROXY_VERSION\-linux-x86_64.zip \
+    && unzip ./download/source.zip -d ./download \
+    && cp ./download/dist/grpcwebproxy-v$GRPC_WEB_PROXY_VERSION\-linux-x86_64 ./install/grpcwebproxy
+
 
 FROM develop AS build
 
@@ -151,13 +159,21 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
 ENV TESSDATA_PREFIX=/local/tesseract/install/share/tessdata/
 COPY --from=build $TESSDATA_PREFIX $TESSDATA_PREFIX
 COPY --from=build /local/grpc-client-cli/install /app/bin
+COPY --from=build /local/grpcwebproxy/install /app/bin
 # see "why can't you just be normal?" meme for why this is necessary
 COPY --from=build /local/opencv/install/lib/libopencv_imgproc.so.* /local/opencv/install/lib/
 COPY --from=build /local/mediocre/install /app
 ENV PATH=$PATH:/app/bin
 
+COPY ./commands.sh /scripts/commands.sh
+RUN ["chmod", "+x", "/scripts/commands.sh"]
+
 # run mediocre
-ENTRYPOINT ["mediocre"]
-EXPOSE 50051
-HEALTHCHECK --interval=30s --timeout=3s \
-  CMD grpc-client-cli health 127.0.0.1:50051
+ENTRYPOINT ["/scripts/commands.sh"]
+EXPOSE 8080
+EXPOSE 8443
+
+# wish to use grpcwebproxy for healthchecks, since that would be more accurate given we only expose the proxy ports
+# however, it seems to think that the grpc server is healthy even when it is not serving, or is offline
+HEALTHCHECK --start-period=30s --start-interval=1s --interval=30s --timeout=3s \
+  CMD grpc-client-cli health 0.0.0.0:8081
