@@ -141,7 +141,6 @@ jobs:
               docker inspect -f '{{json .State.Health.Log}}' mediocre
               exit 1;
             fi
-            docker inspect -f '{{.State.Health.Status}}' mediocre
             sleep 0.05
             export cur_retries=$((cur_retries+1))
           done
