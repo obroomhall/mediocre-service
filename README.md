@@ -104,8 +104,9 @@ instructions below are tailored towards building and running in CLion.
    2. Use this script if there have been any significant changes to the docker image (full rebuilds take about an hour)
 2. Go to `File > Settings > Build, Execution, Deployment` and add a `Docker` toolchain
    1. For image use the previously built `mediocre:local-develop` image
-   2. For CMake use `cmake`
-   3. For debugger, use `\local\gdb\install\bin\gdb`
+   2. For container settings, expose the port mediocre listens on `-p 0.0.0.0:8081:8081 --rm`
+   3. For CMake use `cmake`
+   4. For debugger, use `\local\gdb\install\bin\gdb`
 3. Build the protobuf files using the `proto-objects` cmake run configuration
 
 ### Run
