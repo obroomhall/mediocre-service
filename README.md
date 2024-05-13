@@ -113,4 +113,7 @@ instructions below are tailored towards building and running in CLion.
 
 For library source file changes, run the `mediocre` cmake run configuration.
 
+You can run the proxy alongside by [downloading the latest release](https://github.com/improbable-eng/grpc-web/releases),
+adding it to your PATH, and then running the `Proxy` run configuration.
+
 Otherwise, for docker changes, run the `Build and Run` docker run configuration.
