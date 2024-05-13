@@ -142,7 +142,7 @@ jobs:
               exit 1;
             fi
             docker inspect -f '{{.State.Health.Status}}' mediocre
-            sleep 0.5
+            sleep 0.1
             export cur_retries=$((cur_retries+1))
           done
           echo "Container is healthy!"
