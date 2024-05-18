@@ -28,5 +28,11 @@ else
   )
 fi
 
+if [ -n "$MAX_BACKOFF" ]; then
+  command+=(
+    "--backend_backoff_max_delay=$MAX_BACKOFF"
+  )
+fi
+
 echo "> ${command[@]}"
 "${command[@]}"

@@ -14,6 +14,7 @@
     <envs>
       <env name="TLS_CERT_PATH" value=".certs/localhost/cert.pem" />
       <env name="TLS_KEY_PATH" value=".certs/localhost/key.pem" />
+      <env name="MAX_BACKOFF" value="10m0s" />
     </envs>
     <method v="2" />
   </configuration>
