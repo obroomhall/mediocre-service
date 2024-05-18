@@ -4,9 +4,6 @@
 
 namespace mediocre::image::ocr::v1beta {
 
-    using grpc::ServerContext;
-    using grpc::Status;
-
     Status OcrServiceImpl::GetCharacters(
             ServerContext *context,
             const GetCharactersRequest *request,
