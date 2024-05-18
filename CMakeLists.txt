@@ -13,6 +13,7 @@ add_executable(
         mediocre/server/server.cpp
         mediocre/dependency/v1/dependency.cpp
         mediocre/image/ocr/v1beta/ocr.cpp
+        mediocre/image/identity/v1beta/identity.cpp
         grpc/health/v1/health.cpp
 )
 
@@ -25,6 +26,7 @@ add_library(
         mediocre/dependency/v1/dependency.proto
         mediocre/image/v1beta/image.proto
         mediocre/image/ocr/v1beta/ocr.proto
+        mediocre/image/identity/v1beta/identity.proto
         grpc/health/v1/health.proto
 )
 
