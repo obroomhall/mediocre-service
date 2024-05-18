@@ -119,3 +119,13 @@ certificates. The general steps are:
 2. Generate root and end certificates `minica --domains localhost`
 3. Import the root certificate `Import-Certificate -FilePath .\minica.pem -CertStoreLocation cert:\CurrentUser\Root`
 4. Mount the end certificates to your docker container `-v /path/to/your/certs/localhost:/certificates:ro`
+
+### Updating Protobuf Definitions
+
+If you are making changes in this project and a dependent project, such as [mediocre-configure](https://github.com/obroomhall/mediocre-configure),
+you will likely want to use your locally updated protobuf definitions in the dependent project, before committing changes.
+
+Other languages may vary, but to compile for typescript:
+1. In `./@buf/broomy_mediocre.community_timostamm-protobuf-ts` run `npm install && npm link`
+2. In the project root directory run `buf generate`
+3. In the external project run `npm link @buf/broomy_mediocre.community_timostamm-protobuf-ts`

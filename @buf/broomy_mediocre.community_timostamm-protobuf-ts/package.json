@@ -1,0 +1,8 @@
+{
+  "type": "module",
+  "name": "@buf/broomy_mediocre.community_timostamm-protobuf-ts",
+  "peerDependencies": {
+    "@protobuf-ts/runtime": "^2.9.4",
+    "@protobuf-ts/runtime-rpc": "^2.9.4"
+  }
+}
