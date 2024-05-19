@@ -6,12 +6,12 @@ namespace mediocre::image::crop::v1beta {
 
     Status CropServiceImpl::Crop(
             ServerContext *context,
-            const GetCropRequest *request,
-            GetCropResponse *response) {
+            const CropRequest *request,
+            CropResponse *response) {
 
         const auto decoded = image::v1beta::Decode(request->image());
 
-        const auto &crop_params = request->params();
+        const auto &crop_params = request->fixed_params();
         const auto crop_region = cv::Rect(crop_params.x(), crop_params.y(), crop_params.width(), crop_params.height());
 
         const auto cropped = Crop(decoded, crop_region);

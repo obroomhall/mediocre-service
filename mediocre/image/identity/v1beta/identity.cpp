@@ -5,16 +5,16 @@ namespace mediocre::image::identity::v1beta {
 
     Status IdentityServiceImpl::Protobuf(
             ServerContext *context,
-            const GetIdentityRequest *request,
-            GetIdentityResponse *response) {
+            const ProtobufRequest *request,
+            ProtobufResponse *response) {
         CopyImageProtobuf(request->image(), response->mutable_image());
         return Status::OK;
     }
 
     Status IdentityServiceImpl::OpenCV(
             ServerContext *context,
-            const GetIdentityRequest *request,
-            GetIdentityResponse *response) {
+            const OpenCVRequest *request,
+            OpenCVResponse *response) {
         CopyImageOpenCV(request->image(), response->mutable_image());
         return Status::OK;
     }

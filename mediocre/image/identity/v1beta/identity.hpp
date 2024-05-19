@@ -13,12 +13,12 @@ namespace mediocre::image::identity::v1beta {
     public:
         Status Protobuf(
                 ServerContext *context,
-                const GetIdentityRequest *request,
-                GetIdentityResponse *response) override;
+                const ProtobufRequest *request,
+                ProtobufResponse *response) override;
         Status OpenCV(
                 ServerContext *context,
-                const GetIdentityRequest *request,
-                GetIdentityResponse *response) override;
+                const OpenCVRequest *request,
+                OpenCVResponse *response) override;
     private:
         static void CopyImageProtobuf(const Image& image, Image *mutable_image);
         static void CopyImageOpenCV(const Image& image, Image *mutable_image);

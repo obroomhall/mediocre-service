@@ -5,21 +5,21 @@ import "mediocre/image/v1beta/image.proto";
 package mediocre.image.crop.v1beta;
 
 service CropService {
-  rpc Crop(GetCropRequest) returns (GetCropResponse);
+  rpc Crop(CropRequest) returns (CropResponse);
 }
 
-message GetCropRequest {
+message CropRequest {
   image.v1beta.Image image = 1;
-  GetCropParams params = 2;
+  FixedCropParams fixed_params = 2;
 }
 
-message GetCropParams {
+message FixedCropParams {
   int32 x = 1;
   int32 y = 2;
   int32 width = 3;
   int32 height = 4;
 }
 
-message GetCropResponse {
+message CropResponse {
   image.v1beta.Image image = 1;
 }

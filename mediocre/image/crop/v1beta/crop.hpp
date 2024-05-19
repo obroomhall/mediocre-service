@@ -14,8 +14,8 @@ namespace mediocre::image::crop::v1beta {
     public:
         Status Crop(
                 ServerContext *context,
-                const GetCropRequest *request,
-                GetCropResponse *response) override;
+                const CropRequest *request,
+                CropResponse *response) override;
     private:
         static cv::Mat Crop(const cv::Mat& input, const cv::Rect& region_of_interest);
     };
