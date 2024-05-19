@@ -1,6 +1,6 @@
-#include <csignal>
 #include <grpcpp/ext/proto_server_reflection_plugin.h>
 #include <mediocre/dependency/v1/dependency.hpp>
+#include <mediocre/image/crop/v1beta/crop.hpp>
 #include <mediocre/image/identity/v1beta/identity.hpp>
 #include <mediocre/image/ocr/v1beta/ocr.hpp>
 #include <mediocre/server/server.hpp>
@@ -44,6 +44,7 @@ namespace mediocre::server {
                 new dependency::v1::DependencyServiceImpl(),
                 new image::ocr::v1beta::OcrServiceImpl(),
                 new image::identity::v1beta::IdentityServiceImpl(),
+                new image::crop::v1beta::CropServiceImpl(),
         });
 
         // Register services.
