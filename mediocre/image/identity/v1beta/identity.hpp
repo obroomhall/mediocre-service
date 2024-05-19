@@ -11,12 +11,17 @@ namespace mediocre::image::identity::v1beta {
 
     class IdentityServiceImpl final : public IdentityService::Service {
     public:
-        Status Identity(
+        Status Protobuf(
+                ServerContext *context,
+                const GetIdentityRequest *request,
+                GetIdentityResponse *response) override;
+        Status OpenCV(
                 ServerContext *context,
                 const GetIdentityRequest *request,
                 GetIdentityResponse *response) override;
     private:
-        static void CopyImage(const Image *image, Image *mutableImage);
+        static void CopyImageProtobuf(const Image& image, Image *mutable_image);
+        static void CopyImageOpenCV(const Image& image, Image *mutable_image);
     };
 
 }// namespace mediocre::image::identity::v1beta

@@ -15,6 +15,7 @@ add_executable(
         mediocre/image/ocr/v1beta/ocr.cpp
         mediocre/image/identity/v1beta/identity.cpp
         grpc/health/v1/health.cpp
+        mediocre/image/v1beta/image.cpp
 )
 
 # include all hpp files
