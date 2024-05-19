@@ -1,6 +1,6 @@
-#include <mediocre/image/v1beta/image.hpp>
 #include <leptonica/allheaders.h>
 #include <mediocre/image/ocr/v1beta/ocr.hpp>
+#include <mediocre/image/v1beta/image.hpp>
 #include <opencv2/core/mat.hpp>
 #include <tesseract/baseapi.h>
 

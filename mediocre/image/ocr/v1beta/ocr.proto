@@ -14,7 +14,7 @@ message GetCharactersRequest {
 }
 
 message GetCharactersParams {
-  
+
 }
 
 message GetCharactersResponse {

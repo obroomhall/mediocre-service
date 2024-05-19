@@ -22,7 +22,7 @@ namespace mediocre::image::v1beta {
     std::string Encode(const cv::Mat &mat) {
         std::vector<uchar> buffer;
         cv::imencode(".png", mat, buffer);
-        return { buffer.begin(), buffer.end() };
+        return {buffer.begin(), buffer.end()};
     }
 
     void Encode(const cv::Mat &mat, Image *image) {
@@ -32,4 +32,4 @@ namespace mediocre::image::v1beta {
         image->set_image_data(encoded);
     }
 
-} // namespace mediocre::image::v1beta
+}// namespace mediocre::image::v1beta

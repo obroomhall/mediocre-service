@@ -19,9 +19,10 @@ namespace mediocre::image::identity::v1beta {
                 ServerContext *context,
                 const OpenCVRequest *request,
                 OpenCVResponse *response) override;
+
     private:
-        static void CopyImageProtobuf(const Image& image, Image *mutable_image);
-        static void CopyImageOpenCV(const Image& image, Image *mutable_image);
+        static void CopyImageProtobuf(const Image &image, Image *mutable_image);
+        static void CopyImageOpenCV(const Image &image, Image *mutable_image);
     };
 
 }// namespace mediocre::image::identity::v1beta

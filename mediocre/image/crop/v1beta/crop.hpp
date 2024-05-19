@@ -16,10 +16,11 @@ namespace mediocre::image::crop::v1beta {
                 ServerContext *context,
                 const CropRequest *request,
                 CropResponse *response) override;
+
     private:
-        static cv::Mat Crop(const cv::Mat& input, const cv::Rect& region_of_interest);
+        static cv::Mat Crop(const cv::Mat &input, const cv::Rect &region_of_interest);
     };
 
-} // namespace mediocre::image::crop::v1beta
+}// namespace mediocre::image::crop::v1beta
 
-#endif // mediocre_image_crop_v1beta_h
+#endif// mediocre_image_crop_v1beta_h

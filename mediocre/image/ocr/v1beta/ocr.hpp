@@ -15,8 +15,9 @@ namespace mediocre::image::ocr::v1beta {
                 ServerContext *context,
                 const GetCharactersRequest *request,
                 GetCharactersResponse *response) override;
+
     private:
-        static const char* GetCharacters(const cv::Mat& input);
+        static const char *GetCharacters(const cv::Mat &input);
     };
 
 }// namespace mediocre::image::ocr::v1beta

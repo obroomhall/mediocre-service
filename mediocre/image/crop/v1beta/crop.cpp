@@ -20,8 +20,8 @@ namespace mediocre::image::crop::v1beta {
         return Status::OK;
     }
 
-    cv::Mat CropServiceImpl::Crop(const cv::Mat& input, const cv::Rect& region_of_interest) {
+    cv::Mat CropServiceImpl::Crop(const cv::Mat &input, const cv::Rect &region_of_interest) {
         return input(region_of_interest);
     }
 
-} // namespace mediocre::image::ocr::v1beta
+}// namespace mediocre::image::crop::v1beta

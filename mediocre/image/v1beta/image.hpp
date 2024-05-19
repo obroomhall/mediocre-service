@@ -6,10 +6,10 @@
 
 namespace mediocre::image::v1beta {
 
-    cv::Mat Decode(const Image& image);
-    void Encode(const cv::Mat& mat, Image* image);
+    cv::Mat Decode(const Image &image);
+    void Encode(const cv::Mat &mat, Image *image);
 
-} // namespace mediocre::image::v1beta
+}// namespace mediocre::image::v1beta
 
 
-#endif //mediocre_image_v1beta_h
+#endif//mediocre_image_v1beta_h
