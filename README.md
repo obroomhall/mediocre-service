@@ -126,6 +126,6 @@ If you are making changes in this project and a dependent project, such as [medi
 you will likely want to use your locally updated protobuf definitions in the dependent project, before committing changes.
 
 Other languages may vary, but to compile for typescript:
-1. In `./@buf/broomy_mediocre.community_timostamm-protobuf-ts` run `npm install && npm link`
-2. In the project root directory run `buf generate`
-3. In the external project run `npm link @buf/broomy_mediocre.community_timostamm-protobuf-ts`
+1. In `./@buf/typescript` run `npm install && npm link`
+2. In the external project run `npm link @buf/broomy_mediocre.community_timostamm-protobuf-ts`
+3. Each time a protobuf definition changes, run `buf generate` in the project root directory
