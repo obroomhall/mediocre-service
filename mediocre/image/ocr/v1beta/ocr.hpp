@@ -2,7 +2,7 @@
 #define mediocre_image_ocr_v1beta_h
 
 #include <mediocre/image/ocr/v1beta/ocr.grpc.pb.h>
-#include <tesseract/baseapi.h>
+#include <opencv2/core/mat.hpp>
 
 namespace mediocre::image::ocr::v1beta {
 
@@ -16,8 +16,7 @@ namespace mediocre::image::ocr::v1beta {
                 const GetCharactersRequest *request,
                 GetCharactersResponse *response) override;
     private:
-        static char* GetCharacters(const uint8_t* input, size_t length);
-        static void SaveImage(const uint8_t *input, int32_t length);
+        static const char* GetCharacters(const cv::Mat& input);
     };
 
 }// namespace mediocre::image::ocr::v1beta

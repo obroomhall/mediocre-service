@@ -1,5 +1,7 @@
+#include <mediocre/image/v1beta/image.hpp>
 #include <leptonica/allheaders.h>
 #include <mediocre/image/ocr/v1beta/ocr.hpp>
+#include <opencv2/core/mat.hpp>
 #include <tesseract/baseapi.h>
 
 namespace mediocre::image::ocr::v1beta {
@@ -9,52 +11,36 @@ namespace mediocre::image::ocr::v1beta {
             const GetCharactersRequest *request,
             GetCharactersResponse *response) {
 
-        const auto& image_data_string = request->image().image_data();
-
-        const auto* image_data = reinterpret_cast<const uint8_t*>(image_data_string.c_str());
-        const auto* characters = GetCharacters(image_data, image_data_string.length());
+        const auto decoded = image::v1beta::Decode(request->image());
+        const auto *characters = GetCharacters(decoded);
 
         response->set_characters(characters);
 
         return Status::OK;
     }
 
-    char* OcrServiceImpl::GetCharacters(const uint8_t* input, size_t length)
-    {
+    // it's worth consulting the opencv-tesseract wrapper
+    // https://github.com/opencv/opencv_contrib/blob/4.x/modules/text/src/ocr_tesseract.cpp
+    // should we use that as well / instead?
+
+    const char *OcrServiceImpl::GetCharacters(const cv::Mat &input) {
         // Do we need to initialise on every use?
+        // Potentially, see https://github.com/tesseract-ocr/tesseract/issues/3109#issuecomment-700509450
+        // We may want to initialise a pool of tesseract instances, and then grab from that pool when we want
+        //  to process images
         auto *api = new tesseract::TessBaseAPI();
         if (api->Init(nullptr, "eng")) {
             fprintf(stderr, "Could not initialize tesseract.\n");
             exit(1);
         }
 
-        Pix *image = pixReadMemPng(input, length);
-        api->SetImage(image);
-        char *outText = api->GetUTF8Text();
+        api->SetImage(input.data, input.cols, input.rows, input.channels(), input.step);
+        const auto *outText = api->GetUTF8Text();
 
         api->End();
         delete api;
-        pixDestroy(&image);
 
         return outText;
     }
-
-    void OcrServiceImpl::SaveImage(const uint8_t* input, int32_t length)
-    {
-        auto *api = new tesseract::TessBaseAPI();
-        if (api->Init(nullptr, "eng")) {
-            fprintf(stderr, "Could not initialize tesseract.\n");
-            exit(1);
-        }
-
-        Pix *image = pixReadMemPng(input, length);
-        pixWrite("/tmp/mediocre/out.png", image, pixChooseOutputFormat(image));
-
-        // Destroy used object and release memory
-        api->End();
-        delete api;
-        pixDestroy(&image);
-    }
-    
 
 }// namespace mediocre::image::ocr::v1beta
