@@ -4,19 +4,19 @@
 
 namespace mediocre::image::v1beta {
 
-    cv::Mat Decode(std::string image) {
-        const auto length = static_cast<int>(image.length());
+    cv::Mat Decode(std::string image, int length) {
         const auto encoded = cv::Mat(1, length, CV_8UC1, image.data());
         return cv::imdecode(encoded, cv::IMREAD_UNCHANGED);
     }
 
     cv::Mat Decode(const Image &image) {
-        const auto &image_data_string = image.image_data();
-        if (image_data_string.length() > INT_MAX) {
+        const auto &blob = image.blob().data();
+        if (blob.length() > INT_MAX) {
             throw std::invalid_argument("Image was too large");
         }
 
-        return Decode(image_data_string);
+        const auto length = static_cast<int>(blob.length());
+        return Decode(blob, length);
     }
 
     std::string Encode(const cv::Mat &mat) {
@@ -27,9 +27,7 @@ namespace mediocre::image::v1beta {
 
     void Encode(const cv::Mat &mat, Image *image) {
         auto encoded = Encode(mat);
-        image->set_height(mat.rows);
-        image->set_width(mat.cols);
-        image->set_image_data(encoded);
+        image->mutable_blob()->set_data(encoded);
     }
 
 }// namespace mediocre::image::v1beta
