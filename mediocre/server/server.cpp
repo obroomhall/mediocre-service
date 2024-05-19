@@ -20,6 +20,7 @@ namespace mediocre::server {
         grpc::ServerBuilder builder;
         register_listener(builder, server_address);
         register_services(builder);
+        set_options(builder);
 
         server = builder.BuildAndStart();
         std::cout << "Server started." << std::endl;
@@ -53,6 +54,10 @@ namespace mediocre::server {
         }
 
         std::cout << "Registered " << services.size() << " services." << std::endl;
+    }
+
+    void Server::set_options(grpc::ServerBuilder &builder) {
+        builder.SetMaxReceiveMessageSize(10 * 1024 * 1024);// 10MB
     }
 
     void Server::shutdown_server() {
