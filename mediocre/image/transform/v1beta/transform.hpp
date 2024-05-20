@@ -18,6 +18,7 @@ namespace mediocre::image::transform::v1beta {
                 const TransformRequest *request,
                 ServerWriter<TransformResponse> *writer) override;
 
+    private:
         static std::vector<std::function<cv::Mat(cv::Mat)>>
         getImageTransformations(const google::protobuf::RepeatedPtrField<TransformToImage> &trs);
 
