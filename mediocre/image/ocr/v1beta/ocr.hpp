@@ -16,10 +16,10 @@ namespace mediocre::image::ocr::v1beta {
                 ServerContext *context,
                 const GetCharactersRequest *request,
                 GetCharactersResponse *response) override;
-        static const char *GetCharacters(const cv::Mat &input, const GetCharactersParams &params);
+        static std::string GetCharacters(const cv::Mat &input, const GetCharactersParams &params);
 
     private:
-        static const char *GetCharacters(const Image &image, const GetCharactersParams &params);
+        static std::string GetCharacters(const Image &image, const GetCharactersParams &params);
     };
 
 }// namespace mediocre::image::ocr::v1beta

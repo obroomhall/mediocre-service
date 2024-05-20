@@ -16,52 +16,88 @@ namespace mediocre::image::transform::v1beta {
             const TransformRequest *request,
             ServerWriter<TransformResponse> *writer) {
 
-        std::vector<std::function<cv::Mat(cv::Mat)>> transformations;
-        for (const TransformToImage &transform: request->image_transformations()) {
-            switch (transform.transformation_case()) {
-                case TransformToImage::kGetIdentity: {
-                    auto transformation = [&transform](const cv::Mat &mat) {
-                        return IdentityServiceImpl::GetIdentity(mat, transform.get_identity());
-                    };
-                    transformations.emplace_back(transformation);
-                    break;
-                }
-                case TransformToImage::kCrop: {
-                    auto transformation = [&transform](const cv::Mat &mat) {
-                        return CropServiceImpl::Crop(mat, transform.crop());
-                    };
-                    transformations.emplace_back(transformation);
-                    break;
-                }
-                default:
-                    return {grpc::StatusCode::UNIMPLEMENTED, "Unrecognised transformation request"};
-            }
-        }
+        auto imageTransformations = getImageTransformations(request->image_transformations());
 
-        auto mat = image::v1beta::Decode(request->image());
-        for (const std::function<cv::Mat(cv::Mat)> &transformation: transformations) {
-            mat = transformation(mat);
+        auto writeImageResponse = [=](const cv::Mat &mat) {
             TransformResponse response;
             image::v1beta::Encode(mat, response.mutable_image());
             writer->Write(response);
+        };
+
+        std::function<cv::Mat(cv::Mat)> imageToImageTransformation = &IdentityServiceImpl::GetIdentityDefault;
+        for (const std::function<cv::Mat(cv::Mat)> &transformation: imageTransformations) {
+            imageToImageTransformation = [=](const cv::Mat &mat) {
+                auto transformed = transformation(imageToImageTransformation(mat));
+                writeImageResponse(transformed);
+                return transformed;
+            };
         }
 
-        if (request->has_other_transformation()) {
-            auto &other = request->other_transformation();
-            TransformResponse response;
-            switch (other.transformation_case()) {
-                case TransformToOther::kGetCharacters: {
-                    auto characters = OcrServiceImpl::GetCharacters(mat, other.get_characters());
-                    response.set_characters(characters);
-                    writer->Write(response);
-                    break;
-                }
-                default:
-                    return {grpc::StatusCode::UNIMPLEMENTED, "Unrecognised transformation request"};
-            }
+        if (!request->has_other_transformation()) {
+            auto mat = image::v1beta::Decode(request->image());
+            auto result = imageToImageTransformation(mat);// don't actually need to use the result
+            return Status::OK;
         }
+
+        auto charactersTransformation = getCharactersTransformation(request->other_transformation());
+
+        auto writeCharactersResponse = [=](const std::string &characters) {
+            TransformResponse response;
+            response.set_characters(characters);
+            writer->Write(response);
+        };
+
+        auto imageToCharactersTransformation = [=](const cv::Mat &mat) {
+            auto transformed = charactersTransformation(imageToImageTransformation(mat));
+            writeCharactersResponse(transformed);
+            return transformed;
+        };
+
+        auto mat = image::v1beta::Decode(request->image());
+        auto result = imageToCharactersTransformation(mat);// don't actually need to use the result
 
         return Status::OK;
+    }
+
+    std::vector<std::function<cv::Mat(cv::Mat)>>
+    TransformServiceImpl::getImageTransformations(const google::protobuf::RepeatedPtrField<TransformToImage> &trs) {
+        std::vector<std::function<cv::Mat(cv::Mat)>> transformations;
+        for (const auto &transform: trs) {
+            auto transformation = getImageTransformation(transform);
+            transformations.emplace_back(transformation);
+        }
+        return transformations;
+    }
+
+    std::function<cv::Mat(cv::Mat)>
+    TransformServiceImpl::getImageTransformation(const TransformToImage &transform) {
+        switch (transform.transformation_case()) {
+            case TransformToImage::kGetIdentity: {
+                return [&transform](const cv::Mat &mat) {
+                    return IdentityServiceImpl::GetIdentity(mat, transform.get_identity());
+                };
+            }
+            case TransformToImage::kCrop: {
+                return [&transform](const cv::Mat &mat) {
+                    return CropServiceImpl::Crop(mat, transform.crop());
+                };
+            }
+            default:
+                throw std::logic_error("Unrecognised transformation request");
+        }
+    }
+
+    std::function<std::string(cv::Mat)>
+    TransformServiceImpl::getCharactersTransformation(const TransformToOther &transform) {
+        switch (transform.transformation_case()) {
+            case TransformToOther::kGetCharacters: {
+                return [&transform](const cv::Mat &mat) {
+                    return OcrServiceImpl::GetCharacters(mat, transform.get_characters());
+                };
+            }
+            default:
+                throw std::logic_error("Unrecognised transformation request");
+        }
     }
 
 }// namespace mediocre::image::transform::v1beta

@@ -17,6 +17,15 @@ namespace mediocre::image::transform::v1beta {
                 ServerContext *context,
                 const TransformRequest *request,
                 ServerWriter<TransformResponse> *writer) override;
+
+        static std::vector<std::function<cv::Mat(cv::Mat)>>
+        getImageTransformations(const google::protobuf::RepeatedPtrField<TransformToImage> &trs);
+
+        static std::function<cv::Mat(cv::Mat)>
+        getImageTransformation(const TransformToImage &transform);
+
+        static std::function<std::string(cv::Mat)>
+        getCharactersTransformation(const TransformToOther &transform);
     };
 
 }// namespace mediocre::image::transform::v1beta

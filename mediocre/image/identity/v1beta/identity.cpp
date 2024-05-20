@@ -20,4 +20,8 @@ namespace mediocre::image::identity::v1beta {
         return input;
     }
 
+    cv::Mat IdentityServiceImpl::GetIdentityDefault(const cv::Mat &input) {
+        return input;
+    }
+
 }// namespace mediocre::image::identity::v1beta

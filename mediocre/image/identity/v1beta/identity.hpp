@@ -17,6 +17,7 @@ namespace mediocre::image::identity::v1beta {
                 const GetIdentityRequest *request,
                 GetIdentityResponse *response) override;
         static cv::Mat GetIdentity(const cv::Mat &input, const GetIdentityParams &params);
+        static cv::Mat GetIdentityDefault(const cv::Mat &input);
 
     private:
         static void GetIdentity(const Image &image, Image *mutable_image, const GetIdentityParams &params);
