@@ -16,27 +16,34 @@ namespace mediocre::image::transform::v1beta {
             const TransformRequest *request,
             ServerWriter<TransformResponse> *writer) {
 
-        auto mat = image::v1beta::Decode(request->image());
-
+        std::vector<std::function<cv::Mat(cv::Mat)>> transformations;
         for (const TransformToImage &transform: request->image_transformations()) {
             switch (transform.transformation_case()) {
                 case TransformToImage::kGetIdentity: {
-                    mat = IdentityServiceImpl::GetIdentity(mat, transform.get_identity());
-                    TransformResponse response;
-                    image::v1beta::Encode(mat, response.mutable_image());
-                    writer->Write(response);
+                    auto transformation = [&transform](const cv::Mat &mat) {
+                        return IdentityServiceImpl::GetIdentity(mat, transform.get_identity());
+                    };
+                    transformations.emplace_back(transformation);
                     break;
                 }
                 case TransformToImage::kCrop: {
-                    mat = CropServiceImpl::Crop(mat, transform.crop());
-                    TransformResponse response;
-                    image::v1beta::Encode(mat, response.mutable_image());
-                    writer->Write(response);
+                    auto transformation = [&transform](const cv::Mat &mat) {
+                        return CropServiceImpl::Crop(mat, transform.crop());
+                    };
+                    transformations.emplace_back(transformation);
                     break;
                 }
                 default:
                     return {grpc::StatusCode::UNIMPLEMENTED, "Unrecognised transformation request"};
             }
+        }
+
+        auto mat = image::v1beta::Decode(request->image());
+        for (const std::function<cv::Mat(cv::Mat)> &transformation: transformations) {
+            mat = transformation(mat);
+            TransformResponse response;
+            image::v1beta::Encode(mat, response.mutable_image());
+            writer->Write(response);
         }
 
         if (request->has_other_transformation()) {
