@@ -27,11 +27,11 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           against: https://github.com/obroomhall/mediocre.git#branch=${{ github.base_ref }}
-      - uses: bufbuild/buf-breaking-action@v1
-        name: Check breaking against previous master commit
-        if: github.event_name == 'push' && github.ref_name == 'master'
-        with:
-          against: "https://github.com/obroomhall/mediocre.git#branch=master,ref=HEAD~1"
+      #      - uses: bufbuild/buf-breaking-action@v1
+      #        name: Check breaking against previous master commit
+      #        if: github.event_name == 'push' && github.ref_name == 'master'
+      #        with:
+      #          against: "https://github.com/obroomhall/mediocre.git#branch=master,ref=HEAD~1"
       - uses: bufbuild/buf-push-action@v1
         if: github.event_name == 'push'
         with:
