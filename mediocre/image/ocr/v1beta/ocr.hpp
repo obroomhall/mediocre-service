@@ -8,6 +8,7 @@ namespace mediocre::image::ocr::v1beta {
 
     using grpc::ServerContext;
     using grpc::Status;
+    using mediocre::image::v1beta::Image;
 
     class OcrServiceImpl final : public OcrService::Service {
     public:
@@ -15,9 +16,10 @@ namespace mediocre::image::ocr::v1beta {
                 ServerContext *context,
                 const GetCharactersRequest *request,
                 GetCharactersResponse *response) override;
+        static const char *GetCharacters(const cv::Mat &input, const GetCharactersParams &params);
 
     private:
-        static const char *GetCharacters(const cv::Mat &input);
+        static const char *GetCharacters(const Image &image, const GetCharactersParams &params);
     };
 
 }// namespace mediocre::image::ocr::v1beta

@@ -2,6 +2,7 @@
 #define mediocre_image_identity_v1beta_h
 
 #include <mediocre/image/identity/v1beta/identity.grpc.pb.h>
+#include <opencv2/core/mat.hpp>
 
 namespace mediocre::image::identity::v1beta {
 
@@ -11,18 +12,14 @@ namespace mediocre::image::identity::v1beta {
 
     class IdentityServiceImpl final : public IdentityService::Service {
     public:
-        Status Protobuf(
+        Status GetIdentity(
                 ServerContext *context,
-                const ProtobufRequest *request,
-                ProtobufResponse *response) override;
-        Status OpenCV(
-                ServerContext *context,
-                const OpenCVRequest *request,
-                OpenCVResponse *response) override;
+                const GetIdentityRequest *request,
+                GetIdentityResponse *response) override;
+        static cv::Mat GetIdentity(const cv::Mat &input, const GetIdentityParams &params);
 
     private:
-        static void CopyImageProtobuf(const Image &image, Image *mutable_image);
-        static void CopyImageOpenCV(const Image &image, Image *mutable_image);
+        static void GetIdentity(const Image &image, Image *mutable_image, const GetIdentityParams &params);
     };
 
 }// namespace mediocre::image::identity::v1beta

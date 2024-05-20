@@ -6,22 +6,17 @@ package mediocre.image.identity.v1beta;
 
 // A simple service which returns the same image that it receives.
 service IdentityService {
-  rpc Protobuf(ProtobufRequest) returns (ProtobufResponse);
-  rpc OpenCV(OpenCVRequest) returns (OpenCVResponse);
+  rpc GetIdentity(GetIdentityRequest) returns (GetIdentityResponse);
 }
 
-message ProtobufRequest {
+message GetIdentityRequest {
   image.v1beta.Image image = 1;
+  GetIdentityParams params = 2;
 }
 
-message ProtobufResponse {
-  image.v1beta.Image image = 1;
+message GetIdentityParams {
 }
 
-message OpenCVRequest {
-  image.v1beta.Image image = 1;
-}
-
-message OpenCVResponse {
+message GetIdentityResponse {
   image.v1beta.Image image = 1;
 }

@@ -10,7 +10,13 @@ service CropService {
 
 message CropRequest {
   image.v1beta.Image image = 1;
-  FixedCropParams fixed_params = 2;
+  CropParams params = 2;
+}
+
+message CropParams {
+  oneof params {
+    FixedCropParams fixed = 1;
+  }
 }
 
 message FixedCropParams {
