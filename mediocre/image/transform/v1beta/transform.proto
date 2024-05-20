@@ -35,4 +35,5 @@ message TransformResponse {
     image.v1beta.Image image = 1;
     string characters = 2;
   }
+  double elapsed = 10;
 }
