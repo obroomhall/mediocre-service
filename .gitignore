@@ -33,5 +33,6 @@
 
 # Build Directories
 cmake-build-*
+@buf
 
 .certs

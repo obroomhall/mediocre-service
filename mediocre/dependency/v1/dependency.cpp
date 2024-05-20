@@ -5,9 +5,6 @@
 
 namespace mediocre::dependency::v1 {
 
-    using grpc::Status;
-    using grpc::ServerContext;
-
     Status DependencyServiceImpl::CheckOpenCV(
             ServerContext *context,
             const CheckOpenCVRequest *request,

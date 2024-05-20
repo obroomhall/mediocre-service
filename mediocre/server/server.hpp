@@ -12,6 +12,7 @@ namespace mediocre::server {
         static std::string get_server_address(uint16_t port);
         static void register_listener(grpc::ServerBuilder &builder, const std::string &server_address);
         static void register_services(grpc::ServerBuilder &builder);
+        static void set_options(grpc::ServerBuilder &builder);
         std::string server_address;
         std::unique_ptr<grpc::Server> server;
 

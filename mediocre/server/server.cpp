@@ -1,7 +1,9 @@
-#include <csignal>
 #include <grpcpp/ext/proto_server_reflection_plugin.h>
 #include <mediocre/dependency/v1/dependency.hpp>
+#include <mediocre/image/crop/v1beta/crop.hpp>
+#include <mediocre/image/identity/v1beta/identity.hpp>
 #include <mediocre/image/ocr/v1beta/ocr.hpp>
+#include <mediocre/image/transform/v1beta/transform.hpp>
 #include <mediocre/server/server.hpp>
 
 namespace mediocre::server {
@@ -19,6 +21,7 @@ namespace mediocre::server {
         grpc::ServerBuilder builder;
         register_listener(builder, server_address);
         register_services(builder);
+        set_options(builder);
 
         server = builder.BuildAndStart();
         std::cout << "Server started." << std::endl;
@@ -42,6 +45,9 @@ namespace mediocre::server {
         std::vector<grpc::Service *> services({
                 new dependency::v1::DependencyServiceImpl(),
                 new image::ocr::v1beta::OcrServiceImpl(),
+                new image::identity::v1beta::IdentityServiceImpl(),
+                new image::crop::v1beta::CropServiceImpl(),
+                new image::transform::v1beta::TransformServiceImpl(),
         });
 
         // Register services.
@@ -50,6 +56,10 @@ namespace mediocre::server {
         }
 
         std::cout << "Registered " << services.size() << " services." << std::endl;
+    }
+
+    void Server::set_options(grpc::ServerBuilder &builder) {
+        builder.SetMaxReceiveMessageSize(10 * 1024 * 1024);// 10MB
     }
 
     void Server::shutdown_server() {

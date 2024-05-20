@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+import "mediocre/image/v1beta/image.proto";
+
+package mediocre.image.crop.v1beta;
+
+service CropService {
+  rpc Crop(CropRequest) returns (CropResponse);
+}
+
+message CropRequest {
+  image.v1beta.Image image = 1;
+  CropParams params = 2;
+}
+
+message CropParams {
+  oneof params {
+    FixedCropParams fixed = 1;
+  }
+}
+
+message FixedCropParams {
+  int32 x = 1;
+  int32 y = 2;
+  int32 width = 3;
+  int32 height = 4;
+}
+
+message CropResponse {
+  image.v1beta.Image image = 1;
+}

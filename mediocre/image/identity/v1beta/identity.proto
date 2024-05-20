@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+import "mediocre/image/v1beta/image.proto";
+
+package mediocre.image.identity.v1beta;
+
+// A simple service which returns the same image that it receives.
+service IdentityService {
+  rpc GetIdentity(GetIdentityRequest) returns (GetIdentityResponse);
+}
+
+message GetIdentityRequest {
+  image.v1beta.Image image = 1;
+  GetIdentityParams params = 2;
+}
+
+message GetIdentityParams {
+}
+
+message GetIdentityResponse {
+  image.v1beta.Image image = 1;
+}

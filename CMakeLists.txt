@@ -13,7 +13,11 @@ add_executable(
         mediocre/server/server.cpp
         mediocre/dependency/v1/dependency.cpp
         mediocre/image/ocr/v1beta/ocr.cpp
+        mediocre/image/identity/v1beta/identity.cpp
+        mediocre/image/crop/v1beta/crop.cpp
         grpc/health/v1/health.cpp
+        mediocre/image/v1beta/image.cpp
+        mediocre/image/transform/v1beta/transform.cpp
 )
 
 # include all hpp files
@@ -25,6 +29,9 @@ add_library(
         mediocre/dependency/v1/dependency.proto
         mediocre/image/v1beta/image.proto
         mediocre/image/ocr/v1beta/ocr.proto
+        mediocre/image/identity/v1beta/identity.proto
+        mediocre/image/crop/v1beta/crop.proto
+        mediocre/image/transform/v1beta/transform.proto
         grpc/health/v1/health.proto
 )
 

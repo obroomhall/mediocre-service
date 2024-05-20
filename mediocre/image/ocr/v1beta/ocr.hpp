@@ -2,12 +2,13 @@
 #define mediocre_image_ocr_v1beta_h
 
 #include <mediocre/image/ocr/v1beta/ocr.grpc.pb.h>
-#include <tesseract/baseapi.h>
+#include <opencv2/core/mat.hpp>
 
 namespace mediocre::image::ocr::v1beta {
 
     using grpc::ServerContext;
     using grpc::Status;
+    using mediocre::image::v1beta::Image;
 
     class OcrServiceImpl final : public OcrService::Service {
     public:
@@ -15,9 +16,10 @@ namespace mediocre::image::ocr::v1beta {
                 ServerContext *context,
                 const GetCharactersRequest *request,
                 GetCharactersResponse *response) override;
+        static std::string GetCharacters(const cv::Mat &input, const GetCharactersParams &params);
+
     private:
-        static char* GetCharacters(const uint8_t* input, size_t length);
-        static void SaveImage(const uint8_t *input, int32_t length);
+        static std::string GetCharacters(const Image &image, const GetCharactersParams &params);
     };
 
 }// namespace mediocre::image::ocr::v1beta

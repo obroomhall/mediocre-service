@@ -1,0 +1,39 @@
+﻿syntax = "proto3";
+
+import "mediocre/image/v1beta/image.proto";
+import "mediocre/image/crop/v1beta/crop.proto";
+import "mediocre/image/identity/v1beta/identity.proto";
+import "mediocre/image/ocr/v1beta/ocr.proto";
+
+package mediocre.image.transform.v1beta;
+
+service TransformService {
+  rpc Transform(TransformRequest) returns (stream TransformResponse);
+}
+
+message TransformRequest {
+  image.v1beta.Image image = 1;
+  repeated TransformToImage image_transformations = 2;
+  TransformToOther other_transformation = 3;
+}
+
+message TransformToImage {
+  oneof transformation {
+    image.identity.v1beta.GetIdentityParams get_identity = 1;
+    image.crop.v1beta.CropParams crop = 2;
+  }
+}
+
+message TransformToOther {
+  oneof transformation {
+    image.ocr.v1beta.GetCharactersParams get_characters = 1;
+  }
+}
+
+message TransformResponse {
+  oneof transformed {
+    image.v1beta.Image image = 1;
+    string characters = 2;
+  }
+  double elapsed = 10;
+}

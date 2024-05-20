@@ -3,6 +3,7 @@
 command=(
   "grpcwebproxy"
   "--backend_addr=0.0.0.0:8081"
+  "--backend_max_call_recv_msg_size=10485760" # 10MB
 )
 
 if [[ -f $TLS_CERT_PATH && -f $TLS_KEY_PATH ]]; then
@@ -25,6 +26,12 @@ if [ "$ALLOWED_ORIGINS" = "*" ]; then
 else
   command+=(
     "--allowed_origins=$ALLOWED_ORIGINS"
+  )
+fi
+
+if [ -n "$MAX_BACKOFF" ]; then
+  command+=(
+    "--backend_backoff_max_delay=$MAX_BACKOFF"
   )
 fi
 
