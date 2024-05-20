@@ -17,6 +17,7 @@ add_executable(
         mediocre/image/crop/v1beta/crop.cpp
         grpc/health/v1/health.cpp
         mediocre/image/v1beta/image.cpp
+        mediocre/image/transform/v1beta/transform.cpp
 )
 
 # include all hpp files
@@ -30,6 +31,7 @@ add_library(
         mediocre/image/ocr/v1beta/ocr.proto
         mediocre/image/identity/v1beta/identity.proto
         mediocre/image/crop/v1beta/crop.proto
+        mediocre/image/transform/v1beta/transform.proto
         grpc/health/v1/health.proto
 )
 

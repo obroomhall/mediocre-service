@@ -3,6 +3,7 @@
 #include <mediocre/image/crop/v1beta/crop.hpp>
 #include <mediocre/image/identity/v1beta/identity.hpp>
 #include <mediocre/image/ocr/v1beta/ocr.hpp>
+#include <mediocre/image/transform/v1beta/transform.hpp>
 #include <mediocre/server/server.hpp>
 
 namespace mediocre::server {
@@ -46,6 +47,7 @@ namespace mediocre::server {
                 new image::ocr::v1beta::OcrServiceImpl(),
                 new image::identity::v1beta::IdentityServiceImpl(),
                 new image::crop::v1beta::CropServiceImpl(),
+                new image::transform::v1beta::TransformServiceImpl(),
         });
 
         // Register services.
