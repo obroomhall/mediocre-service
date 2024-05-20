@@ -16,6 +16,9 @@ namespace mediocre::image::transform::v1beta {
             const TransformRequest *request,
             ServerWriter<TransformResponse> *writer) {
 
+        // This is now completely over-engineered, and almost certainly doesn't provide any benefit
+        // over a standard iterative approach.
+
         auto imageTransformations = getImageTransformations(request->image_transformations());
 
         auto writeImageResponse = [=](const cv::Mat &mat) {
@@ -24,14 +27,7 @@ namespace mediocre::image::transform::v1beta {
             writer->Write(response);
         };
 
-        std::function<cv::Mat(cv::Mat)> imageToImageTransformation = &IdentityServiceImpl::GetIdentityDefault;
-        for (const std::function<cv::Mat(cv::Mat)> &transformation: imageTransformations) {
-            imageToImageTransformation = [=](const cv::Mat &mat) {
-                auto transformed = transformation(imageToImageTransformation(mat));
-                writeImageResponse(transformed);
-                return transformed;
-            };
-        }
+        auto imageToImageTransformation = compose(imageTransformations, writeImageResponse);
 
         if (!request->has_other_transformation()) {
             auto mat = image::v1beta::Decode(request->image());
@@ -47,11 +43,7 @@ namespace mediocre::image::transform::v1beta {
             writer->Write(response);
         };
 
-        auto imageToCharactersTransformation = [=](const cv::Mat &mat) {
-            auto transformed = charactersTransformation(imageToImageTransformation(mat));
-            writeCharactersResponse(transformed);
-            return transformed;
-        };
+        auto imageToCharactersTransformation = compose<cv::Mat, std::string>(imageToImageTransformation, charactersTransformation, writeCharactersResponse);
 
         auto mat = image::v1beta::Decode(request->image());
         auto result = imageToCharactersTransformation(mat);// don't actually need to use the result
@@ -98,6 +90,43 @@ namespace mediocre::image::transform::v1beta {
             default:
                 throw std::logic_error("Unrecognised transformation request");
         }
+    }
+
+    std::function<cv::Mat(cv::Mat)>
+    TransformServiceImpl::compose(const std::vector<std::function<cv::Mat(cv::Mat)>> &functions, const std::function<void(cv::Mat)> &onTransform) {
+        auto composed = std::function<cv::Mat(cv::Mat)>(&IdentityServiceImpl::GetIdentityDefault);
+        compose(composed, functions, onTransform);
+        return composed;
+    }
+
+    template<typename Type>
+    void
+    TransformServiceImpl::compose(std::function<Type(Type)> &composedFunction, const std::vector<std::function<Type(Type)>> &functions, const std::function<void(Type)> &onTransform) {
+        for (const auto &function: functions) {
+            compose(composedFunction, function, onTransform);
+        }
+    }
+
+    template<typename Type>
+    void
+    TransformServiceImpl::compose(std::function<Type(Type)> &composedFunction, const std::function<Type(Type)> &function, const std::function<void(Type)> &onTransform) {
+        composedFunction = [=](const Type &input) {
+            auto previousValue = composedFunction(input);
+            auto newValue = function(previousValue);
+            onTransform(newValue);
+            return newValue;
+        };
+    }
+
+    template<typename IN, typename OUT>
+    std::function<OUT(IN)>
+    TransformServiceImpl::compose(const std::function<IN(IN)> &composedFunction, const std::function<OUT(IN)> &function, const std::function<void(OUT)> &onTransform) {
+        return [=](const IN &input) {
+            auto previousValue = composedFunction(input);
+            auto newValue = function(previousValue);
+            onTransform(newValue);
+            return newValue;
+        };
     }
 
 }// namespace mediocre::image::transform::v1beta

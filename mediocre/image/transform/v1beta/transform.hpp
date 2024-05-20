@@ -26,6 +26,21 @@ namespace mediocre::image::transform::v1beta {
 
         static std::function<std::string(cv::Mat)>
         getCharactersTransformation(const TransformToOther &transform);
+
+        std::function<cv::Mat(cv::Mat)>
+        compose(const std::vector<std::function<cv::Mat(cv::Mat)>> &functions, const std::function<void(cv::Mat)> &onTransform);
+
+        template<typename Type>
+        void
+        compose(std::function<Type(Type)> &composedFunction, const std::vector<std::function<Type(Type)>> &functions, const std::function<void(Type)> &onTransform);
+
+        template<typename Type>
+        void
+        compose(std::function<Type(Type)> &composedFunction, const std::function<Type(Type)> &function, const std::function<void(Type)> &onTransform);
+
+        template<typename IN, typename OUT>
+        std::function<OUT(IN)>
+        compose(const std::function<IN(IN)> &composedFunction, const std::function<OUT(IN)> &function, const std::function<void(OUT)> &onTransform);
     };
 
 }// namespace mediocre::image::transform::v1beta
