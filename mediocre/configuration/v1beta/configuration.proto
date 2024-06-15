@@ -1,6 +1,7 @@
 ﻿syntax = "proto3";
 
 import "mediocre/image/ocr/v1beta/ocr.proto";
+import "mediocre/image/transform/v1beta/transform.proto";
 
 package mediocre.configuration.v1beta;
 
@@ -19,31 +20,12 @@ message Stage {
 message Zone {
   string id = 1;
   string name = 2;
-  int32 x = 3;
-  int32 y = 4;
-  int32 width = 5;
-  int32 height = 6;
-  repeated Region region = 7;
+  repeated Region region = 3;
+  repeated image.transform.v1beta.TransformToImage transformations = 4;
 }
 
 message Region {
   string id = 1;
   string name = 2;
-  int32 x = 3;
-  int32 y = 4;
-  int32 width = 5;
-  int32 height = 6;
-  repeated Transformer transformer = 7;
-}
-
-message Transformer {
-  oneof transformer {
-    ImageTransformer image_transformer = 1;
-  }
-}
-
-message ImageTransformer {
-  oneof parameters {
-    image.ocr.v1beta.GetCharactersParams get_characters_params = 1;
-  }
+  repeated image.transform.v1beta.TransformToImage transformations = 3;
 }
