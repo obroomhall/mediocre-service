@@ -32,6 +32,7 @@ add_library(
         mediocre/image/identity/v1beta/identity.proto
         mediocre/image/crop/v1beta/crop.proto
         mediocre/image/transform/v1beta/transform.proto
+        mediocre/options/v1beta/options.proto
         grpc/health/v1/health.proto
 )
 
