@@ -1,3 +1,7 @@
+#include "mediocre/image/colour/v1beta/colour.hpp"
+#include "mediocre/image/invert/v1beta/invert.hpp"
+#include "mediocre/image/rotate/v1beta/rotate.hpp"
+#include "mediocre/image/threshold/v1beta/threshold.hpp"
 #include <grpcpp/ext/proto_server_reflection_plugin.h>
 #include <mediocre/dependency/v1/dependency.hpp>
 #include <mediocre/image/crop/v1beta/crop.hpp>
@@ -48,6 +52,10 @@ namespace mediocre::server {
                 new image::identity::v1beta::IdentityServiceImpl(),
                 new image::crop::v1beta::CropServiceImpl(),
                 new image::transform::v1beta::TransformServiceImpl(),
+                new image::colour::v1beta::GetColourServiceImpl(),
+                new image::threshold::v1beta::ThresholdServiceImpl(),
+                new image::rotate::v1beta::RotateServiceImpl(),
+                new image::invert::v1beta::InvertServiceImpl(),
         });
 
         // Register services.

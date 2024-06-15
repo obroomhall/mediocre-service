@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+import "mediocre/image/v1beta/image.proto";
+import "mediocre/options/v1beta/options.proto";
+
+package mediocre.image.threshold.v1beta;
+
+service ThresholdService {
+  rpc Threshold(ThresholdRequest) returns (ThresholdResponse);
+}
+
+message ThresholdRequest {
+  image.v1beta.Image image = 1;
+  ThresholdParams params = 2;
+}
+
+message ThresholdParams {
+  oneof params {
+    ColourThresholdParams colour = 1;
+  }
+}
+
+message ColourThresholdParams {
+  Colour lower = 1;
+  Colour upper = 2;
+}
+
+message Colour {
+  int32 red = 1 [(options.v1beta.mediocre_options).min = 0, (options.v1beta.mediocre_options).max = 255];
+  int32 green = 2 [(options.v1beta.mediocre_options).min = 0, (options.v1beta.mediocre_options).max = 255];
+  int32 blue = 3 [(options.v1beta.mediocre_options).min = 0, (options.v1beta.mediocre_options).max = 255];
+}
+
+message ThresholdResponse {
+  image.v1beta.Image image = 1;
+}

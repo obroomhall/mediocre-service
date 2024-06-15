@@ -1,15 +1,23 @@
+#include <mediocre/image/colour/v1beta/colour.hpp>
 #include <mediocre/image/crop/v1beta/crop.hpp>
 #include <mediocre/image/identity/v1beta/identity.hpp>
+#include <mediocre/image/invert/v1beta/invert.hpp>
 #include <mediocre/image/ocr/v1beta/ocr.hpp>
+#include <mediocre/image/rotate/v1beta/rotate.hpp>
+#include <mediocre/image/threshold/v1beta/threshold.hpp>
 #include <mediocre/image/transform/v1beta/transform.hpp>
 #include <mediocre/image/v1beta/image.hpp>
 #include <opencv2/core/mat.hpp>
 
 namespace mediocre::image::transform::v1beta {
 
+    using mediocre::image::colour::v1beta::GetColourServiceImpl;
     using mediocre::image::crop::v1beta::CropServiceImpl;
     using mediocre::image::identity::v1beta::IdentityServiceImpl;
+    using mediocre::image::invert::v1beta::InvertServiceImpl;
     using mediocre::image::ocr::v1beta::OcrServiceImpl;
+    using mediocre::image::rotate::v1beta::RotateServiceImpl;
+    using mediocre::image::threshold::v1beta::ThresholdServiceImpl;
 
     Status TransformServiceImpl::Transform(
             ServerContext *context,
@@ -74,6 +82,21 @@ namespace mediocre::image::transform::v1beta {
             case TransformToImage::kCrop: {
                 return [&transform](const cv::Mat &mat) {
                     return CropServiceImpl::Crop(mat, transform.crop());
+                };
+            }
+            case TransformToImage::kThreshold: {
+                return [&transform](const cv::Mat &mat) {
+                    return ThresholdServiceImpl::Threshold(mat, transform.threshold());
+                };
+            }
+            case TransformToImage::kRotate: {
+                return [&transform](const cv::Mat &mat) {
+                    return RotateServiceImpl::Rotate(mat, transform.rotate());
+                };
+            }
+            case TransformToImage::kInvert: {
+                return [&transform](const cv::Mat &mat) {
+                    return InvertServiceImpl::Invert(mat, transform.invert());
                 };
             }
             default:

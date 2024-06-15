@@ -4,6 +4,10 @@ import "mediocre/image/v1beta/image.proto";
 import "mediocre/image/crop/v1beta/crop.proto";
 import "mediocre/image/identity/v1beta/identity.proto";
 import "mediocre/image/ocr/v1beta/ocr.proto";
+import "mediocre/image/colour/v1beta/colour.proto";
+import "mediocre/image/threshold/v1beta/threshold.proto";
+import "mediocre/image/rotate/v1beta/rotate.proto";
+import "mediocre/image/invert/v1beta/invert.proto";
 
 package mediocre.image.transform.v1beta;
 
@@ -21,6 +25,9 @@ message TransformToImage {
   oneof transformation {
     image.identity.v1beta.GetIdentityParams get_identity = 1;
     image.crop.v1beta.CropParams crop = 2;
+    image.threshold.v1beta.ThresholdParams threshold = 3;
+    image.rotate.v1beta.RotateParams rotate = 4;
+    image.invert.v1beta.InvertParams invert = 5;
   }
 }
 

@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+import "mediocre/image/v1beta/image.proto";
+
+package mediocre.image.colour.v1beta;
+
+service GetColourService {
+  rpc GetColour(GetColourRequest) returns (GetColourResponse);
+}
+
+message GetColourRequest {
+  image.v1beta.Image image = 1;
+  GetColourParams params = 2;
+}
+
+message GetColourParams {
+  int32 x = 1;
+  int32 y = 2;
+}
+
+message GetColourResponse {
+  int32 red = 1;
+  int32 green = 2;
+  int32 blue = 3;
+}

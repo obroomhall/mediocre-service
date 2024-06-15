@@ -36,6 +36,7 @@ namespace mediocre::image::ocr::v1beta {
             exit(1);
         }
 
+        api->SetVariable("tessedit_char_whitelist", "0123456789");
         api->SetImage(input.data, input.cols, input.rows, input.channels(), input.step);
         const auto *outText = api->GetUTF8Text();
 

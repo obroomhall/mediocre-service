@@ -18,6 +18,10 @@ add_executable(
         grpc/health/v1/health.cpp
         mediocre/image/v1beta/image.cpp
         mediocre/image/transform/v1beta/transform.cpp
+        mediocre/image/colour/v1beta/colour.cpp
+        mediocre/image/threshold/v1beta/threshold.cpp
+        mediocre/image/rotate/v1beta/rotate.cpp
+        mediocre/image/invert/v1beta/invert.cpp
 )
 
 # include all hpp files
@@ -32,7 +36,11 @@ add_library(
         mediocre/image/identity/v1beta/identity.proto
         mediocre/image/crop/v1beta/crop.proto
         mediocre/image/transform/v1beta/transform.proto
+        mediocre/image/colour/v1beta/colour.proto
+        mediocre/image/threshold/v1beta/threshold.proto
         mediocre/options/v1beta/options.proto
+        mediocre/image/rotate/v1beta/rotate.proto
+        mediocre/image/invert/v1beta/invert.proto
         grpc/health/v1/health.proto
 )
 
