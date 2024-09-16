@@ -1,3 +1,4 @@
+#include <mediocre/image/border/v1beta/border.hpp>
 #include <mediocre/image/colour/v1beta/colour.hpp>
 #include <mediocre/image/crop/v1beta/crop.hpp>
 #include <mediocre/image/identity/v1beta/identity.hpp>
@@ -12,6 +13,7 @@
 
 namespace mediocre::image::transform::v1beta {
 
+    using mediocre::image::border::v1beta::BorderServiceImpl;
     using mediocre::image::colour::v1beta::GetColourServiceImpl;
     using mediocre::image::crop::v1beta::CropServiceImpl;
     using mediocre::image::identity::v1beta::IdentityServiceImpl;
@@ -104,6 +106,11 @@ namespace mediocre::image::transform::v1beta {
             case TransformToImage::kScale: {
                 return [&transform](const cv::Mat &mat) {
                     return ScaleServiceImpl::Scale(mat, transform.scale());
+                };
+            }
+            case TransformToImage::kBorder: {
+                return [&transform](const cv::Mat &mat) {
+                    return BorderServiceImpl::Border(mat, transform.border());
                 };
             }
             default:

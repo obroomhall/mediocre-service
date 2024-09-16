@@ -9,6 +9,7 @@ import "mediocre/image/threshold/v1beta/threshold.proto";
 import "mediocre/image/rotate/v1beta/rotate.proto";
 import "mediocre/image/invert/v1beta/invert.proto";
 import "mediocre/image/scale/v1beta/scale.proto";
+import "mediocre/image/border/v1beta/border.proto";
 
 package mediocre.image.transform.v1beta;
 
@@ -30,6 +31,7 @@ message TransformToImage {
     image.rotate.v1beta.RotateParams rotate = 4;
     image.invert.v1beta.InvertParams invert = 5;
     image.scale.v1beta.ScaleParams scale = 6;
+    image.border.v1beta.BorderParams border = 7;
   }
 }
 

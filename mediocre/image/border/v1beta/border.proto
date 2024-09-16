@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+import "mediocre/image/v1beta/image.proto";
+import "mediocre/options/v1beta/options.proto";
+
+package mediocre.image.border.v1beta;
+
+service BorderService {
+  rpc Border(BorderRequest) returns (BorderResponse);
+}
+
+message BorderRequest {
+  image.v1beta.Image image = 1;
+  BorderParams params = 2;
+}
+
+message BorderParams {
+  int32 size = 1;
+  Colour colour = 2;
+}
+
+message Colour {
+  int32 red = 1 [(options.v1beta.mediocre_options).min = 0, (options.v1beta.mediocre_options).max = 255];
+  int32 green = 2 [(options.v1beta.mediocre_options).min = 0, (options.v1beta.mediocre_options).max = 255];
+  int32 blue = 3 [(options.v1beta.mediocre_options).min = 0, (options.v1beta.mediocre_options).max = 255];
+}
+
+message BorderResponse {
+  image.v1beta.Image image = 1;
+}
