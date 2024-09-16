@@ -27,21 +27,12 @@ namespace mediocre::image::threshold::v1beta {
     }
 
     cv::Mat ThresholdServiceImpl::ThresholdColour(const cv::Mat &input, const ColourThresholdParams &params) {
-        try {
-            const auto lowerColour = cv::Scalar(params.lower().blue(), params.lower().green(), params.lower().red());
-            const auto upperColour = cv::Scalar(params.upper().blue(), params.upper().green(), params.upper().red());
-            
-            cv::Mat mask;
-            cv::inRange(input, lowerColour, upperColour, mask);
-            return mask;
+        const auto lowerColour = cv::Scalar(params.blue().at(0), params.green().at(0), params.red().at(0));
+        const auto upperColour = cv::Scalar(params.blue().at(1), params.green().at(1), params.red().at(1));
 
-            cv::Mat output = cv::Mat::zeros(input.size(), input.type());
-            cv::copyTo(input, output, mask);
-            return output;
-        } catch (std::exception &e) {
-            std::cout << "Exception " << e.what() << std::endl;
-            throw e;
-        }
+        cv::Mat mask;
+        cv::inRange(input, lowerColour, upperColour, mask);
+        return mask;
     }
 
 }// namespace mediocre::image::threshold::v1beta
