@@ -22,6 +22,7 @@ add_executable(
         mediocre/image/threshold/v1beta/threshold.cpp
         mediocre/image/rotate/v1beta/rotate.cpp
         mediocre/image/invert/v1beta/invert.cpp
+        mediocre/image/scale/v1beta/scale.cpp
 )
 
 # include all hpp files
@@ -41,6 +42,7 @@ add_library(
         mediocre/options/v1beta/options.proto
         mediocre/image/rotate/v1beta/rotate.proto
         mediocre/image/invert/v1beta/invert.proto
+        mediocre/image/scale/v1beta/scale.proto
         grpc/health/v1/health.proto
 )
 

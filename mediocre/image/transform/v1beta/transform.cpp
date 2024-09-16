@@ -4,6 +4,7 @@
 #include <mediocre/image/invert/v1beta/invert.hpp>
 #include <mediocre/image/ocr/v1beta/ocr.hpp>
 #include <mediocre/image/rotate/v1beta/rotate.hpp>
+#include <mediocre/image/scale/v1beta/scale.hpp>
 #include <mediocre/image/threshold/v1beta/threshold.hpp>
 #include <mediocre/image/transform/v1beta/transform.hpp>
 #include <mediocre/image/v1beta/image.hpp>
@@ -17,6 +18,7 @@ namespace mediocre::image::transform::v1beta {
     using mediocre::image::invert::v1beta::InvertServiceImpl;
     using mediocre::image::ocr::v1beta::OcrServiceImpl;
     using mediocre::image::rotate::v1beta::RotateServiceImpl;
+    using mediocre::image::scale::v1beta::ScaleServiceImpl;
     using mediocre::image::threshold::v1beta::ThresholdServiceImpl;
 
     Status TransformServiceImpl::Transform(
@@ -97,6 +99,11 @@ namespace mediocre::image::transform::v1beta {
             case TransformToImage::kInvert: {
                 return [&transform](const cv::Mat &mat) {
                     return InvertServiceImpl::Invert(mat, transform.invert());
+                };
+            }
+            case TransformToImage::kScale: {
+                return [&transform](const cv::Mat &mat) {
+                    return ScaleServiceImpl::Scale(mat, transform.scale());
                 };
             }
             default:
