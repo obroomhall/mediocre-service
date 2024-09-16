@@ -5,10 +5,10 @@ import "google/protobuf/descriptor.proto";
 package mediocre.options.v1beta;
 
 extend google.protobuf.FieldOptions {
-  optional MediocreOptions mediocre_options = 50000;
+  optional MediocreFieldOptions mediocre_field_options = 50000;
 }
 
-message MediocreOptions {
+message MediocreFieldOptions {
   optional int32 min = 1 [targets = TARGET_TYPE_FIELD];
   optional int32 max = 2 [targets = TARGET_TYPE_FIELD];
 }

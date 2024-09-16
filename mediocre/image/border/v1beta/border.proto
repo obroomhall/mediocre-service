@@ -20,9 +20,9 @@ message BorderParams {
 }
 
 message Colour {
-  int32 red = 1 [(options.v1beta.mediocre_options).min = 0, (options.v1beta.mediocre_options).max = 255];
-  int32 green = 2 [(options.v1beta.mediocre_options).min = 0, (options.v1beta.mediocre_options).max = 255];
-  int32 blue = 3 [(options.v1beta.mediocre_options).min = 0, (options.v1beta.mediocre_options).max = 255];
+  int32 red = 1 [(options.v1beta.mediocre_field_options).min = 0, (options.v1beta.mediocre_field_options).max = 255];
+  int32 green = 2 [(options.v1beta.mediocre_field_options).min = 0, (options.v1beta.mediocre_field_options).max = 255];
+  int32 blue = 3 [(options.v1beta.mediocre_field_options).min = 0, (options.v1beta.mediocre_field_options).max = 255];
 }
 
 message BorderResponse {

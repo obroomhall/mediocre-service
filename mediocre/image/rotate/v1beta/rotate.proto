@@ -15,7 +15,7 @@ message RotateRequest {
 }
 
 message RotateParams {
-  double angle = 1 [(options.v1beta.mediocre_options).min = 0, (options.v1beta.mediocre_options).max = 360];
+  double angle = 1 [(options.v1beta.mediocre_field_options).min = 0, (options.v1beta.mediocre_field_options).max = 360];
 }
 
 message RotateResponse {
