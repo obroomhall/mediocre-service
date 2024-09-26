@@ -40,15 +40,15 @@ RUN --mount=type=cache,target=/local/grpc/download \
     --mount=type=cache,target=/local/grpc/build \
     cd /local/grpc/build \
     && mkdir ../install \
-    && ([ -d ../download/grpc ] \
-        && (pushd ../download/grpc \
-          && ([[ $(git describe --tags) != v$GRPC_VERSION ]] \
-            && (git fetch origin v$GRPC_VERSION:v$GRPC_VERSION --recurse-submodules --depth 1 \
-                && git switch --detach v$GRPC_VERSION \
-                && git submodule update --single-branch) \
-            || echo "Tags are equal") \
-          && popd) \
-        || (git clone --recurse-submodules -b v$GRPC_VERSION --depth 1 --shallow-submodules https://github.com/grpc/grpc ../download/grpc)) \
+    && ( [ ! -d ../download/grpc ] \
+        && ( git clone --recurse-submodules -b v$GRPC_VERSION --depth 1 --shallow-submodules https://github.com/grpc/grpc ../download/grpc ) \
+        || ( pushd ../download/grpc \
+            && ( [[ $(git describe --tags) != v$GRPC_VERSION ]] \
+                && echo "Already on correct tag" \
+                || ( git fetch origin v$GRPC_VERSION:v$GRPC_VERSION --recurse-submodules --depth 1 \
+                    && git switch --detach v$GRPC_VERSION \
+                    && git submodule update --single-branch )) \
+            && popd )) \
     && cmake -D gRPC_BUILD_TESTS=OFF \
              -D CMAKE_INSTALL_PREFIX=../install \
              -G Ninja \
