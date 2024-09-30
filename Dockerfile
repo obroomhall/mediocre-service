@@ -112,47 +112,6 @@ ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/tesseract/install/lib/cmake
 ARG TESSDATA_VERSION=4.1.0
 RUN wget -q -P /local/tesseract/install/share/tessdata/ https://github.com/tesseract-ocr/tessdata_best/raw/$TESSDATA_VERSION/eng.traineddata
 
-# install paddle
-ARG PADDLE_VERSION="2.6.2"
-RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
-    apt-get update \
-    && apt-get install -y python3 python3-dev python3-pip swig patchelf \
-    && pip3 install numpy protobuf
-RUN --mount=type=cache,target=/local/paddle/download \
-    --mount=type=cache,target=/local/paddle/build \
-    cd /local/paddle/build \
-    && mkdir ../install \
-    && ( [ ! -d ../download/paddle ] \
-        && ( git clone --recurse-submodules -b v$PADDLE_VERSION --depth 1 --shallow-submodules https://github.com/PaddlePaddle/Paddle.git ../download/paddle ) \
-        || ( pushd ../download/paddle \
-            && ( [[ $(git describe --tags) == v$PADDLE_VERSION ]]  \
-                && echo "Already on correct tag" \
-                || ( git fetch origin tag v$PADDLE_VERSION --recurse-submodules --depth 1 \
-                    && git checkout v$PADDLE_VERSION \
-                    && git submodule update --single-branch )) \
-            && popd )) \
-    && cmake -D WITH_TESTING=OFF \
-             -D WITH_MKL=ON \
-             -D WITH_GPU=OFF \
-             -D ON_INFER=ON \
-             -S ../download/paddle \
-             -B . \
-    && make -j4
-
-#RUN mkdir -p /local/paddle && cd "$_" \
-#    && mkdir ./download && mkdir ./install \
-#    && wget -q -O ./download/source.tar.gz https://paddle-inference-lib.bj.bcebos.com/$PADDLE_VERSION/cxx_c/Linux/CPU/gcc8.2_avx_openblas/paddle_inference.tgz \
-#    && tar -xzf ./download/source.tar.gz -C ./install
-
-# install paddle model
-ARG PADDLE_SYSTEM="PP-OCRv3"
-ARG PADDLE_MODEL_NAME="en_PP-OCRv3_rec_infer"
-RUN cd /local/paddle \
-    && mkdir ./install/models \
-    && wget -q -O ./download/model.tar https://paddleocr.bj.bcebos.com/$PADDLE_SYSTEM/english/$PADDLE_MODEL_NAME.tar \
-    && tar -xvf ./download/model.tar -C ./install/models
-ENV PADDLE_MODEL_DIR=/local/paddle/install/models/$PADDLE_MODEL_NAME
-
 # install grpc client cli
 ARG GRPC_CLIENT_CLI_VERSION=1.20.2
 RUN mkdir -p /local/grpc-client-cli && cd "$_" \
