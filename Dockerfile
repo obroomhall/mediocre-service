@@ -56,6 +56,7 @@ RUN --mount=type=cache,target=/local/grpc/download \
              -B . \
     && ninja install
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/grpc/install/lib/cmake
+ENV PATH=$PATH:/local/grpc/install/bin
 
 # install opencv
 # we should be building staticly, but see https://github.com/opencv/opencv/issues/21447#issuecomment-1013088996
@@ -76,6 +77,7 @@ RUN --mount=type=cache,target=/local/opencv/build \
              -B . \
     && ninja install
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/opencv/install/lib/cmake
+ENV PATH=$PATH:/local/opencv/install/bin
 
 # install leptonica
 ARG LEPTONICA_VERSION=1.83.1
@@ -107,6 +109,7 @@ RUN --mount=type=cache,target=/local/tesseract/build \
              -B . \
     && ninja install
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/tesseract/install/lib/cmake
+ENV PATH=$PATH:/local/tesseract/install/bin
 
 # install tesseract languages
 ARG TESSDATA_VERSION=4.1.0
@@ -127,6 +130,7 @@ RUN mkdir -p /local/grpcwebproxy && cd "$_" \
     && wget -q -O ./download/source.zip https://github.com/improbable-eng/grpc-web/releases/download/v$GRPC_WEB_PROXY_VERSION/grpcwebproxy-v$GRPC_WEB_PROXY_VERSION\-linux-x86_64.zip \
     && unzip ./download/source.zip -d ./download \
     && cp ./download/dist/grpcwebproxy-v$GRPC_WEB_PROXY_VERSION\-linux-x86_64 ./install/grpcwebproxy
+ENV PATH=$PATH:/local/grpcwebproxy/bin
 
 
 FROM develop AS build
