@@ -107,10 +107,37 @@ RUN --mount=type=cache,target=/local/tesseract/build \
              -B . \
     && ninja install
 ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/tesseract/install/lib/cmake
+ENV PATH=$PATH:/local/tesseract/install/bin
 
 # install tesseract languages
 ARG TESSDATA_VERSION=4.1.0
 RUN wget -q -P /local/tesseract/install/share/tessdata/ https://github.com/tesseract-ocr/tessdata_best/raw/$TESSDATA_VERSION/eng.traineddata
+ENV TESSDATA_PREFIX=/local/tesseract/install/share/tessdata/
+
+COPY ground-truth /local/tesstrain/ground-truth
+
+# install tesseract train
+RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
+    apt-get update \
+    && apt-get install -y python3-pip
+RUN --mount=type=cache,target=/local/tesstrain/download \
+    --mount=type=cache,target=/local/tesstrain/build \
+    cd /local/tesstrain/build \
+    && ( [ ! -d ../download/tesstrain ] \
+        && git clone https://github.com/tesseract-ocr/tesstrain ../download/tesstrain \
+        || git -C ../download/tesstrain pull) \
+    && pip3 install -r ../download/tesstrain/requirements.txt \
+    && make -C ../download/tesstrain tesseract-langdata \
+            DATA_DIR=../build/data \
+    && mkdir -p data/rocket_league-ground-truth \
+    && cp ../ground-truth/* ./data/rocket_league-ground-truth/ \
+    && rm -rf ./data/rocket_league/ \
+    && make -C ../download/tesstrain training  \
+            DATA_DIR=/local/tesstrain/build/data \
+            START_MODEL=eng \
+            TESSDATA=$TESSDATA_PREFIX \
+            MODEL_NAME=rocket_league \
+    && cp data/rocket_league.traineddata $TESSDATA_PREFIX
 
 # install grpc client cli
 ARG GRPC_CLIENT_CLI_VERSION=1.20.2
