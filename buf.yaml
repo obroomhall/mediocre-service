@@ -3,6 +3,7 @@ name: buf.build/broomy/mediocre
 breaking:
   use:
     - FILE
+  ignore_unstable_packages: true
 lint:
   use:
     - STANDARD
