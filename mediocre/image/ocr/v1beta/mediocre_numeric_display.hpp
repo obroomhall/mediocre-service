@@ -15,6 +15,7 @@ namespace mediocre::image::ocr::v1beta {
         static std::vector<cv::Mat> DetectCharacters(const cv::Mat &input);
         static cv::Mat ExtractCharacter(const cv::Mat &input, int startColumnInclusive, int endColumnExclusive);
         static std::pair<int, int> FindVerticalBounds(const cv::Mat &input, int startColumnInclusive, int endColumnExclusive);
+        static bool GetSegment(int x, int y, const cv::Mat &character);
     };
 }// namespace mediocre::image::ocr::v1beta
 

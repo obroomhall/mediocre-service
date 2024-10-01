@@ -80,6 +80,54 @@ namespace mediocre::image::ocr::v1beta {
         return characters;
     }
 
+    bool MediocreNumericDisplay::GetSegment(int x, int y, const cv::Mat &character) {
+        /*
+         * We confirm the presence of a segment by looking at a perpendicular section of the segment:
+         *
+         *         |
+         *     --     --
+         *         |
+         *     --     --
+         *         |
+         *
+         * This is more robust than looking for the whole segment to be present as segments may not appear exactly as expected.
+         * However, this method is likely to fall over if the character is too small.
+         */
+
+        const auto colsFromEdge = std::min(x, character.cols - x);
+        const auto rowsFromEdge = std::min(y, character.rows - y);
+        const auto verticalLookup = colsFromEdge < rowsFromEdge;
+
+        const auto estimatedLineThickness = 3;
+        const auto lookupWidth = verticalLookup ? int(character.cols / 5) : estimatedLineThickness;
+        const auto lookupHeight = verticalLookup ? estimatedLineThickness : int(character.rows / 5);
+
+        int offsetX;
+        if (x < lookupWidth / 2) {
+            offsetX = x;
+        } else if (x > character.cols - lookupWidth) {
+            offsetX = character.cols - lookupWidth;
+        } else {
+            offsetX = x - (lookupWidth / 2);
+        }
+
+        int offsetY;
+        if (y < lookupHeight / 2) {
+            offsetY = y;
+        } else if (y > character.rows - lookupHeight) {
+            offsetY = character.rows - lookupHeight;
+        } else {
+            offsetY = y - (lookupHeight / 2);
+        }
+
+        const cv::Rect topSegmentRect(offsetX, offsetY, lookupWidth, lookupHeight);
+        const cv::Mat topSegmentMat = character(topSegmentRect);
+        const auto topSegmentNonZero = cv::countNonZero(topSegmentMat);
+
+        const auto lookupThreshold = int(estimatedLineThickness * estimatedLineThickness * 0.8);
+        return topSegmentNonZero > lookupThreshold;
+    }
+
     const auto &segment0 = std::vector<bool>{true, true, true, false, true, true, true};
     const auto &segment2 = std::vector<bool>{true, false, true, true, true, false, true};
     const auto &segment3 = std::vector<bool>{true, false, true, true, false, true, true};
@@ -107,44 +155,14 @@ namespace mediocre::image::ocr::v1beta {
             }
         }
 
-        // this will fall over with very small characters
-        const auto lookupWidth = 3;
-        const auto lookupHeight = 3;
-
-        const auto lookupArea = lookupWidth * lookupHeight;
-        const auto lookupThreshold = lookupArea / 2;
-
-        const cv::Rect topSegmentRect((width / 2) - 1, 0, lookupWidth, lookupHeight);
-        const cv::Rect topLeftSegmentRect(0, (height / 4), lookupWidth, lookupHeight);
-        const cv::Rect topRightSegmentRect(width - lookupWidth, (height / 4), lookupWidth, lookupHeight);
-        const cv::Rect middleSegmentRect((width / 2) - 1, (height / 2) - 1, lookupWidth, lookupHeight);
-        const cv::Rect bottomLeftSegmentRect(0, 3 * (height / 4), lookupWidth, lookupHeight);
-        const cv::Rect bottomRightSegmentRect(width - lookupWidth, 3 * (height / 4), lookupWidth, lookupHeight);
-        const cv::Rect bottomSegmentRect((width / 2) - 1, height - lookupHeight, lookupWidth, lookupHeight);
-
-        const cv::Mat topSegmentMat = character(topSegmentRect);
-        const cv::Mat topLeftSegmentMat = character(topLeftSegmentRect);
-        const cv::Mat topRightSegmentMat = character(topRightSegmentRect);
-        const cv::Mat middleSegmentMat = character(middleSegmentRect);
-        const cv::Mat bottomLeftSegmentMat = character(bottomLeftSegmentRect);
-        const cv::Mat bottomRightSegmentMat = character(bottomRightSegmentRect);
-        const cv::Mat bottomSegmentMat = character(bottomSegmentRect);
-
-        const auto topSegment = cv::countNonZero(topSegmentMat) > lookupThreshold;
-        const auto topLeftSegment = cv::countNonZero(topLeftSegmentMat) > lookupThreshold;
-        const auto topRightSegment = cv::countNonZero(topRightSegmentMat) > lookupThreshold;
-        const auto middleSegment = cv::countNonZero(middleSegmentMat) > lookupThreshold;
-        const auto bottomLeftSegment = cv::countNonZero(bottomLeftSegmentMat) > lookupThreshold;
-        const auto bottomRightSegment = cv::countNonZero(bottomRightSegmentMat) > lookupThreshold;
-        const auto bottomSegment = cv::countNonZero(bottomSegmentMat) > lookupThreshold;
         const auto segments = std::vector<bool>{
-                topSegment,
-                topLeftSegment,
-                topRightSegment,
-                middleSegment,
-                bottomLeftSegment,
-                bottomRightSegment,
-                bottomSegment};
+                GetSegment(width / 2, 0, character),
+                GetSegment(0, height / 4, character),
+                GetSegment(width, height / 4, character),
+                GetSegment(width / 2, height / 2, character),
+                GetSegment(0, 3 * (height / 4), character),
+                GetSegment(width, 3 * (height / 4), character),
+                GetSegment(width / 2, height, character)};
 
         if (segments == segment0) {
             return '0';
