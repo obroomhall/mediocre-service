@@ -11,6 +11,11 @@ on:
       - "**/*.proto"
       - .github/workflows/buf.yml
       - buf.yaml
+  delete:
+    paths:
+      - "**/*.proto"
+      - .github/workflows/buf.yml
+      - buf.yaml
 
 jobs:
   buf:
