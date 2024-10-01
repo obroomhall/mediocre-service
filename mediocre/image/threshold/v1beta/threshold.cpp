@@ -27,6 +27,10 @@ namespace mediocre::image::threshold::v1beta {
     }
 
     cv::Mat ThresholdServiceImpl::ThresholdColour(const cv::Mat &input, const ColourThresholdParams &params) {
+        if (params.blue().size() != 2 || params.green().size() != 2 || params.red().size() != 2) {
+            throw std::invalid_argument("Colour threshold params must have two values for each channel");
+        }
+
         const auto lowerColour = cv::Scalar(params.blue().at(0), params.green().at(0), params.red().at(0));
         const auto upperColour = cv::Scalar(params.blue().at(1), params.green().at(1), params.red().at(1));
 
