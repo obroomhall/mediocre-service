@@ -18,6 +18,10 @@ on:
       - .github/workflows/buf.yml
       - buf.yaml
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   buf:
     name: Buf Action
