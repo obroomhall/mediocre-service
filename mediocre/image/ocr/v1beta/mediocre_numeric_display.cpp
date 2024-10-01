@@ -93,14 +93,14 @@ namespace mediocre::image::ocr::v1beta {
          * This is more robust than looking for the whole segment to be present as segments may not appear exactly as expected.
          * However, this method is likely to fall over if the character is too small.
          */
+        const auto estimatedLineThickness = 3;
 
         const auto colsFromEdge = std::min(x, character.cols - x);
         const auto rowsFromEdge = std::min(y, character.rows - y);
-        const auto verticalLookup = colsFromEdge < rowsFromEdge;
+        const auto segmentIsVertical = colsFromEdge < rowsFromEdge || std::min(colsFromEdge, rowsFromEdge) <= estimatedLineThickness;
 
-        const auto estimatedLineThickness = 3;
-        const auto lookupWidth = verticalLookup ? int(character.cols / 5) : estimatedLineThickness;
-        const auto lookupHeight = verticalLookup ? estimatedLineThickness : int(character.rows / 5);
+        const auto lookupWidth = segmentIsVertical ? int(character.cols / 5) : estimatedLineThickness;
+        const auto lookupHeight = segmentIsVertical ? estimatedLineThickness : int(character.rows / 5);
 
         int offsetX;
         if (x < lookupWidth / 2) {
