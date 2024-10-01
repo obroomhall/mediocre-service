@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-import "mediocre/image/v1beta/image.proto";
-
 package mediocre.image.colour.v1beta;
+
+import "mediocre/image/v1beta/image.proto";
 
 service GetColourService {
   rpc GetColour(GetColourRequest) returns (GetColourResponse);

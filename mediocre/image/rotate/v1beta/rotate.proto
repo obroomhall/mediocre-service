@@ -1,9 +1,9 @@
 syntax = "proto3";
 
-import "mediocre/image/v1beta/image.proto";;
-import "mediocre/options/v1beta/options.proto";
-
 package mediocre.image.rotate.v1beta;
+
+import "mediocre/image/v1beta/image.proto";
+import "mediocre/options/v1beta/options.proto";
 
 service RotateService {
   rpc Rotate(RotateRequest) returns (RotateResponse);
@@ -15,7 +15,10 @@ message RotateRequest {
 }
 
 message RotateParams {
-  double angle = 1 [(options.v1beta.mediocre_field_options).min = 0, (options.v1beta.mediocre_field_options).max = 360];
+  double angle = 1 [
+    (options.v1beta.mediocre_field_options).min = 0,
+    (options.v1beta.mediocre_field_options).max = 360
+  ];
 }
 
 message RotateResponse {

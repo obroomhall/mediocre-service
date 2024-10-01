@@ -1,9 +1,9 @@
 syntax = "proto3";
 
+package mediocre.image.scale.v1beta;
+
 import "mediocre/image/v1beta/image.proto";
 import "mediocre/options/v1beta/options.proto";
-
-package mediocre.image.scale.v1beta;
 
 service ScaleService {
   rpc Scale(ScaleRequest) returns (ScaleResponse);

@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-import "mediocre/image/v1beta/image.proto";
-
 package mediocre.image.identity.v1beta;
+
+import "mediocre/image/v1beta/image.proto";
 
 // A simple service which returns the same image that it receives.
 service IdentityService {
@@ -14,8 +14,7 @@ message GetIdentityRequest {
   GetIdentityParams params = 2;
 }
 
-message GetIdentityParams {
-}
+message GetIdentityParams {}
 
 message GetIdentityResponse {
   image.v1beta.Image image = 1;

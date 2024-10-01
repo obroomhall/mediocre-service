@@ -1,9 +1,9 @@
-﻿syntax = "proto3";
+syntax = "proto3";
+
+package mediocre.configuration.v1beta;
 
 import "mediocre/image/ocr/v1beta/ocr.proto";
 import "mediocre/image/transform/v1beta/transform.proto";
-
-package mediocre.configuration.v1beta;
 
 message Configuration {
   string id = 1;

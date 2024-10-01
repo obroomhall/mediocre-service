@@ -1,16 +1,16 @@
-﻿syntax = "proto3";
-
-import "mediocre/image/v1beta/image.proto";
-import "mediocre/image/crop/v1beta/crop.proto";
-import "mediocre/image/identity/v1beta/identity.proto";
-import "mediocre/image/ocr/v1beta/ocr.proto";
-import "mediocre/image/threshold/v1beta/threshold.proto";
-import "mediocre/image/rotate/v1beta/rotate.proto";
-import "mediocre/image/invert/v1beta/invert.proto";
-import "mediocre/image/scale/v1beta/scale.proto";
-import "mediocre/image/border/v1beta/border.proto";
+syntax = "proto3";
 
 package mediocre.image.transform.v1beta;
+
+import "mediocre/image/border/v1beta/border.proto";
+import "mediocre/image/crop/v1beta/crop.proto";
+import "mediocre/image/identity/v1beta/identity.proto";
+import "mediocre/image/invert/v1beta/invert.proto";
+import "mediocre/image/ocr/v1beta/ocr.proto";
+import "mediocre/image/rotate/v1beta/rotate.proto";
+import "mediocre/image/scale/v1beta/scale.proto";
+import "mediocre/image/threshold/v1beta/threshold.proto";
+import "mediocre/image/v1beta/image.proto";
 
 service TransformService {
   rpc Transform(TransformRequest) returns (stream TransformResponse);
