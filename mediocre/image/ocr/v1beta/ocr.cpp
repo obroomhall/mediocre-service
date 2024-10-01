@@ -1,6 +1,8 @@
+#include "mediocre_numeric_display.hpp"
 #include <leptonica/allheaders.h>
 #include <mediocre/image/ocr/v1beta/ocr.hpp>
 #include <mediocre/image/v1beta/image.hpp>
+#include <opencv2/core.hpp>
 #include <opencv2/core/mat.hpp>
 #include <tesseract/baseapi.h>
 
@@ -23,6 +25,8 @@ namespace mediocre::image::ocr::v1beta {
     std::string OcrServiceImpl::GetCharacters(const cv::Mat &input, const GetCharactersParams &params) {
         if (params.has_tesseract_params()) {
             return Tesseract(input, params.tesseract_params());
+        } else if (params.has_mediocre_params()) {
+            return Mediocre(input, params.mediocre_params());
         }
 
         throw std::invalid_argument("No ocr engine was supplied");
@@ -51,6 +55,14 @@ namespace mediocre::image::ocr::v1beta {
         delete api;
 
         return outText;
+    }
+
+    std::string OcrServiceImpl::Mediocre(const cv::Mat &input, const MediocreParams &params) {
+        if (params.has_numeric_display_params()) {
+            return MediocreNumericDisplay::GetCharacters(input, params.numeric_display_params());
+        }
+
+        throw std::invalid_argument("No method supplied for mediocre ocr");
     }
 
 }// namespace mediocre::image::ocr::v1beta

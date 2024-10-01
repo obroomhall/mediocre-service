@@ -24,6 +24,7 @@ add_executable(
         mediocre/image/invert/v1beta/invert.cpp
         mediocre/image/scale/v1beta/scale.cpp
         mediocre/image/border/v1beta/border.cpp
+        mediocre/image/ocr/v1beta/mediocre_numeric_display.cpp
 )
 
 # include all hpp files
