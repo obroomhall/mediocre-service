@@ -1,7 +1,6 @@
 syntax = "proto3";
 
-import "mediocre/image/v1beta/image.proto";;
-import "mediocre/options/v1beta/options.proto";
+import "mediocre/image/v1beta/image.proto";
 
 package mediocre.image.invert.v1beta;
 
