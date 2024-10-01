@@ -80,6 +80,17 @@ namespace mediocre::image::ocr::v1beta {
         return characters;
     }
 
+    const auto &segment0 = std::vector<bool>{true, true, true, false, true, true, true};
+    const auto &segment2 = std::vector<bool>{true, false, true, true, true, false, true};
+    const auto &segment3 = std::vector<bool>{true, false, true, true, false, true, true};
+    const auto &segment4 = std::vector<bool>{false, true, true, true, false, true, false};
+    const auto &segment5 = std::vector<bool>{true, true, false, true, false, true, true};
+    const auto &segment6 = std::vector<bool>{true, true, false, true, true, true, true};
+    const auto &segmentStraight7 = std::vector<bool>{true, false, true, false, false, true, false};
+    const auto &segmentSlanted7 = std::vector<bool>{true, false, false, false, false, false, false};
+    const auto &segment8 = std::vector<bool>{true, true, true, true, true, true, true};
+    const auto &segment9 = std::vector<bool>{true, true, true, true, false, true, true};
+
     char MediocreNumericDisplay::RecogniseCharacter(const cv::Mat &character) {
         const auto width = character.cols;
         const auto height = character.rows;
@@ -96,8 +107,10 @@ namespace mediocre::image::ocr::v1beta {
             }
         }
 
+        // this will fall over with very small characters
         const auto lookupWidth = 3;
         const auto lookupHeight = 3;
+
         const auto lookupArea = lookupWidth * lookupHeight;
         const auto lookupThreshold = lookupArea / 2;
 
@@ -133,42 +146,41 @@ namespace mediocre::image::ocr::v1beta {
                 bottomRightSegment,
                 bottomSegment};
 
-        if (segments == std::vector<bool>{true, true, true, false, true, true, true}) {
+        if (segments == segment0) {
             return '0';
         }
 
-        if (segments == std::vector<bool>{true, false, true, true, true, false, true}) {
+        // 1 is handled earlier
+
+        if (segments == segment2) {
             return '2';
         }
 
-        if (segments == std::vector<bool>{true, false, true, true, false, true, true}) {
+        if (segments == segment3) {
             return '3';
         }
 
-        if (segments == std::vector<bool>{false, true, true, true, false, true, false}) {
+        if (segments == segment4) {
             return '4';
         }
 
-        if (segments == std::vector<bool>{true, true, false, true, false, true, true}) {
+        if (segments == segment5) {
             return '5';
         }
 
-        if (segments == std::vector<bool>{true, true, false, true, true, true, true}) {
+        if (segments == segment6) {
             return '6';
         }
 
-        // for 7 we handle the case where the leg is slanted or straight
-        if (segments == std::vector<bool>{true, false, true, false, false, true, false}     // straight leg
-            || segments == std::vector<bool>{true, false, false, false, false, false, false}// slanted leg
-        ) {
+        if (segments == segmentStraight7 || segments == segmentSlanted7) {
             return '7';
         }
 
-        if (segments == std::vector<bool>{true, true, true, true, true, true, true}) {
+        if (segments == segment8) {
             return '8';
         }
 
-        if (segments == std::vector<bool>{true, true, true, true, false, true, true}) {
+        if (segments == segment9) {
             return '9';
         }
 
