@@ -23,142 +23,70 @@ namespace mediocre::image::transform::v1beta {
     using mediocre::image::scale::v1beta::ScaleServiceImpl;
     using mediocre::image::threshold::v1beta::ThresholdServiceImpl;
 
+    using IntermediateType = std::variant<cv::Mat, std::string>;
+
     Status TransformServiceImpl::Transform(
             ServerContext *context,
             const TransformRequest *request,
             ServerWriter<TransformResponse> *writer) {
 
-        // This is now completely over-engineered, and almost certainly doesn't provide any benefit
-        // over a standard iterative approach.
+        TransformResponse response;
+        IntermediateType intermediate = image::v1beta::Decode(request->image());
 
-        auto imageTransformations = getImageTransformations(request->image_transformations());
+        for (auto &transform: request->transformations()) {
+            auto before = std::chrono::high_resolution_clock::now();
 
-        auto writeImageResponse = [=](const cv::Mat &mat, double elapsed) {
-            TransformResponse response;
-            image::v1beta::Encode(mat, response.mutable_image());
-            response.set_elapsed(elapsed);
+            if (auto *mat = std::get_if<cv::Mat>(&intermediate)) {
+                if (transform.has_image_to_image()) {
+                    *mat = transformImageToImage(*mat, transform.image_to_image());
+                    image::v1beta::Encode(*mat, response.mutable_image());
+                } else if (transform.has_image_to_text()) {
+                    auto text = transformImageToText(*mat, transform.image_to_text());
+                    response.set_characters(text);
+                    intermediate = text;
+                } else {
+                    throw std::logic_error("Cannot handle transform, unimplemented method");
+                }
+            } else {
+                throw std::logic_error("Cannot handle transform, unimplemented type");
+            }
+
+            auto after = std::chrono::high_resolution_clock::now();
+            std::chrono::duration<double, std::milli> elapsed = after - before;
+            response.set_elapsed(elapsed.count());
+
             writer->Write(response);
-        };
-
-        auto imageToImageTransformation = compose(imageTransformations, writeImageResponse);
-
-        if (!request->has_other_transformation()) {
-            auto mat = image::v1beta::Decode(request->image());
-            auto result = imageToImageTransformation(mat);// don't actually need to use the result
-            return Status::OK;
         }
-
-        auto charactersTransformation = getCharactersTransformation(request->other_transformation());
-
-        auto writeCharactersResponse = [=](const std::string &characters, double elapsed) {
-            TransformResponse response;
-            response.set_characters(characters);
-            response.set_elapsed(elapsed);
-            writer->Write(response);
-        };
-
-        auto imageToCharactersTransformation = compose<cv::Mat, std::string>(imageToImageTransformation, charactersTransformation, writeCharactersResponse);
-
-        auto mat = image::v1beta::Decode(request->image());
-        auto result = imageToCharactersTransformation(mat);// don't actually need to use the result
 
         return Status::OK;
     }
 
-    std::vector<std::function<cv::Mat(cv::Mat)>>
-    TransformServiceImpl::getImageTransformations(const google::protobuf::RepeatedPtrField<TransformToImage> &trs) {
-        std::vector<std::function<cv::Mat(cv::Mat)>> transformations;
-        for (const auto &transform: trs) {
-            auto transformation = getImageTransformation(transform);
-            transformations.emplace_back(transformation);
-        }
-        return transformations;
-    }
-
-    std::function<cv::Mat(cv::Mat)>
-    TransformServiceImpl::getImageTransformation(const TransformToImage &transform) {
-        switch (transform.transformation_case()) {
-            case TransformToImage::kGetIdentity: {
-                return [&transform](const cv::Mat &mat) {
-                    return IdentityServiceImpl::GetIdentity(mat, transform.get_identity());
-                };
-            }
-            case TransformToImage::kCrop: {
-                return [&transform](const cv::Mat &mat) {
-                    return CropServiceImpl::Crop(mat, transform.crop());
-                };
-            }
-            case TransformToImage::kThreshold: {
-                return [&transform](const cv::Mat &mat) {
-                    return ThresholdServiceImpl::Threshold(mat, transform.threshold());
-                };
-            }
-            case TransformToImage::kRotate: {
-                return [&transform](const cv::Mat &mat) {
-                    return RotateServiceImpl::Rotate(mat, transform.rotate());
-                };
-            }
-            case TransformToImage::kInvert: {
-                return [&transform](const cv::Mat &mat) {
-                    return InvertServiceImpl::Invert(mat, transform.invert());
-                };
-            }
-            case TransformToImage::kScale: {
-                return [&transform](const cv::Mat &mat) {
-                    return ScaleServiceImpl::Scale(mat, transform.scale());
-                };
-            }
-            case TransformToImage::kBorder: {
-                return [&transform](const cv::Mat &mat) {
-                    return BorderServiceImpl::Border(mat, transform.border());
-                };
-            }
-            default:
-                throw std::logic_error("Unrecognised transformation request");
+    cv::Mat TransformServiceImpl::transformImageToImage(const cv::Mat &input, const TransformImageToImage &transform) {
+        if (transform.has_get_identity()) {
+            return IdentityServiceImpl::GetIdentity(input, transform.get_identity());
+        } else if (transform.has_crop()) {
+            return CropServiceImpl::Crop(input, transform.crop());
+        } else if (transform.has_threshold()) {
+            return ThresholdServiceImpl::Threshold(input, transform.threshold());
+        } else if (transform.has_rotate()) {
+            return RotateServiceImpl::Rotate(input, transform.rotate());
+        } else if (transform.has_invert()) {
+            return InvertServiceImpl::Invert(input, transform.invert());
+        } else if (transform.has_scale()) {
+            return ScaleServiceImpl::Scale(input, transform.scale());
+        } else if (transform.has_border()) {
+            return BorderServiceImpl::Border(input, transform.border());
+        } else {
+            throw std::logic_error("Unrecognised transform image to image request");
         }
     }
 
-    std::function<std::string(cv::Mat)>
-    TransformServiceImpl::getCharactersTransformation(const TransformToOther &transform) {
-        switch (transform.transformation_case()) {
-            case TransformToOther::kGetCharacters: {
-                return [&transform](const cv::Mat &mat) {
-                    return OcrServiceImpl::GetCharacters(mat, transform.get_characters());
-                };
-            }
-            default:
-                throw std::logic_error("Unrecognised transformation request");
+    std::string TransformServiceImpl::transformImageToText(const cv::Mat &input, const TransformImageToText &transform) {
+        if (transform.has_get_characters()) {
+            return OcrServiceImpl::GetCharacters(input, transform.get_characters());
+        } else {
+            throw std::logic_error("Unrecognised transform image to image request");
         }
-    }
-
-    std::function<cv::Mat(cv::Mat)>
-    TransformServiceImpl::compose(const std::vector<std::function<cv::Mat(cv::Mat)>> &functions, const std::function<void(cv::Mat, double)> &onTransform) {
-        auto composed = std::function<cv::Mat(cv::Mat)>(&IdentityServiceImpl::GetIdentityDefault);
-        compose(composed, functions, onTransform);
-        return composed;
-    }
-
-    template<typename Type>
-    void
-    TransformServiceImpl::compose(std::function<Type(Type)> &composedFunction, const std::vector<std::function<Type(Type)>> &functions, const std::function<void(Type, double)> &onTransform) {
-        for (const auto &function: functions) {
-            composedFunction = compose(composedFunction, function, onTransform);
-        }
-    }
-    template<typename IN, typename OUT>
-    std::function<OUT(IN)>
-    TransformServiceImpl::compose(const std::function<IN(IN)> &composedFunction, const std::function<OUT(IN)> &function, const std::function<void(OUT, double)> &onTransform) {
-        return [=](const IN &input) {
-            auto previousValue = composedFunction(input);
-
-            auto before = std::chrono::high_resolution_clock::now();
-            auto newValue = function(previousValue);
-            auto after = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double, std::milli> elapsed = after - before;
-
-            onTransform(newValue, elapsed.count());
-            return newValue;
-        };
     }
 
 }// namespace mediocre::image::transform::v1beta

@@ -18,11 +18,10 @@ service TransformService {
 
 message TransformRequest {
   image.v1beta.Image image = 1;
-  repeated TransformToImage image_transformations = 2;
-  TransformToOther other_transformation = 3;
+  repeated Transform transformations = 2;
 }
 
-message TransformToImage {
+message TransformImageToImage {
   oneof transformation {
     image.identity.v1beta.GetIdentityParams get_identity = 1;
     image.crop.v1beta.CropParams crop = 2;
@@ -31,12 +30,20 @@ message TransformToImage {
     image.invert.v1beta.InvertParams invert = 5;
     image.scale.v1beta.ScaleParams scale = 6;
     image.border.v1beta.BorderParams border = 7;
+    image.ocr.v1beta.GetCharactersParams get_characters = 8;
   }
 }
 
-message TransformToOther {
+message TransformImageToText {
   oneof transformation {
     image.ocr.v1beta.GetCharactersParams get_characters = 1;
+  }
+}
+
+message Transform {
+  oneof transformation {
+    TransformImageToImage image_to_image = 1;
+    TransformImageToText image_to_text = 2;
   }
 }
 

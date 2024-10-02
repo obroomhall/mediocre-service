@@ -19,25 +19,8 @@ namespace mediocre::image::transform::v1beta {
                 ServerWriter<TransformResponse> *writer) override;
 
     private:
-        static std::vector<std::function<cv::Mat(cv::Mat)>>
-        getImageTransformations(const google::protobuf::RepeatedPtrField<TransformToImage> &trs);
-
-        static std::function<cv::Mat(cv::Mat)>
-        getImageTransformation(const TransformToImage &transform);
-
-        static std::function<std::string(cv::Mat)>
-        getCharactersTransformation(const TransformToOther &transform);
-
-        static std::function<cv::Mat(cv::Mat)>
-        compose(const std::vector<std::function<cv::Mat(cv::Mat)>> &functions, const std::function<void(cv::Mat, double)> &onTransform);
-
-        template<typename Type>
-        static void
-        compose(std::function<Type(Type)> &composedFunction, const std::vector<std::function<Type(Type)>> &functions, const std::function<void(Type, double)> &onTransform);
-
-        template<typename IN, typename OUT>
-        static std::function<OUT(IN)>
-        compose(const std::function<IN(IN)> &composedFunction, const std::function<OUT(IN)> &function, const std::function<void(OUT, double)> &onTransform);
+        static cv::Mat transformImageToImage(const cv::Mat &input, const TransformImageToImage &transform);
+        static std::string transformImageToText(const cv::Mat &input, const TransformImageToText &transform);
     };
 
 }// namespace mediocre::image::transform::v1beta
