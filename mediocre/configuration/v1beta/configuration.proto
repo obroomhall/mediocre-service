@@ -7,20 +7,19 @@ import "mediocre/transform/v1beta/transform.proto";
 message Configuration {
   string id = 1;
   string name = 2;
-  repeated Stage stage = 3;
+  repeated Stage stages = 3;
 }
 
 message Stage {
   string id = 1;
   string name = 2;
-  repeated Zone zone = 3;
+  repeated Zone zones = 3;
 }
 
 message Zone {
   string id = 1;
   string name = 2;
-  repeated Region region = 3;
-  repeated transform.v1beta.Transform transformations = 4;
+  repeated Region regions = 3;
 }
 
 message Region {
