@@ -20,6 +20,7 @@ message Zone {
   string id = 1;
   string name = 2;
   repeated Region regions = 3;
+  repeated transform.v1beta.TransformImageToImage transformations = 4;
 }
 
 message Region {
