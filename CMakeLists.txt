@@ -46,6 +46,8 @@ add_library(
         mediocre/image/invert/v1beta/invert.proto
         mediocre/image/scale/v1beta/scale.proto
         mediocre/image/border/v1beta/border.proto
+        mediocre/configuration/v1beta/configuration.proto
+        mediocre/test/v1beta/test.proto
         grpc/health/v1/health.proto
 )
 

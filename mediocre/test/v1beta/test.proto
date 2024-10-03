@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package mediocre.test.v1beta;
+
+import "mediocre/configuration/v1beta/configuration.proto";
+import "mediocre/transform/v1beta/transform.proto";
+
+message Test {
+  string id = 1;
+  string name = 2;
+  configuration.v1beta.Configuration configuration = 3;
+  string video = 4;
+  repeated ExpectedStage expected_stages = 5;
+  repeated ExpectedZone expected_zones = 6;
+  repeated ExpectedRegion expected_regions = 7;
+}
+
+message ExpectedStage {
+  string id = 1;
+  double timestamp = 2;
+}
+
+message ExpectedZone {
+  string id = 1;
+  double timestamp = 2;
+}
+
+message ExpectedRegion {
+  string id = 1;
+  double timestamp = 2;
+  transform.v1beta.Transformed value = 3;
+}
