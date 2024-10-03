@@ -1,10 +1,10 @@
 #ifndef mediocre_image_transform_v1beta_h
 #define mediocre_image_transform_v1beta_h
 
-#include <mediocre/image/transform/v1beta/transform.grpc.pb.h>
+#include <mediocre/transform/v1beta/transform.grpc.pb.h>
 #include <opencv2/core/mat.hpp>
 
-namespace mediocre::image::transform::v1beta {
+namespace mediocre::transform::v1beta {
 
     using grpc::ServerContext;
     using grpc::ServerWriter;
@@ -23,6 +23,6 @@ namespace mediocre::image::transform::v1beta {
         static std::string transformImageToText(const cv::Mat &input, const TransformImageToText &transform);
     };
 
-}// namespace mediocre::image::transform::v1beta
+}// namespace mediocre::transform::v1beta
 
 #endif// mediocre_image_transform_v1beta_h

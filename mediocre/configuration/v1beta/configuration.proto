@@ -2,8 +2,7 @@ syntax = "proto3";
 
 package mediocre.configuration.v1beta;
 
-import "mediocre/image/ocr/v1beta/ocr.proto";
-import "mediocre/image/transform/v1beta/transform.proto";
+import "mediocre/transform/v1beta/transform.proto";
 
 message Configuration {
   string id = 1;
@@ -21,11 +20,11 @@ message Zone {
   string id = 1;
   string name = 2;
   repeated Region region = 3;
-  repeated image.transform.v1beta.Transform transformations = 4;
+  repeated transform.v1beta.Transform transformations = 4;
 }
 
 message Region {
   string id = 1;
   string name = 2;
-  repeated image.transform.v1beta.Transform transformations = 3;
+  repeated transform.v1beta.Transform transformations = 3;
 }

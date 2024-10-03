@@ -7,11 +7,11 @@
 #include <mediocre/image/rotate/v1beta/rotate.hpp>
 #include <mediocre/image/scale/v1beta/scale.hpp>
 #include <mediocre/image/threshold/v1beta/threshold.hpp>
-#include <mediocre/image/transform/v1beta/transform.hpp>
 #include <mediocre/image/v1beta/image.hpp>
+#include <mediocre/transform/v1beta/transform.hpp>
 #include <opencv2/core/mat.hpp>
 
-namespace mediocre::image::transform::v1beta {
+namespace mediocre::transform::v1beta {
 
     using mediocre::image::border::v1beta::BorderServiceImpl;
     using mediocre::image::colour::v1beta::GetColourServiceImpl;
@@ -39,10 +39,10 @@ namespace mediocre::image::transform::v1beta {
             if (auto *mat = std::get_if<cv::Mat>(&intermediate)) {
                 if (transform.has_image_to_image()) {
                     *mat = transformImageToImage(*mat, transform.image_to_image());
-                    image::v1beta::Encode(*mat, response.mutable_image());
+                    image::v1beta::Encode(*mat, response.mutable_transformed()->mutable_image());
                 } else if (transform.has_image_to_text()) {
                     auto text = transformImageToText(*mat, transform.image_to_text());
-                    response.set_characters(text);
+                    response.mutable_transformed()->set_characters(text);
                     intermediate = text;
                 } else {
                     throw std::logic_error("Cannot handle transform, unimplemented method");
@@ -89,4 +89,4 @@ namespace mediocre::image::transform::v1beta {
         }
     }
 
-}// namespace mediocre::image::transform::v1beta
+}// namespace mediocre::transform::v1beta

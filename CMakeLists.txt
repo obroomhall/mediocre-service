@@ -17,7 +17,7 @@ add_executable(
         mediocre/image/crop/v1beta/crop.cpp
         grpc/health/v1/health.cpp
         mediocre/image/v1beta/image.cpp
-        mediocre/image/transform/v1beta/transform.cpp
+        mediocre/transform/v1beta/transform.cpp
         mediocre/image/colour/v1beta/colour.cpp
         mediocre/image/threshold/v1beta/threshold.cpp
         mediocre/image/rotate/v1beta/rotate.cpp
@@ -38,7 +38,7 @@ add_library(
         mediocre/image/ocr/v1beta/ocr.proto
         mediocre/image/identity/v1beta/identity.proto
         mediocre/image/crop/v1beta/crop.proto
-        mediocre/image/transform/v1beta/transform.proto
+        mediocre/transform/v1beta/transform.proto
         mediocre/image/colour/v1beta/colour.proto
         mediocre/image/threshold/v1beta/threshold.proto
         mediocre/options/v1beta/options.proto

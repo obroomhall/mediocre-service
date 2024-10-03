@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package mediocre.image.transform.v1beta;
+package mediocre.transform.v1beta;
 
 import "mediocre/image/border/v1beta/border.proto";
 import "mediocre/image/crop/v1beta/crop.proto";
@@ -47,10 +47,14 @@ message Transform {
   }
 }
 
-message TransformResponse {
-  oneof transformed {
+message Transformed {
+  oneof value {
     image.v1beta.Image image = 1;
     string characters = 2;
   }
-  double elapsed = 10;
+}
+
+message TransformResponse {
+  Transformed transformed = 1;
+  double elapsed = 2;
 }

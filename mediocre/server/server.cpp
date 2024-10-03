@@ -7,8 +7,8 @@
 #include <mediocre/image/crop/v1beta/crop.hpp>
 #include <mediocre/image/identity/v1beta/identity.hpp>
 #include <mediocre/image/ocr/v1beta/ocr.hpp>
-#include <mediocre/image/transform/v1beta/transform.hpp>
 #include <mediocre/server/server.hpp>
+#include <mediocre/transform/v1beta/transform.hpp>
 
 namespace mediocre::server {
 
@@ -51,7 +51,7 @@ namespace mediocre::server {
                 new image::ocr::v1beta::OcrServiceImpl(),
                 new image::identity::v1beta::IdentityServiceImpl(),
                 new image::crop::v1beta::CropServiceImpl(),
-                new image::transform::v1beta::TransformServiceImpl(),
+                new transform::v1beta::TransformServiceImpl(),
                 new image::colour::v1beta::GetColourServiceImpl(),
                 new image::threshold::v1beta::ThresholdServiceImpl(),
                 new image::rotate::v1beta::RotateServiceImpl(),
