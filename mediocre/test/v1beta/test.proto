@@ -8,25 +8,45 @@ import "mediocre/transform/v1beta/transform.proto";
 message Test {
   string id = 1;
   string name = 2;
-  configuration.v1beta.Configuration configuration = 3;
-  string video = 4;
-  repeated ExpectedStage expected_stages = 5;
-  repeated ExpectedZone expected_zones = 6;
-  repeated ExpectedRegion expected_regions = 7;
+  string configuration_id = 3;
+  Video video = 4;
+  repeated ExpectedStage stages = 5;
+}
+
+message Video {
+  string name = 1;
+  string url = 2;
 }
 
 message ExpectedStage {
   string id = 1;
-  double timestamp = 2;
+  repeated ExpectedStageDetails details = 2;
+  repeated ExpectedZone zones = 3;
+}
+
+message ExpectedStageDetails {
+  double start = 1;
+  double end = 2;
+  repeated double timestamps = 3;
 }
 
 message ExpectedZone {
   string id = 1;
-  double timestamp = 2;
+  repeated ExpectedZoneDetails details = 2;
+  repeated ExpectedRegion regions = 3;
+}
+
+message ExpectedZoneDetails {
+  double timestamp = 1;
+  bool visible = 2;
 }
 
 message ExpectedRegion {
   string id = 1;
-  double timestamp = 2;
-  transform.v1beta.Transformed value = 3;
+  repeated ExpectedRegionDetails details = 2;
+}
+
+message ExpectedRegionDetails {
+  double timestamp = 1;
+  transform.v1beta.Transformed value = 2;
 }
