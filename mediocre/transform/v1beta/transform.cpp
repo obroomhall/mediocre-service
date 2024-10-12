@@ -23,42 +23,93 @@ namespace mediocre::transform::v1beta {
     using mediocre::image::scale::v1beta::ScaleServiceImpl;
     using mediocre::image::threshold::v1beta::ThresholdServiceImpl;
 
-    using IntermediateType = std::variant<cv::Mat, std::string>;
 
     Status TransformServiceImpl::Transform(
             ServerContext *context,
             const TransformRequest *request,
             ServerWriter<TransformResponse> *writer) {
 
-        TransformResponse response;
         IntermediateType intermediate = image::v1beta::Decode(request->image());
 
-        for (auto &transform: request->transformations()) {
+        const std::function<void(mediocre::transform::v1beta::Transform, TransformResponse)> writeResponseFn =
+                [&writer](const mediocre::transform::v1beta::Transform &transform, const TransformResponse &response) {
+                    writer->Write(response);
+                };
+
+        transform(request->transformations(), writeResponseFn, intermediate);
+
+        return Status::OK;
+    }
+
+    Status TransformServiceImpl::TransformBatch(
+            ServerContext *context,
+            const BatchTransformsRequest *request,
+            ServerWriter<BatchTransformsResponse> *writer) {
+
+        IntermediateType intermediate = image::v1beta::Decode(request->image());
+
+        for (const auto &batch: request->batch()) {
+
+            BatchTransformsResponse batchResponse;
+            batchResponse.set_id(batch.id());
+
+            const std::function<void(mediocre::transform::v1beta::Transform, TransformResponse)> onResponse =
+                    [&batchResponse](const mediocre::transform::v1beta::Transform &transform, const TransformResponse &response) {
+                        batchResponse.mutable_transforms()->Add()->CopyFrom(transform);
+                        batchResponse.mutable_responses()->Add()->CopyFrom(response);
+                    };
+
+            transform(batch.transforms(), onResponse, intermediate);
+
+            writer->Write(batchResponse);
+        }
+
+        return Status::OK;
+    }
+
+    void TransformServiceImpl::transform(
+            const google::protobuf::RepeatedPtrField<mediocre::transform::v1beta::Transform> &transforms,
+            const std::function<void(mediocre::transform::v1beta::Transform, TransformResponse)> &onTransformed,
+            IntermediateType &intermediate) {
+
+        int index = 0;
+        for (const auto &transform: transforms) {
+            TransformResponse response;
             auto before = std::chrono::high_resolution_clock::now();
 
-            if (auto *mat = std::get_if<cv::Mat>(&intermediate)) {
-                if (transform.has_image_to_image()) {
-                    *mat = transformImageToImage(*mat, transform.image_to_image());
-                    image::v1beta::Encode(*mat, response.mutable_transformed()->mutable_image());
-                } else if (transform.has_image_to_text()) {
-                    auto text = transformImageToText(*mat, transform.image_to_text());
-                    response.mutable_transformed()->set_characters(text);
-                    intermediate = text;
+            try {
+                if (auto *mat = std::get_if<cv::Mat>(&intermediate)) {
+                    if (transform.has_image_to_image()) {
+                        *mat = transformImageToImage(*mat, transform.image_to_image());
+                        image::v1beta::Encode(*mat, response.mutable_transformed()->mutable_image());
+                    } else if (transform.has_image_to_text()) {
+                        auto text = transformImageToText(*mat, transform.image_to_text());
+                        response.mutable_transformed()->set_characters(text);
+                        intermediate = text;
+                    } else {
+                        throw std::logic_error("Cannot handle transform, unimplemented method");
+                    }
                 } else {
-                    throw std::logic_error("Cannot handle transform, unimplemented method");
+                    throw std::logic_error("Cannot handle transform, unimplemented type");
                 }
-            } else {
-                throw std::logic_error("Cannot handle transform, unimplemented type");
+            } catch (const std::exception &e) {
+                response.set_error(e.what());
+
+                auto after = std::chrono::high_resolution_clock::now();
+                std::chrono::duration<double, std::milli> elapsed = after - before;
+                response.set_elapsed(elapsed.count());
+
+                onTransformed(transform, response);
+                break;
             }
 
             auto after = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double, std::milli> elapsed = after - before;
             response.set_elapsed(elapsed.count());
 
-            writer->Write(response);
+            onTransformed(transform, response);
+            index++;
         }
-
-        return Status::OK;
     }
 
     cv::Mat TransformServiceImpl::transformImageToImage(const cv::Mat &input, const TransformImageToImage &transform) {

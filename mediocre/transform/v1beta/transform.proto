@@ -14,6 +14,7 @@ import "mediocre/image/v1beta/image.proto";
 
 service TransformService {
   rpc Transform(TransformRequest) returns (stream TransformResponse);
+  rpc TransformBatch(BatchTransformsRequest) returns (stream BatchTransformsResponse);
 }
 
 message TransformRequest {
@@ -55,6 +56,25 @@ message Transformed {
 }
 
 message TransformResponse {
-  Transformed transformed = 1;
-  double elapsed = 2;
+  oneof response {
+    Transformed transformed = 1;
+    string error = 2;
+  }
+  double elapsed = 3;
+}
+
+message BatchTransformsRequest {
+  image.v1beta.Image image = 1;
+  repeated BatchTransforms batch = 2;
+}
+
+message BatchTransforms {
+  string id = 1;
+  repeated Transform transforms = 2;
+}
+
+message BatchTransformsResponse {
+  string id = 1;
+  repeated Transform transforms = 2;
+  repeated TransformResponse responses = 3;
 }

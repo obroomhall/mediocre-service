@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+package mediocre.configuration.v1beta;
+
+// intended for notification preferences

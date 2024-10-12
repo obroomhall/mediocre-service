@@ -4,22 +4,24 @@ package mediocre.configuration.v1beta;
 
 import "mediocre/transform/v1beta/transform.proto";
 
-message Configuration {
+message GameConfiguration {
   string id = 1;
   string name = 2;
   repeated Stage stages = 3;
+  repeated Zone zones = 4;
+  repeated Region regions = 5;
 }
 
 message Stage {
   string id = 1;
   string name = 2;
-  repeated Zone zones = 3;
+  repeated string zone_ids = 3;
 }
 
 message Zone {
   string id = 1;
   string name = 2;
-  repeated Region regions = 3;
+  repeated string region_ids = 3;
   repeated transform.v1beta.TransformImageToImage transformations = 4;
 }
 
