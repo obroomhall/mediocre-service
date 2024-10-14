@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-import "mediocre/image/v1beta/image.proto";
-
 package mediocre.image.crop.v1beta;
+
+import "mediocre/image/v1beta/image.proto";
 
 service CropService {
   rpc Crop(CropRequest) returns (CropResponse);

@@ -7,8 +7,7 @@ service DependencyService {
   rpc CheckTesseract(CheckTesseractRequest) returns (CheckTesseractResponse);
 }
 
-message CheckOpenCVRequest {
-}
+message CheckOpenCVRequest {}
 
 message CheckOpenCVResponse {
   bool healthy = 1;
@@ -16,8 +15,7 @@ message CheckOpenCVResponse {
   string error = 3;
 }
 
-message CheckTesseractRequest {
-}
+message CheckTesseractRequest {}
 
 message CheckTesseractResponse {
   bool healthy = 1;

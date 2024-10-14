@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-import "mediocre/image/v1beta/image.proto";
-
 package mediocre.image.ocr.v1beta;
+
+import "mediocre/image/v1beta/image.proto";
 
 service OcrService {
   rpc GetCharacters(GetCharactersRequest) returns (GetCharactersResponse);
@@ -14,8 +14,21 @@ message GetCharactersRequest {
 }
 
 message GetCharactersParams {
-
+  oneof params {
+    TesseractParams tesseract_params = 1;
+    MediocreParams mediocre_params = 2;
+  }
 }
+
+message TesseractParams {}
+
+message MediocreParams {
+  oneof method {
+    NumericDisplayParams numeric_display_params = 1;
+  }
+}
+
+message NumericDisplayParams {}
 
 message GetCharactersResponse {
   string characters = 1;

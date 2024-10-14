@@ -17,9 +17,11 @@ namespace mediocre::image::ocr::v1beta {
                 const GetCharactersRequest *request,
                 GetCharactersResponse *response) override;
         static std::string GetCharacters(const cv::Mat &input, const GetCharactersParams &params);
+        static std::string Tesseract(const cv::Mat &input, const TesseractParams &params);
+        static std::string Mediocre(const cv::Mat &input, const MediocreParams &params);
 
     private:
-        static std::string GetCharacters(const Image &image, const GetCharactersParams &params);
+        static void GetCharacters(const Image &image, std::string *mutable_string, const GetCharactersParams &params);
     };
 
 }// namespace mediocre::image::ocr::v1beta

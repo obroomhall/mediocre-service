@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package mediocre.options.v1beta;
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.FieldOptions {
+  optional MediocreFieldOptions mediocre_field_options = 50000;
+}
+
+message MediocreFieldOptions {
+  optional int32 min = 1 [targets = TARGET_TYPE_FIELD];
+  optional int32 max = 2 [targets = TARGET_TYPE_FIELD];
+}

@@ -2,6 +2,7 @@ name: Buf
 
 on:
   pull_request:
+    types: [ opened, synchronize, reopened, labeled, unlabeled ]
     paths:
       - "**/*.proto"
       - .github/workflows/buf.yml
@@ -11,29 +12,23 @@ on:
       - "**/*.proto"
       - .github/workflows/buf.yml
       - buf.yaml
+  delete:
+    paths:
+      - "**/*.proto"
+      - .github/workflows/buf.yml
+      - buf.yaml
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   buf:
-    name: Lint, breaking and push
+    name: Buf Action
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: bufbuild/buf-setup-action@v1
+      - uses: actions/checkout@v4
+      - uses: bufbuild/buf-action@v1
         with:
+          token: ${{ secrets.BUF_TOKEN }}
           github_token: ${{ github.token }}
-      - uses: bufbuild/buf-lint-action@v1
-      #      - uses: bufbuild/buf-breaking-action@v1
-      #        name: Check breaking against the base branch
-      #        if: github.event_name == 'pull_request'
-      #        with:
-      #          against: https://github.com/obroomhall/mediocre.git#branch=${{ github.base_ref }}
-      #      - uses: bufbuild/buf-breaking-action@v1
-      #        name: Check breaking against previous master commit
-      #        if: github.event_name == 'push' && github.ref_name == 'master'
-      #        with:
-      #          against: "https://github.com/obroomhall/mediocre.git#branch=master,ref=HEAD~1"
-      - uses: bufbuild/buf-push-action@v1
-        if: github.event_name == 'push'
-        with:
-          buf_token: ${{ secrets.BUF_TOKEN }}
-          draft: ${{ github.ref_name != 'master' }}

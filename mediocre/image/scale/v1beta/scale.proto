@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package mediocre.image.scale.v1beta;
+
+import "mediocre/image/v1beta/image.proto";
+import "mediocre/options/v1beta/options.proto";
+
+service ScaleService {
+  rpc Scale(ScaleRequest) returns (ScaleResponse);
+}
+
+message ScaleRequest {
+  image.v1beta.Image image = 1;
+  ScaleParams params = 2;
+}
+
+message ScaleParams {
+  oneof params {
+    FixedAspectScaleParams fixed_aspect = 1;
+  }
+}
+
+message FixedAspectScaleParams {
+  oneof dimension {
+    int32 width = 1 [(options.v1beta.mediocre_field_options).min = 1];
+    int32 height = 2 [(options.v1beta.mediocre_field_options).min = 1];
+  }
+}
+
+message ScaleResponse {
+  image.v1beta.Image image = 1;
+}

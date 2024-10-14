@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package mediocre.transform.v1beta;
+
+import "mediocre/image/border/v1beta/border.proto";
+import "mediocre/image/crop/v1beta/crop.proto";
+import "mediocre/image/identity/v1beta/identity.proto";
+import "mediocre/image/invert/v1beta/invert.proto";
+import "mediocre/image/ocr/v1beta/ocr.proto";
+import "mediocre/image/rotate/v1beta/rotate.proto";
+import "mediocre/image/scale/v1beta/scale.proto";
+import "mediocre/image/threshold/v1beta/threshold.proto";
+import "mediocre/image/v1beta/image.proto";
+
+service TransformService {
+  rpc Transform(TransformRequest) returns (stream TransformResponse);
+  rpc TransformBatch(TransformBatchRequest) returns (stream TransformBatchResponse);
+}
+
+message TransformRequest {
+  image.v1beta.Image image = 1;
+  repeated Transform transformations = 2;
+}
+
+message TransformImageToImage {
+  oneof transformation {
+    image.identity.v1beta.GetIdentityParams get_identity = 1;
+    image.crop.v1beta.CropParams crop = 2;
+    image.threshold.v1beta.ThresholdParams threshold = 3;
+    image.rotate.v1beta.RotateParams rotate = 4;
+    image.invert.v1beta.InvertParams invert = 5;
+    image.scale.v1beta.ScaleParams scale = 6;
+    image.border.v1beta.BorderParams border = 7;
+    image.ocr.v1beta.GetCharactersParams get_characters = 8;
+  }
+}
+
+message TransformImageToText {
+  oneof transformation {
+    image.ocr.v1beta.GetCharactersParams get_characters = 1;
+  }
+}
+
+message Transform {
+  oneof transformation {
+    TransformImageToImage image_to_image = 1;
+    TransformImageToText image_to_text = 2;
+  }
+}
+
+message Transformed {
+  oneof value {
+    image.v1beta.Image image = 1;
+    string characters = 2;
+  }
+}
+
+message TransformResponse {
+  oneof response {
+    Transformed transformed = 1;
+    string error = 2;
+  }
+  double elapsed = 3;
+}
+
+message TransformBatchRequest {
+  image.v1beta.Image image = 1;
+  repeated BatchTransforms batch = 2;
+}
+
+message BatchTransforms {
+  string id = 1;
+  repeated Transform transforms = 2;
+}
+
+message TransformBatchResponse {
+  string id = 1;
+  repeated Transform transforms = 2;
+  repeated TransformResponse responses = 3;
+}

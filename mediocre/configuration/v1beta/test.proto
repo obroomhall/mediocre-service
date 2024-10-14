@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package mediocre.configuration.v1beta;
+
+import "mediocre/transform/v1beta/transform.proto";
+
+message TestConfiguration {
+  string id = 1;
+  string configuration_id = 2;
+  Video video = 3;
+  repeated StageTests stages_tests = 4;
+  repeated ZoneTests zones_tests = 5;
+  repeated RegionTests regions_tests = 6;
+}
+
+message Video {
+  string name = 1;
+  string url = 2;
+}
+
+message StageTests {
+  string stage_id = 1;
+  repeated StageTest tests = 2;
+}
+
+message StageTest {
+  double start = 1;
+  double end = 2;
+  repeated double timestamps = 3;
+}
+
+message ZoneTests {
+  string zone_id = 1;
+  repeated ZoneTest tests = 2;
+}
+
+message ZoneTest {
+  double timestamp = 1;
+  bool visible = 2;
+}
+
+message RegionTests {
+  string region_id = 1;
+  repeated RegionTest tests = 2;
+}
+
+message RegionTest {
+  double timestamp = 1;
+  transform.v1beta.Transformed value = 2;
+}

@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package mediocre.image.invert.v1beta;
+
+import "mediocre/image/v1beta/image.proto";
+
+service InvertService {
+  rpc Invert(InvertRequest) returns (InvertResponse);
+}
+
+message InvertRequest {
+  image.v1beta.Image image = 1;
+  InvertParams params = 2;
+}
+
+message InvertParams {}
+
+message InvertResponse {
+  image.v1beta.Image image = 1;
+}
