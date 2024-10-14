@@ -6,7 +6,7 @@ namespace mediocre::image::v1beta {
 
     cv::Mat Decode(std::string image, int length) {
         const auto encoded = cv::Mat(1, length, CV_8UC1, image.data());
-        return cv::imdecode(encoded, cv::IMREAD_UNCHANGED);
+        return cv::imdecode(encoded, cv::IMREAD_COLOR);
     }
 
     cv::Mat Decode(const Image &image) {
