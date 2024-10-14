@@ -46,7 +46,7 @@ namespace mediocre::transform::v1beta {
             const BatchTransformsRequest *request,
             ServerWriter<BatchTransformsResponse> *writer) {
 
-        IntermediateType intermediate = image::v1beta::Decode(request->image());
+        const auto image = image::v1beta::Decode(request->image());
 
         for (const auto &batch: request->batch()) {
 
@@ -59,6 +59,7 @@ namespace mediocre::transform::v1beta {
                         batchResponse.mutable_responses()->Add()->CopyFrom(response);
                     };
 
+            IntermediateType intermediate = image.clone();
             transform(batch.transforms(), onResponse, intermediate);
 
             writer->Write(batchResponse);
