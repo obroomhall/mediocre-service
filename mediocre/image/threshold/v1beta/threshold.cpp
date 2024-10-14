@@ -31,11 +31,14 @@ namespace mediocre::image::threshold::v1beta {
             throw std::invalid_argument("Colour threshold params must have two values for each channel");
         }
 
+        cv::Mat bgrMat;
+        cv::cvtColor(input, bgrMat, cv::COLOR_BGRA2BGR);
+
         const auto lowerColour = cv::Scalar(params.blue().at(0), params.green().at(0), params.red().at(0));
         const auto upperColour = cv::Scalar(params.blue().at(1), params.green().at(1), params.red().at(1));
 
         cv::Mat mask;
-        cv::inRange(input, lowerColour, upperColour, mask);
+        cv::inRange(bgrMat, lowerColour, upperColour, mask);
         return mask;
     }
 
