@@ -135,7 +135,8 @@ namespace mediocre::image::ocr::v1beta {
     const auto &segment5 = std::vector<bool>{true, true, false, true, false, true, true};
     const auto &segment6 = std::vector<bool>{true, true, false, true, true, true, true};
     const auto &segmentStraight7 = std::vector<bool>{true, false, true, false, false, true, false};
-    const auto &segmentSlanted7 = std::vector<bool>{true, false, false, false, false, false, false};
+    const auto &segmentSlanted7 = std::vector<bool>{true, false, true, false, false, false, false};
+    const auto &segmentVerySlanted7 = std::vector<bool>{true, false, true, false, false, false, true};
     const auto &segment8 = std::vector<bool>{true, true, true, true, true, true, true};
     const auto &segment9 = std::vector<bool>{true, true, true, true, false, true, true};
 
@@ -190,7 +191,7 @@ namespace mediocre::image::ocr::v1beta {
             return '6';
         }
 
-        if (segments == segmentStraight7 || segments == segmentSlanted7) {
+        if (segments == segmentStraight7 || segments == segmentSlanted7 || segments == segmentVerySlanted7) {
             return '7';
         }
 
