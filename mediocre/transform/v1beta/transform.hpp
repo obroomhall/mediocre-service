@@ -19,8 +19,8 @@ namespace mediocre::transform::v1beta {
                 ServerWriter<TransformResponse> *writer) override;
         Status TransformBatch(
                 ServerContext *context,
-                const BatchTransformsRequest *request,
-                ServerWriter<BatchTransformsResponse> *writer) override;
+                const TransformBatchRequest *request,
+                ServerWriter<TransformBatchResponse> *writer) override;
 
     private:
         using IntermediateType = std::variant<cv::Mat, std::string>;

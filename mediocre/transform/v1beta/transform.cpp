@@ -43,14 +43,14 @@ namespace mediocre::transform::v1beta {
 
     Status TransformServiceImpl::TransformBatch(
             ServerContext *context,
-            const BatchTransformsRequest *request,
-            ServerWriter<BatchTransformsResponse> *writer) {
+            const TransformBatchRequest *request,
+            ServerWriter<TransformBatchResponse> *writer) {
 
         const auto image = image::v1beta::Decode(request->image());
 
         for (const auto &batch: request->batch()) {
 
-            BatchTransformsResponse batchResponse;
+            TransformBatchResponse batchResponse;
             batchResponse.set_id(batch.id());
 
             const std::function<void(mediocre::transform::v1beta::Transform, TransformResponse)> onResponse =
