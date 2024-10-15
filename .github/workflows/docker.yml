@@ -1,15 +1,7 @@
 name: Docker
 
 on:
-  pull_request:
-    paths:
-      - .github/workflows/docker.yml
-      - Dockerfile
-      - CMakeLists.txt
-      - mediocre/**
   push:
-    branches:
-      - master
     paths:
       - .github/workflows/docker.yml
       - Dockerfile
