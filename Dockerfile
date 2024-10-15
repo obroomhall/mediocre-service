@@ -80,10 +80,10 @@ ENV CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:/local/opencv/install/lib/cmake
 ENV PATH=$PATH:/local/opencv/install/bin
 
 # install leptonica
-ARG LEPTONICA_VERSION=1.84.1
+ARG LEPTONICA_VERSION=1.83.1
 RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     apt-get update \
-    && apt-get install -y libicu-dev libpango1.0-dev libcairo2-dev libtiff-dev libjpeg-dev libwebp-dev
+    && apt-get install -y libicu-dev libpango1.0-dev libcairo2-dev libtiff-dev libjpeg-dev
 RUN --mount=type=cache,target=/local/leptonica/build \
     cd /local/leptonica/build \
     && mkdir ../download && mkdir ../install \
