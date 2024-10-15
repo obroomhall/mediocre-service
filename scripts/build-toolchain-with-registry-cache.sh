@@ -27,12 +27,12 @@ select choice in "${options_array[@]}"; do
         fi
 
         command=(
-          "docker buildx build"
+          "docker" "buildx" "build"
           "--force-rm"
-          "--progress plain"
-          "--cache-from type=registry,ref=$selected_choice"
-          "--target develop"
-          "-t mediocre:local-develop"
+          "--progress" "plain"
+          "--cache-from" "type=registry,ref=$selected_choice"
+          "--target" "develop"
+          "-t" "mediocre:local-develop"
           "."
         )
         break
