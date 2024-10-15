@@ -33,11 +33,9 @@ jobs:
       main: ${{ steps.tags.outputs.main }}
       sha: ${{ steps.tags.outputs.sha }}
     steps:
-      -
-        name: Check out the repo
+      - name: Check out the repo
         uses: actions/checkout@v4
-      -
-        name: Docker meta
+      - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         env:
@@ -54,8 +52,7 @@ jobs:
             type=ref,event=pr,priority=6
             type=sha,priority=4
             type=raw,value=master,priority=2
-      -
-        name: Get most recently closed PR
+      - name: Get most recently closed PR
         id: last-pr
         if: fromJSON(steps.meta.outputs.json).tags[2] == ''
         run: |
@@ -63,24 +60,20 @@ jobs:
           export most_recent_closed_pr_number=$(curl -s https://api.github.com/repos/${REPOSITORY}/pulls?state=closed | jq ".[] | .number" | head -1)
           echo "Last closed PR was: $most_recent_closed_pr_number"
           echo "number=$most_recent_closed_pr_number" >> "$GITHUB_OUTPUT"
-      -
-        name: Docker meta parse
+      - name: Docker meta parse
         id: tags
         run: |
           echo "main=${{ fromJSON(steps.meta.outputs.json).tags[0] }}" >> "$GITHUB_OUTPUT"
           echo "sha=${{ fromJSON(steps.meta.outputs.json).tags[1] }}" >> "$GITHUB_OUTPUT"
           echo "fallback=${{ fromJSON(steps.meta.outputs.json).tags[2] || format('{0}:pr-{1}', env.REPOSITORY, steps.last-pr.outputs.number) }}" >> "$GITHUB_OUTPUT"
-      -
-        name: Set up Docker Buildx
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      -
-        name: Log in to Docker Hub
+      - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-      -
-        name: Build and push sha image develop
+      - name: Build and push sha image develop
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -96,8 +89,7 @@ jobs:
             type=registry,ref=${{ steps.tags.outputs.sha }}-develop-cache
             type=registry,ref=${{ steps.tags.outputs.main }}-develop-cache
           target: develop
-      -
-        name: Build and push sha image
+      - name: Build and push sha image
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -116,22 +108,18 @@ jobs:
     runs-on: ubuntu-latest
     needs: build_push
     steps:
-      -
-        name: Log in to Docker Hub
+      - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-      -
-        name: Install testing tools
+      - name: Install testing tools
         env:
           GRPC_CLIENT_CLI_VERSION: 1.18.0
         run: curl -L -s https://github.com/vadimi/grpc-client-cli/releases/download/v${{ env.GRPC_CLIENT_CLI_VERSION }}/grpc-client-cli_linux_x86_64.tar.gz | tar -C /usr/local/bin -xz
-      -
-        name: Pull updated sha image
+      - name: Pull updated sha image
         run: docker pull ${{ needs.build_push.outputs.sha }}
-      -
-        name: Start container
+      - name: Start container
         run: |
           docker run -d --rm --name mediocre -p 127.0.0.1:80:8081/tcp ${{ needs.build_push.outputs.sha }}
           export max_retries=20
@@ -143,26 +131,34 @@ jobs:
             export cur_retries=$((cur_retries+1))
           done
           echo "Container is healthy!"
-      -
-        name: Check OpenCV
+      - name: Check OpenCV
         run: |
           check_opencv=$(echo '{}' | grpc-client-cli -service Dependency -method CheckOpenCV 127.0.0.1:80)
           echo $check_opencv && [[ $(echo $check_opencv | jq '.healthy') == 'true' ]]
-      -
-        name: Check Tesseract
+      - name: Check Tesseract
         run: |
           check_tesseract=$(echo '{}' | grpc-client-cli -service Dependency -method CheckTesseract localhost:80)
           echo $check_tesseract && [[ $(echo $check_tesseract | jq '.healthy') == 'true' ]]
-      -
-        name: Stop container
+      - name: Stop container
         run: |
           docker logs -f mediocre &
           docker stop mediocre
-      -
-        name: Set up Docker Buildx
+      - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      -
-        name: Re-tag image and cache
+      - name: Re-tag image and cache
         run: |
           docker buildx imagetools create --tag ${{ needs.build_push.outputs.main }}-cache ${{ needs.build_push.outputs.sha }}-cache
           docker buildx imagetools create --tag ${{ needs.build_push.outputs.main }} ${{ needs.build_push.outputs.sha }}
+
+  deploy:
+    name: Deploy image
+    runs-on: ubuntu-latest
+    needs: test_push
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Push to dokku
+        uses: dokku/github-action@v1.6.1
+        with:
+          git_remote_url: ssh://dokku@${{ secrets.CLIENT_IP }}:22/client
+          ssh_private_key: ${{ secrets.CLIENT_SSH_KEY }}
+          deploy_docker_image: ${{ env.REPOSITORY }}:master
