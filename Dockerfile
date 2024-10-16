@@ -32,6 +32,7 @@ RUN mkdir -p /local/ninja && cd "$_" \
 ENV PATH=$PATH:/local/ninja/install
 
 # install grpc and protobuf
+# there is some issue with upgrading grpc regarding std::thread
 ARG GRPC_VERSION=1.64.3
 RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     apt-get update \
