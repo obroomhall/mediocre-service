@@ -32,7 +32,7 @@ RUN mkdir -p /local/ninja && cd "$_" \
 ENV PATH=$PATH:/local/ninja/install
 
 # install grpc and protobuf
-ARG GRPC_VERSION=1.67.0
+ARG GRPC_VERSION=1.63.0
 RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     apt-get update \
     && apt-get install -y autoconf libtool pkg-config
