@@ -60,7 +60,7 @@ ENV PATH=$PATH:/local/grpc/install/bin
 
 # install opencv
 # we should be building staticly, but see https://github.com/opencv/opencv/issues/21447#issuecomment-1013088996
-ARG OPENCV_VERSION=4.9.0
+ARG OPENCV_VERSION=4.10.0
 RUN --mount=type=cache,target=/local/opencv/build \
     cd /local/opencv/build \
     && mkdir ../download && mkdir ../install \
