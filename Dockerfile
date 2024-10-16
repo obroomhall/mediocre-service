@@ -16,7 +16,7 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
 
 # install cmake
 # check support in Clion > Build, Execution, Deployment > Toolchains before upgrading cmake
-ARG CMAKE_VERSION=3.29.8
+ARG CMAKE_VERSION=3.28.4
 RUN mkdir -p /local/cmake && cd "$_" \
     && mkdir ./download && mkdir ./install \
     && wget -q -O ./download/cmake-linux.sh https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION\-linux-x86_64.sh \
