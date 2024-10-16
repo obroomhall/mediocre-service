@@ -43,7 +43,7 @@ RUN --mount=type=cache,target=/local/grpc/download \
     && ( [ ! -d ../download/grpc ] \
         && ( git clone --recurse-submodules -b v$GRPC_VERSION --depth 1 --shallow-submodules https://github.com/grpc/grpc ../download/grpc ) \
         || ( pushd ../download/grpc \
-            && ( [[ $(git describe --tags) != v$GRPC_VERSION ]] \
+            && ( [[ $(git describe --tags) == v$GRPC_VERSION ]] \
                 && echo "Already on correct tag" \
                 || ( git fetch origin v$GRPC_VERSION:v$GRPC_VERSION --recurse-submodules --depth 1 \
                     && git switch --detach v$GRPC_VERSION \
