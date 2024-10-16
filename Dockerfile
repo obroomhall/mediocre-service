@@ -16,7 +16,7 @@ RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
 
 # install cmake
 # check support in Clion > Build, Execution, Deployment > Toolchains before upgrading cmake
-ARG CMAKE_VERSION=3.28.4
+ARG CMAKE_VERSION=3.29.5
 RUN mkdir -p /local/cmake && cd "$_" \
     && mkdir ./download && mkdir ./install \
     && wget -q -O ./download/cmake-linux.sh https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION\-linux-x86_64.sh \
@@ -32,7 +32,7 @@ RUN mkdir -p /local/ninja && cd "$_" \
 ENV PATH=$PATH:/local/ninja/install
 
 # install grpc and protobuf
-ARG GRPC_VERSION=1.67.0
+ARG GRPC_VERSION=1.63.0
 RUN --mount=type=cache,sharing=locked,target=/var/cache/apt \
     apt-get update \
     && apt-get install -y autoconf libtool pkg-config
@@ -60,7 +60,7 @@ ENV PATH=$PATH:/local/grpc/install/bin
 
 # install opencv
 # we should be building staticly, but see https://github.com/opencv/opencv/issues/21447#issuecomment-1013088996
-ARG OPENCV_VERSION=4.10.0
+ARG OPENCV_VERSION=4.9.0
 RUN --mount=type=cache,target=/local/opencv/build \
     cd /local/opencv/build \
     && mkdir ../download && mkdir ../install \
