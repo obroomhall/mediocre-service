@@ -167,7 +167,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.PROD_SSH_KEY }}
       - name: Setup known hosts
-        run: ssh-keygen -R ${{ secrets.PROD_IP }}
+        run: ssh-keyscan -H ${{ secrets.PROD_IP }} >> ~/.ssh/known_hosts
       - name: Deploy Preview
         if: ${{ needs.build_push.outputs.current-pr }}
         working-directory: scripts/deploy
