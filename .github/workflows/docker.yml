@@ -49,12 +49,16 @@ jobs:
         run: sudo apt install -y jq
       - name: Get current PR
         id: current-pr
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           export current_pr_number=$(gh pr list --head ${{ github.ref }} --json number --jq ".[0].number")
           echo "Last closed PR was: $most_recent_closed_pr_number"
           echo "number=$current_pr_number" >> "$GITHUB_OUTPUT"
       - name: Get most recently closed PR
         id: last-pr
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           export most_recent_closed_pr_number=$(gh pr list --state closed --limit 1 --json number --jq ".[0].number")
           echo "Last closed PR was: $most_recent_closed_pr_number"
