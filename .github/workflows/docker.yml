@@ -152,4 +152,4 @@ jobs:
         with:
           git_remote_url: ssh://dokku@${{ secrets.CLIENT_IP }}:22/client
           ssh_private_key: ${{ secrets.CLIENT_SSH_KEY }}
-          deploy_docker_image: ${{ env.REPOSITORY }}:${{ needs.build_push.outputs.sha }}
+          deploy_docker_image: ${{ needs.build_push.outputs.sha }}
