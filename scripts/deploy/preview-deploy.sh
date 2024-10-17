@@ -1,11 +1,10 @@
 #!/bin/bash
 set -e
 
-tag="$1"
+image="$1"
 pr="$2"
 branch="$3"
 
-image="obroomhall/mediocre:$tag"
 name="mediocre-preview-$pr"
 port=$(printf "1%04d" $pr)
 
