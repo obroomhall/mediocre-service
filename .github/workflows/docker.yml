@@ -166,6 +166,8 @@ jobs:
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.PROD_SSH_KEY }}
+      - name: Setup known hosts
+        run: ssh-keygen -R ${{ secrets.PROD_IP }}
       - name: Deploy Preview
         if: ${{ needs.build_push.outputs.current-pr }}
         working-directory: scripts/deploy
