@@ -12,7 +12,8 @@ on:
       - "published"
 
 env:
-  REPOSITORY: obroomhall/mediocre
+  GITHUB_REPOSITORY: obroomhall/mediocre
+  DOCKER_REPOSITORY: obroomhall/mediocre
   DOCKER_USERNAME: obroomhall
 
 jobs:
@@ -33,7 +34,7 @@ jobs:
           DOCKER_METADATA_PR_HEAD_SHA: true
         with:
           images: |
-            ${{ env.REPOSITORY }}
+            ${{ env.DOCKER_REPOSITORY }}
           # be aware of priorities here, since highest priority determines the label org.opencontainers.image.version
           # any tag with an unspecified priority receives a default, see https://github.com/docker/metadata-action#priority-attribute
           # they also determine the order of the output array
@@ -48,7 +49,7 @@ jobs:
         if: fromJSON(steps.meta.outputs.json).tags[2] == ''
         run: |
           sudo apt install -y jq
-          export most_recent_closed_pr_number=$(curl -s https://api.github.com/repos/${REPOSITORY}/pulls?state=closed | jq ".[] | .number" | head -1)
+          export most_recent_closed_pr_number=$(curl -s https://api.github.com/repos/${GITHUB_REPOSITORY}/pulls?state=closed | jq ".[] | .number" | head -1)
           echo "Last closed PR was: $most_recent_closed_pr_number"
           echo "number=$most_recent_closed_pr_number" >> "$GITHUB_OUTPUT"
       - name: Docker meta parse
@@ -56,7 +57,7 @@ jobs:
         run: |
           echo "main=${{ fromJSON(steps.meta.outputs.json).tags[0] }}" >> "$GITHUB_OUTPUT"
           echo "sha=${{ fromJSON(steps.meta.outputs.json).tags[1] }}" >> "$GITHUB_OUTPUT"
-          echo "fallback=${{ fromJSON(steps.meta.outputs.json).tags[2] || format('{0}:pr-{1}', env.REPOSITORY, steps.last-pr.outputs.number) }}" >> "$GITHUB_OUTPUT"
+          echo "fallback=${{ fromJSON(steps.meta.outputs.json).tags[2] || format('{0}:pr-{1}', env.DOCKER_REPOSITORY, steps.last-pr.outputs.number) }}" >> "$GITHUB_OUTPUT"
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Log in to Docker Hub
