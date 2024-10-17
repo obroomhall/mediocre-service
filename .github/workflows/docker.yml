@@ -21,7 +21,6 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     outputs:
-      labels: ${{ steps.meta.outputs.labels }}
       main: ${{ steps.tags.outputs.main }}
       sha: ${{ steps.tags.outputs.sha }}
     steps:
@@ -98,6 +97,8 @@ jobs:
   test_push:
     name: Test
     runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.tags.outputs.sha }}
     needs: build_push
     steps:
       - name: Log in to Docker Hub
@@ -146,11 +147,11 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     needs: test_push
-    if: github.ref == 'refs/heads/master'
+    if: ${{ github.ref == format('refs/heads/{0}', github.event.repository.default_branch) }}
     steps:
       - name: Push to dokku
         uses: dokku/github-action@v1.6.1
         with:
           git_remote_url: ssh://dokku@${{ secrets.CLIENT_IP }}:22/client
           ssh_private_key: ${{ secrets.CLIENT_SSH_KEY }}
-          deploy_docker_image: ${{ env.REPOSITORY }}:master
+          deploy_docker_image: ${{ env.REPOSITORY }}:${{ needs.test_push.outputs.sha }}
