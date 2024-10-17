@@ -171,7 +171,7 @@ COPY --from=build /local/mediocre/install /app
 ENV PATH=$PATH:/app/bin
 
 # setup the proxy script
-COPY scripts/run-proxy.sh /scripts/run-proxy.sh
+COPY scripts/run/proxy.sh /scripts/run-proxy.sh
 RUN ["chmod", "+x", "/scripts/run-proxy.sh"]
 ENV TLS_CERT_PATH=${TLS_CERT_PATH:-/certificates/cert.pem}
 ENV TLS_KEY_PATH=${TLS_KEY_PATH:-/certificates/key.pem}
