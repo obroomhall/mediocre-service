@@ -6,7 +6,10 @@ on:
       - .github/workflows/docker.yml
       - Dockerfile
       - CMakeLists.txt
+      - grpc/**
       - mediocre/**
+      - scripts/deploy/**
+      - scripts/run/**
   release:
     types:
       - "published"
