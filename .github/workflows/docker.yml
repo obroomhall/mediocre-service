@@ -21,7 +21,6 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     outputs:
-      labels: ${{ steps.meta.outputs.labels }}
       main: ${{ steps.tags.outputs.main }}
       sha: ${{ steps.tags.outputs.sha }}
     steps:
