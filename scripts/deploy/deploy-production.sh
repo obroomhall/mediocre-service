@@ -32,9 +32,7 @@ docker run \
     --name $name \
     --restart unless-stopped \
     -p $port:8443 \
-    -v ./certs:/certs:ro \
-    -v ./certs/client.mediocre.tv.pem:/certificates/cert.pem:ro \
-    -v ./certs/client.mediocre.tv.key:/certificates/key.pem:ro \
-    -v ./certs/origin_ca_ecc_root.pem:/certificates/root.pem:ro \
+    -v /etc/letsencrypt/live/client.mediocre.tv/fullchain.pem:/certificates/cert.pem:ro \
+    -v /etc/letsencrypt/live/client.mediocre.tv/privkey.pem:/certificates/key.pem:ro \
     -e ALLOWED_ORIGINS=$allowed_origins \
     $image
