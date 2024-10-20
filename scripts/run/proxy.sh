@@ -19,13 +19,6 @@ else
   ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:5173}
 fi
 
-if [[ -f $TLS_CA_PATH ]]; then
-  command+=(
-    "--server_tls_client_ca_files=$TLS_CA_PATH"
-    "--server_tls_client_cert_verification=require"
-  )
-fi
-
 if [ "$ALLOWED_ORIGINS" = "*" ]; then
   command+=(
     "--allow_all_origins"
