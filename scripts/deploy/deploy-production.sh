@@ -33,7 +33,8 @@ docker run \
     --restart unless-stopped \
     -p $port:8443 \
     -v ./certs:/certs:ro \
-    -e TLS_CERT_PATH=/certs/client.mediocre.tv.pem \
-    -e TLS_KEY_PATH=/certs/client.mediocre.tv.key \
+    -v ./certs/client.mediocre.tv.pem:/certificates/cert.pem:ro \
+    -v ./certs/client.mediocre.tv.key:/certificates/key.pem:ro \
+    -v ./certs/origin_ca_ecc_root.pem:/certificates/ca.pem:ro \
     -e ALLOWED_ORIGINS=$allowed_origins \
     $image

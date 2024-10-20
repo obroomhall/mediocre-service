@@ -39,5 +39,6 @@ docker run \
     -p $port:8443 \
     -v ./certs/preview.mediocre.tv.pem:/certificates/cert.pem:ro \
     -v ./certs/preview.mediocre.tv.key:/certificates/key.pem:ro \
+    -v ./certs/origin_ca_ecc_root.pem:/certificates/ca.pem:ro \
     -e ALLOWED_ORIGINS=$allowed_origins \
     $image

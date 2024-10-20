@@ -175,6 +175,7 @@ COPY scripts/run/proxy.sh /scripts/run-proxy.sh
 RUN ["chmod", "+x", "/scripts/run-proxy.sh"]
 ENV TLS_CERT_PATH=${TLS_CERT_PATH:-/certificates/cert.pem}
 ENV TLS_KEY_PATH=${TLS_KEY_PATH:-/certificates/key.pem}
+ENV TLS_CA_PATH=${TLS_CA_PATH:-/certificates/root.pem}
 
 # run mediocre
 ENTRYPOINT ["/bin/bash", "-c", "mediocre & /scripts/run-proxy.sh"]
