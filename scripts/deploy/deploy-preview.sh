@@ -1,10 +1,15 @@
 #!/bin/bash
 set -e
 
-image="obroomhall/mediocre:master"
-name="mediocre-production"
-port=443
-allowed_origins=https://configure.mediocre.tv
+image="$1"
+pr="$2"
+branch="$3"
+
+name="mediocre-preview-$pr"
+port=$(printf "1%04d" $pr)
+
+sanitised_branch=$(echo $branch | sed 's/\//-/')
+allowed_origins="https://mediocre-configure-git-$sanitised_branch-mediocrity.vercel.app/"
 
 echo -------
 echo image: $image
@@ -32,8 +37,7 @@ docker run \
     --name $name \
     --restart unless-stopped \
     -p $port:8443 \
-    -v ./certs:/certs:ro \
-    -e TLS_CERT_PATH=/certs/client.mediocre.tv.pem \
-    -e TLS_KEY_PATH=/certs/client.mediocre.tv.key \
+    -v ./certs/preview.mediocre.tv.pem:/certificates/cert.pem:ro \
+    -v ./certs/preview.mediocre.tv.key:/certificates/key.pem:ro \
     -e ALLOWED_ORIGINS=$allowed_origins \
     $image
