@@ -7,16 +7,19 @@ on:
       - "**/*.proto"
       - .github/workflows/buf.yml
       - buf.yaml
+      - README.md
   push:
     paths:
       - "**/*.proto"
       - .github/workflows/buf.yml
       - buf.yaml
+      - README.md
   delete:
     paths:
       - "**/*.proto"
       - .github/workflows/buf.yml
       - buf.yaml
+      - README.md
 
 permissions:
   contents: read
