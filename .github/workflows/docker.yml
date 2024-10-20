@@ -175,7 +175,7 @@ jobs:
         working-directory: scripts/deploy
         run: |
           ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_IP }} \
-            "bash -s ${{ needs.build_push.outputs.main }} ${{ needs.build_push.outputs.current-pr }} ${{ github.ref_name }}" \
+            "bash -s ${{ needs.build_push.outputs.main }} ${{ needs.build_push.outputs.current-pr }}" \
             < deploy-preview.sh
 
   deploy:

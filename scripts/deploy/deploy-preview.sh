@@ -3,18 +3,13 @@ set -e
 
 image="$1"
 pr="$2"
-branch="$3"
 
 name="mediocre-preview-$pr"
 port=$(printf "1%04d" $pr)
 
-sanitised_branch=$(echo $branch | sed 's/\//-/')
-allowed_origins="https://mediocre-configure-git-$sanitised_branch-mediocrity.vercel.app/"
-
 echo -------
 echo image: $image
 echo port: $port
-echo allowed_origins: $allowed_origins
 
 echo
 echo -------
@@ -39,5 +34,5 @@ docker run \
     -p $port:8443 \
     -v /etc/letsencrypt/live/preview.mediocre.tv/fullchain.pem:/certificates/cert.pem:ro \
     -v /etc/letsencrypt/live/preview.mediocre.tv/privkey.pem:/certificates/key.pem:ro \
-    -e ALLOWED_ORIGINS=$allowed_origins \
+    -e ALLOWED_ORIGINS=* \
     $image
