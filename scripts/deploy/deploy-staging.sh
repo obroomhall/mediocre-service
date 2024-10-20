@@ -30,7 +30,7 @@ docker run \
     --name $name \
     --restart unless-stopped \
     -p $port:8443 \
-    -v /etc/letsencrypt/live/staging.mediocre.tv/fullchain.pem:/certificates/cert.pem:ro \
-    -v /etc/letsencrypt/live/staging.mediocre.tv/privkey.pem:/certificates/key.pem:ro \
+    -v /etc/letsencrypt/live/client.staging.mediocre.tv/fullchain.pem:/certificates/cert.pem:ro \
+    -v /etc/letsencrypt/live/client.staging.mediocre.tv/privkey.pem:/certificates/key.pem:ro \
     -e ALLOWED_ORIGINS=* \
     $image
