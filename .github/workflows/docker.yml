@@ -192,7 +192,7 @@ jobs:
           ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
       - name: Setup known hosts
         run: ssh-keyscan -H ${{ secrets.STAGING_IP }} >> ~/.ssh/known_hosts
-      - name: Deploy Production
+      - name: Deploy Staging
         working-directory: scripts/deploy
         run: |
           ssh ${{ secrets.STAGING_USER }}@${{ secrets.STAGING_IP }} \
