@@ -131,7 +131,7 @@ certificates. The general steps are:
 ### Updating Protobuf Definitions
 
 If you are making changes in this project and a dependent project, such
-as [mediocre-configure](https://github.com/obroomhall/mediocre-configure),
+as [mediocre-configure](https://github.com/mediocre-tv/mediocre-configure),
 you will likely want to use your locally updated protobuf definitions in the dependent project, before committing
 changes.
 
